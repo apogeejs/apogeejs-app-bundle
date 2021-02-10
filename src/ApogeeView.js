@@ -1,13 +1,13 @@
-import {closeWorkspace} from "/apogeeview/commandseq/closeworkspaceseq.js";
-import {createWorkspace} from "/apogeeview/commandseq/createworkspaceseq.js";
-import {openWorkspace} from "/apogeeview/commandseq/openworkspaceseq.js";
-import {saveWorkspace} from "/apogeeview/commandseq/saveworkspaceseq.js";
+import {closeWorkspace} from "/apogeejs-view-lib/src/commandseq/closeworkspaceseq.js";
+import {createWorkspace} from "/apogeejs-view-lib/src/commandseq/createworkspaceseq.js";
+import {openWorkspace} from "/apogeejs-view-lib/src/commandseq/openworkspaceseq.js";
+import {saveWorkspace} from "/apogeejs-view-lib/src/commandseq/saveworkspaceseq.js";
 
-import WorkspaceView from "/apogeeappview/WorkspaceView.js";
+import WorkspaceView from "/apogeejs-appview-lib/src/WorkspaceView.js";
 
-import {uiutil,TabFrame,Menu,SplitPane,TreeControl,DisplayAndHeader,showSimpleActionDialog} from "/apogeeui/apogeeUiLib.js";
+import {uiutil,TabFrame,Menu,SplitPane,TreeControl,DisplayAndHeader,showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
-import {Apogee} from "/apogeeapp/apogeeAppLib.js";
+import {Apogee} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
 export default class ApogeeView {
 

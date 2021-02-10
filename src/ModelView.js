@@ -1,7 +1,7 @@
-import {uiutil,TreeEntry} from "/apogeeui/apogeeUiLib.js";
-import {componentInfo} from "/apogeeapp/apogeeAppLib.js";
-import {addComponent} from "/apogeeview/commandseq/addcomponentseq.js";
-import {getComponentViewClass,ERROR_COMPONENT_VIEW_CLASS} from "/apogeeview/componentViewInfo.js";
+import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
+import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+import {addComponent} from "/apogeejs-view-lib/src/commandseq/addcomponentseq.js";
+import {getComponentViewClass,ERROR_COMPONENT_VIEW_CLASS} from "/apogeejs-view-lib/src/componentViewInfo.js";
 
 /** This class manages the user interface for a workspace object. */
 export default class ModelView {

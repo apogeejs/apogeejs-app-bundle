@@ -1,5 +1,5 @@
-import ParentComponentView from "/apogeeappview/componentdisplay/ParentComponentView.js";
-import LiteratePageComponentDisplay from "/apogeeappview/componentdisplay/LiteratePageComponentDisplay.js";
+import ParentComponentView from "/apogeejs-appview-lib/src/componentdisplay/ParentComponentView.js";
+import LiteratePageComponentDisplay from "/apogeejs-appview-lib/src/componentdisplay/LiteratePageComponentDisplay.js";
 
 
 /** This component represents a table object. */

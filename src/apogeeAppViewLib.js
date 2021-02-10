@@ -1,6 +1,6 @@
 
-export {default as ApogeeView} from "/apogeeappview/ApogeeView.js";
+export {default as ApogeeView} from "/apogeejs-appview-lib/src/ApogeeView.js";
 
 //import the default parent component views
-import "/apogeeappview/parentComponentViewConfig.js";
+import "/apogeejs-appview-lib/src/parentComponentViewConfig.js";
 

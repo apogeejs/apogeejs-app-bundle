@@ -6,9 +6,9 @@
 // - don't convert included lists to be the specified type
 // - don't handle tabs at the start of non-list items, beign converted to child lists
 
-import { findWrapping, /*ReplaceStep,*/ ReplaceAroundStep } from "/prosemirror/dist/prosemirror-transform.es.js";
-import { Slice, NodeRange, Fragment } from "/prosemirror/dist/prosemirror-model.es.js"
-import { TextSelection } from "/prosemirror/dist/prosemirror-state.es.js"
+import { findWrapping, /*ReplaceStep,*/ ReplaceAroundStep } from "/prosemirror-admin/dist/prosemirror-transform.es.js";
+import { Slice, NodeRange, Fragment } from "/prosemirror-admin/dist/prosemirror-model.es.js"
+import { TextSelection } from "/prosemirror-admin/dist/prosemirror-state.es.js"
 
 //--------------------------------------------------------
 // Commands
@@ -516,7 +516,7 @@ function insertParagraphAfterFirstApogeeNode(state,dispatch) {
 
 import { createParagraphNear, splitBlock, deleteSelection, 
   joinBackward, joinForward, selectAll,
-  chainCommands  }  from "/prosemirror/dist/prosemirror-commands.es.js";
+  chainCommands  }  from "/prosemirror-admin/dist/prosemirror-commands.es.js";
 
 let enter = chainCommands(exitEmptyList, insertParagraphAfterFirstApogeeNode, createParagraphNear, splitBlock);
 let backspace = chainCommands(exitEmptyList,deleteSelection, joinBackward, exitFromStartOfList);

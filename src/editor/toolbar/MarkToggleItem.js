@@ -1,4 +1,4 @@
-import {setMark,clearMark} from "/apogeeappview/editor/apogeeCommands.js";
+import {setMark,clearMark} from "/apogeejs-appview-lib/src/editor/apogeeCommands.js";
 
 /** This is a toolbar button for marks. It is inteded for marks with either no attrbiutes or with 
  * fixed attributes. Arguments:

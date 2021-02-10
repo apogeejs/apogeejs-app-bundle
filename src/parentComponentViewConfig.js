@@ -1,7 +1,7 @@
-import FolderComponentView from "/apogeeappview/componentviews/FolderComponentView.js";
-import FolderFunctionComponentView from "/apogeeappview/componentviews/FolderFunctionComponentView.js";
+import FolderComponentView from "/apogeejs-appview-lib/src/componentviews/FolderComponentView.js";
+import FolderFunctionComponentView from "/apogeejs-appview-lib/src/componentviews/FolderFunctionComponentView.js";
 
-import {registerComponentView} from "/apogeeview/componentViewInfo.js";
+import {registerComponentView} from "/apogeejs-view-lib/src/componentViewInfo.js";
 
 //registration of the parent component views
 

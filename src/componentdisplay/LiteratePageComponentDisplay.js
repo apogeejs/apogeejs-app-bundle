@@ -1,12 +1,12 @@
-import apogeeutil from "/apogeeutil/apogeeUtilLib.js";
-import {EventManager} from "/apogeebase/apogeeBaseLib.js";
-import {componentInfo} from "/apogeeapp/apogeeAppLib.js";
+import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
+import {EventManager} from "/apogeejs-base-lib/src/apogeeBaseLib.js";
+import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
-import {addComponent, addAdditionalComponent} from "/apogeeview/commandseq/addcomponentseq.js";
-import PageChildComponentDisplay from "/apogeeappview/componentdisplay/PageChildComponentDisplay.js"
-import {getComponentViewClass} from "/apogeeview/componentViewInfo.js";
+import {addComponent, addAdditionalComponent} from "/apogeejs-view-lib/src/commandseq/addcomponentseq.js";
+import PageChildComponentDisplay from "/apogeejs-appview-lib/src/componentdisplay/PageChildComponentDisplay.js"
+import {getComponentViewClass} from "/apogeejs-view-lib/src/componentViewInfo.js";
 
-import {uiutil,Tab,bannerConstants,getBanner,getIconOverlay} from "/apogeeui/apogeeUiLib.js";
+import {uiutil,Tab,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
 /** This component represents a json table object. */
 export default class LiteratePageComponentDisplay {

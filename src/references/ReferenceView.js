@@ -1,7 +1,7 @@
-import apogeeutil from "/apogeeutil/apogeeUtilLib.js";
-import {uiutil,TreeEntry} from "/apogeeui/apogeeUiLib.js";
+import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
+import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
-import ReferenceListView from "/apogeeappview/references/ReferenceListView.js";
+import ReferenceListView from "/apogeejs-appview-lib/src/references/ReferenceListView.js";
 
 export default class ReferenceView {
 

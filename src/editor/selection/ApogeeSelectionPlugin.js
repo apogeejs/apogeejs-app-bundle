@@ -1,6 +1,6 @@
-import {keydownHandler} from "/prosemirror/dist/prosemirror-keymap.es.js"
-import {TextSelection, NodeSelection, Plugin} from "/prosemirror/dist/prosemirror-state.es.js"
-import {Decoration, DecorationSet} from "/prosemirror/dist/prosemirror-view.es.js"
+import {keydownHandler} from "/prosemirror-admin/dist/prosemirror-keymap.es.js"
+import {TextSelection, NodeSelection, Plugin} from "/prosemirror-admin/dist/prosemirror-state.es.js"
+import {Decoration, DecorationSet} from "/prosemirror-admin/dist/prosemirror-view.es.js"
 
 import {GapSelection} from "./GapSelection.js"
 import {isLeafBlock} from "./selectionUtils.js"

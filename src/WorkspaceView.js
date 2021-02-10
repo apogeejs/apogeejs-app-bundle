@@ -1,9 +1,9 @@
-import {uiutil,TreeEntry} from "/apogeeui/apogeeUiLib.js";
+import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
-import {updateWorkspaceProperties} from "/apogeeview/commandseq/updateworkspaceseq.js";
+import {updateWorkspaceProperties} from "/apogeejs-view-lib/src/commandseq/updateworkspaceseq.js";
 
-import ReferenceView from "/apogeeappview/references/ReferenceView.js";
-import ModelView from "/apogeeappview/ModelView.js";
+import ReferenceView from "/apogeejs-appview-lib/src/references/ReferenceView.js";
+import ModelView from "/apogeejs-appview-lib/src/ModelView.js";
 
 /** This class manages the user interface for a workspace object. */
 export default class WorkspaceView {

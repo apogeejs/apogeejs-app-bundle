@@ -1,6 +1,6 @@
-import PageDisplayContainer from "/apogeeappview/componentdisplay/PageDisplayContainer.js";
+import PageDisplayContainer from "/apogeejs-appview-lib/src/componentdisplay/PageDisplayContainer.js";
 
-import {uiutil,Menu,bannerConstants,getBanner,getIconOverlay} from "/apogeeui/apogeeUiLib.js";
+import {uiutil,Menu,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
 /** This component represents a json table object. */
 export default class PageChildComponentDisplay {
