@@ -1,0 +1,28 @@
+{
+    "DEV_RELEASE": true,
+    "name": "apogeejs-appview-lib",
+    "version": "2.0.0-p1",
+    "description": "This library is part of the view layer, containing the web app specific components.",
+    "homepage": "https://www.apogeejs.com",
+    "license": "MIT",
+    "author": "Dave Sutter",
+    "main": "apogeejs-appview-lib.js",
+    "module": "apogeeAppViewLib.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sutter-dave/apogeejs-appview-lib.git"
+    },
+    "dependencies": {
+        "apogeejs-base-lib": "^2.0.0",
+        "apogeejs-util-lib": "^2.0.0",
+        "apogeejs-app-lib": "^2.0.0",
+        "apogeejs-ui-lib": "^2.0.0",
+        "apogeejs-view-lib": "^2.0.0",
+        "prosemirror-model": "^1.0.0",
+        "prosemirror-state": "^1.0.0",
+        "prosemirror-view": "^1.0.0",
+        "prosemirror-transform": "^1.0.0",
+        "prosemirror-keymap": "^1.0.0",
+        "prosemirror-commands": "^1.0.0"
+    }
+}

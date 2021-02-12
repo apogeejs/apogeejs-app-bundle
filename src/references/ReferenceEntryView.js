@@ -1,5 +1,5 @@
 import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
-import {updateLink, removeLink} from "/apogeejs-view-lib/src/commandseq/updatelinkseq.js";
+import {updateLink, removeLink} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 export default class ReferenceEntryView {
 

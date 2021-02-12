@@ -1,5 +1,5 @@
-import {getSaveBar} from "/apogeejs-view-lib/src/componentdisplay/toolbar.js";
-import DATA_DISPLAY_CONSTANTS from "/apogeejs-view-lib/src/datadisplay/dataDisplayConstants.js";
+import {getSaveBar} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {DATA_DISPLAY_CONSTANTS} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import {uiutil,getHelpElement} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
 /** This is a standin for the display conatiner for the literate page

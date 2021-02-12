@@ -1,7 +1,7 @@
-import {closeWorkspace} from "/apogeejs-view-lib/src/commandseq/closeworkspaceseq.js";
-import {createWorkspace} from "/apogeejs-view-lib/src/commandseq/createworkspaceseq.js";
-import {openWorkspace} from "/apogeejs-view-lib/src/commandseq/openworkspaceseq.js";
-import {saveWorkspace} from "/apogeejs-view-lib/src/commandseq/saveworkspaceseq.js";
+import {closeWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {createWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {openWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {saveWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 import WorkspaceView from "/apogeejs-appview-lib/src/WorkspaceView.js";
 
@@ -462,20 +462,20 @@ export default class ApogeeView {
     // Static Functions
     //========================================
 
-    /** This method is used to register a new component view class for the user interface. */
-    static registerComponentView(viewClass) {
-        componentClassMap[viewClass.componentName] = viewClass;
-    }
+    // /** This method is used to register a new component view class for the user interface. */
+    // static registerComponentView(viewClass) {
+    //     componentClassMap[viewClass.componentName] = viewClass;
+    // }
 
-    /** This method retrieves a component view class using the component unique name. */
-    static getComponentViewClass(componentName) {
-        return componentClassMap[componentName];
-    }
+    // /** This method retrieves a component view class using the component unique name. */
+    // static getComponentViewClass(componentName) {
+    //     return componentClassMap[componentName];
+    // }
 
 }
 
 
-let componentClassMap = {};
+//let componentClassMap = {};
 
 const RESIZE_TIMER_PERIOD_MS = 500;
 

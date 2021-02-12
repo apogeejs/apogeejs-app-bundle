@@ -1,6 +1,6 @@
 import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
-import {updateWorkspaceProperties} from "/apogeejs-view-lib/src/commandseq/updateworkspaceseq.js";
+import {updateWorkspaceProperties} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 import ReferenceView from "/apogeejs-appview-lib/src/references/ReferenceView.js";
 import ModelView from "/apogeejs-appview-lib/src/ModelView.js";
