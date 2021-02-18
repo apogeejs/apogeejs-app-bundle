@@ -1,17 +1,18 @@
 const { src, dest, series, parallel} = require('gulp');
 const concat = require('gulp-concat');
 const rollup = require('rollup');
-const replace = require('gulp-replace');
-const rename = require('gulp-rename');
+//const replace = require('gulp-replace');
+//const rename = require('gulp-rename');
 const path = require('path');
 const buildUtils = require("../../apogeejs-admin/src/build-utils.js");
 
-const versionConfig = require('../versionConfig.json');
+const DEPENDENCY_MAP_URL = "/apogeejs-admin/lib-build/dependencyMap.json";
 
-//read data from the release package.json
+const versionConfig = require("../versionConfig.json");
+const releasePackageJson = require("../package.json");
+
 let isDevRelease = !(versionConfig.isOfficialRelease);
 let version = versionConfig.version;
-let versionAssetsPath = "/lib/v" + version;
 let pathMapping = versionConfig.pathMapping;
 
 let repoName = "apogeejs-app-bundle";
@@ -20,6 +21,9 @@ let repoName = "apogeejs-app-bundle";
 const PATH_TO_ABSOLUTE_ROOT = "../..";
 let resolveAbsoluteUrl = buildUtils.createResolveAbsoluteUrl(__dirname,PATH_TO_ABSOLUTE_ROOT,pathMapping); //used to convert urls to paths
 let resolveId = buildUtils.createResolveId(resolveAbsoluteUrl); //used for rollup
+
+
+const dependencyMap = require(resolveAbsoluteUrl(DEPENDENCY_MAP_URL));
 
 const mainOutputFolder = buildUtils.getReleaseFolder(repoName,version,isDevRelease);
 const npmOutputFolder = path.join(mainOutputFolder,"npm-module");
@@ -137,57 +141,54 @@ let globalSrcFileSystemPaths = GLOBAL_SRC_URLS.map(resolveAbsoluteUrl);
 let copyGlobalFiles = () => copyFiles(globalSrcFileSystemPaths,mainOutputFolder)
 
 //==============================
-// Web App
+// Bundle
 //==============================
 
-const SRC_WEB_PAGE_FILE = '../src/apogee.DEPLOY.html'
-const WEB_PAGE_NAME = "apogee.html"
-const WEB_APP_JS_FILENAME = "apogeeWebApp.js";
+const ES_MODULE_NAME = "apogeeAppBundle.js";
+const NPM_MODULE_NAME = "apogeejs-app-bundle.js";
 
-let releaseWebAppTask = parallel(
-    copyWebAppPageTask,
-    packageWebAppTask
-)
+let packageBundleTask = parallel(
+    packageEsModuleTask,
+    packageNpmModuleTask
+);
 
-function copyWebAppPageTask() {
-    let baseHref = versionAssetsPath + "/";
-
-    //fix path - related to odd problem on windows with rollup "dest"
-    let srcFile = buildUtils.fixPath(SRC_WEB_PAGE_FILE);
-    let target = buildUtils.fixPath(mainOutputFolder);
-
-    return src(srcFile)
-        .pipe(replace("BASE_HREF",baseHref))
-        .pipe(replace("APOGEE_VERSION",version))
-        .pipe(rename(WEB_PAGE_NAME))
-        .pipe(dest(target));
-}
-
-function packageWebAppTask() {
+function packageEsModuleTask() {
     return rollup.rollup({
-        input: '../src/app.js',
+        input: '../src/apogeeAppBundle.js',
         plugins: [
             {resolveId}
         ]
     }).then(bundle => {
-        return Promise.all([
-            bundle.write(
-                { 
-                    file: path.join(mainOutputFolder,esModuleFileName),
-                    format: 'es',
-                    banner: buildUtils.getJsFileHeader(esModuleFileName,version),
-                    //no external dependenciees in this bundle 
-                }
-            ),
-            bundle.write(
-                { 
-                    file: path.join(npmOutputFolder,npmModuleFileName),
-                    format: 'cjs',
-                    banner: buildUtils.getJsFileHeader(npmModuleFileName,version),
-                    paths: externalDependencyInfo.npmExternalRemap,
-                }
-            )
-        ]);
+        return bundle.write(
+            { 
+                file: path.join(mainOutputFolder,ES_MODULE_NAME),
+                format: 'es',
+                banner: buildUtils.getJsFileHeader(ES_MODULE_NAME,version),
+                //no external dependenciees in this bundle 
+            }
+        )
+    });
+}
+
+//remap the npm external depndencies. We will not leave any external dependencies in the es module.
+let npmDependencyInfo = getNpmExternalDependencyInfo(releasePackageJson.dependencies,dependencyMap);
+
+function packageNpmModuleTask() {
+    return rollup.rollup({
+        input: '../src/apogeeAppBundle.js',
+        external: npmDependencyInfo.externalLibs,
+        plugins: [
+            {resolveId}
+        ]
+    }).then(bundle => {
+        return bundle.write(
+            { 
+                file: path.join(npmOutputFolder,NPM_MODULE_NAME),
+                format: 'cjs',
+                banner: buildUtils.getJsFileHeader(NPM_MODULE_NAME,version),
+                paths: npmDependencyInfo.npmExternalRemap,
+            }
+        )
     });
 }
 
@@ -207,6 +208,28 @@ function copyFiles(fileList,destFolder) {
         .pipe(dest(alteredDestFolder));
 }
 
+
+
+/** This function gets information on external libraries to include in the bundle creation based
+ * on the dependnecies in the package.json file. */
+function getNpmExternalDependencyInfo(packageDependencies,dependencyMap) {
+    let dependencyInfo = {
+        externalLibs: [],
+        npmExternalRemap: {}
+    };
+    if(packageDependencies) {
+        for(let npmModule in packageDependencies) {
+            let esFileUrl = dependencyMap.npmToEsExternLib[npmModule];
+            if(!esFileUrl) {
+                throw new Error("npm module " + npmModule + " missing from dependency map file!");
+            }
+            dependencyInfo.externalLibs.push(esFileUrl);
+            dependencyInfo.npmExternalRemap[esFileUrl] = npmModule;
+        }
+    }
+    return dependencyInfo;
+}
+
 //============================
 // Exports
 //============================
@@ -221,7 +244,7 @@ exports.release = series(
         copyResourcesTask,
         copyAceIncludesTask,
         copyGlobalFiles,
-        releaseWebAppTask,
+        packageBundleTask,
     )
 );
 
