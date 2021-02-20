@@ -9,9 +9,8 @@ const buildUtils = require("../../apogeejs-admin/src/build-utils.js");
 const DEPENDENCY_MAP_URL = "/apogeejs-admin/lib-build/dependencyMap.json";
 
 const versionConfig = require("../versionConfig.json");
-const releasePackageJson = require("../package.json");
 
-let isDevRelease = !(versionConfig.isOfficialRelease);
+let isProductionRelease = versionConfig.isProductionRelease;
 let version = versionConfig.version;
 let pathMapping = versionConfig.pathMapping;
 
@@ -22,23 +21,23 @@ const PATH_TO_ABSOLUTE_ROOT = "../..";
 let resolveAbsoluteUrl = buildUtils.createResolveAbsoluteUrl(__dirname,PATH_TO_ABSOLUTE_ROOT,pathMapping); //used to convert urls to paths
 let resolveId = buildUtils.createResolveId(resolveAbsoluteUrl); //used for rollup
 
-
 const dependencyMap = require(resolveAbsoluteUrl(DEPENDENCY_MAP_URL));
+const releasePackageJson = require(resolveAbsoluteUrl("/apogeejs-appview-lib/package.json"));
 
-const mainOutputFolder = buildUtils.getReleaseFolder(repoName,version,isDevRelease);
-const npmOutputFolder = path.join(mainOutputFolder,"npm-module");
+const esOutputFolder = resolveAbsoluteUrl(buildUtils.getEsReleaseFolderUrl(repoName,version,isProductionRelease));
+const npmOutputFolder = resolveAbsoluteUrl(buildUtils.getNpmReleaseFolderUrl(repoName,version,isProductionRelease));
 
 //======================================
 // Release Info
 //======================================
 
 //base files - version info
-const BASE_FILES = [
+const ES_BASE_FILES = [
     "../versionConfig.json"
 ]
 
 let copyReleaseInfoTask = parallel(
-    () => copyFiles(BASE_FILES,npmOutputFolder)
+    () => copyFiles(ES_BASE_FILES,esOutputFolder)
 )
 
 //base files - version info
@@ -70,7 +69,7 @@ const CSS_FILES_URLS = [
     "/apogeejs-ui-lib/src/configurablepanel/ConfigurablePanel.css",
     "/apogeejs-ui-lib/src/configurablepanel/elements/listElement.css",
     "/apogeejs-ui-lib/src/tooltip/tooltip.css",  
-    "/apogeejs-web-app/src/fileaccess/combinedFileAccess.css",
+//    "/apogeejs-web-app/src/fileaccess/combinedFileAccess.css",
     "/prosemirror-admin/compiledCss/editor.css",    
     "/apogeejs-admin/ext/handsontable/handsontable_6.2.0/handsontable.full.min.css"
 ]
@@ -81,7 +80,7 @@ let cssFileSystemPaths = CSS_FILES_URLS.map(resolveAbsoluteUrl);
 function packageCssTask() {
     //fix path - related to odd problem on windows with rollup "dest"
     let srcFiles = cssFileSystemPaths.map(buildUtils.fixPath);
-    let target = buildUtils.fixPath(mainOutputFolder);
+    let target = buildUtils.fixPath(esOutputFolder);
     return src(srcFiles)
         .pipe(concat(CSS_BUNDLE_FILENAME))
         .pipe(dest(target))
@@ -94,7 +93,7 @@ function packageCssTask() {
 //----------------
 
 const RESOURCES_FOLDER_NAME = "resources";
-const RESOURCE_URL_PATTERN = "/apogeejs-app-bundle/resources/**/*";
+const RESOURCE_URL_PATTERN = "/apogeejs-appview-lib/resources/**/*";
 
 //convert for remapped directories
 let resourceSystemFilesPattern = resolveAbsoluteUrl(RESOURCE_URL_PATTERN);
@@ -102,7 +101,7 @@ let resourceSystemFilesPattern = resolveAbsoluteUrl(RESOURCE_URL_PATTERN);
 function copyResourcesTask() {
     //fix path - related to odd problem on windows with rollup "dest"
     let srcPattern = buildUtils.fixPath(resourceSystemFilesPattern);
-    let target = buildUtils.fixPath(path.join(mainOutputFolder,RESOURCES_FOLDER_NAME))
+    let target = buildUtils.fixPath(path.join(esOutputFolder,RESOURCES_FOLDER_NAME))
     return src(srcPattern)
         .pipe(dest(target))
 }
@@ -120,7 +119,7 @@ let aceIncludeSystemFilesPattern = resolveAbsoluteUrl(ACE_INCLUDE_URL_PATTERN);
 function copyAceIncludesTask() {
     //fix path - related to odd problem on windows with rollup "dest"
     let srcPattern = buildUtils.fixPath(aceIncludeSystemFilesPattern);
-    let target = buildUtils.fixPath(path.join(mainOutputFolder,ACE_INCLUDES_FOLDER_NAME))
+    let target = buildUtils.fixPath(path.join(esOutputFolder,ACE_INCLUDES_FOLDER_NAME))
 
     return src(srcPattern)
         .pipe(dest(target))
@@ -138,7 +137,7 @@ const GLOBAL_SRC_URLS = [
 //convert for remapped directories
 let globalSrcFileSystemPaths = GLOBAL_SRC_URLS.map(resolveAbsoluteUrl);
 
-let copyGlobalFiles = () => copyFiles(globalSrcFileSystemPaths,mainOutputFolder)
+let copyGlobalFiles = () => copyFiles(globalSrcFileSystemPaths,esOutputFolder)
 
 //==============================
 // Bundle
@@ -161,7 +160,7 @@ function packageEsModuleTask() {
     }).then(bundle => {
         return bundle.write(
             { 
-                file: path.join(mainOutputFolder,ES_MODULE_NAME),
+                file: path.join(esOutputFolder,ES_MODULE_NAME),
                 format: 'es',
                 banner: buildUtils.getJsFileHeader(ES_MODULE_NAME,version),
                 //no external dependenciees in this bundle 
@@ -236,7 +235,7 @@ function getNpmExternalDependencyInfo(packageDependencies,dependencyMap) {
 
 //This task executes the complete release
 exports.release = series(
-    () => buildUtils.makeSureReleaseNotPresent(mainOutputFolder),
+    () => buildUtils.makeSureReleaseNotPresent(esOutputFolder),
     parallel(
         copyReleaseInfoTask,
         copyNpmReleaseInfoTask,
