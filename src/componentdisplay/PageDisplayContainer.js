@@ -368,10 +368,10 @@ export default class PageDisplayContainer {
         this.viewSelectorLink = uiutil.createElementWithClass("div","visiui_displayContainer_viewSelectorLinkClass visiui_hideSelection",this.viewSelectorContainer);
 
         this.expandImage = uiutil.createElementWithClass("img","visiui_displayContainer_expandContractClass visiui_hideSelection",this.viewSelectorLink);
-        this.expandImage.src = uiutil.getResourcePath(PageDisplayContainer.VIEW_CLOSED_IMAGE_PATH);
+        this.expandImage.src = uiutil.getResourcePath(PageDisplayContainer.VIEW_CLOSED_IMAGE_PATH,"ui-lib");
     
         this.contractImage = uiutil.createElementWithClass("img","visiui_displayContainer_expandContractClass visiui_hideSelection",this.viewSelectorLink);
-        this.contractImage.src = uiutil.getResourcePath(PageDisplayContainer.VIEW_OPENED_IMAGE_PATH);
+        this.contractImage.src = uiutil.getResourcePath(PageDisplayContainer.VIEW_OPENED_IMAGE_PATH,"ui-lib");
 
         this.viewNameElement = uiutil.createElementWithClass("span","visiui_displayContainer_viewSelectorClass visiui_hideSelection",this.viewSelectorLink);
         this.viewNameElement.innerHTML = this.viewTypeLabel;

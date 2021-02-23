@@ -38,7 +38,7 @@ export default class ReferenceEntryView {
     //===========================================
 
     _createTreeEntry() {
-        var iconUrl = uiutil.getResourcePath(this.displayInfo.ENTRY_ICON_PATH);
+        var iconUrl = uiutil.getResourcePath(this.displayInfo.ENTRY_ICON_PATH,"app");
         var label = this.referenceEntry.getNickname();
         var menuItemsCallback = () => this._getMenuItems();
 

@@ -112,7 +112,7 @@ export default class WorkspaceView {
         let modelManager = this.workspaceManager.getModelManager();
         let model = modelManager.getModel();
         var labelText = model ? model.getName() : Workspace_OPENING_NAME; //add the name
-        var iconUrl = uiutil.getResourcePath(WorkspaceView.ICON_RES_PATH);
+        var iconUrl = uiutil.getResourcePath(WorkspaceView.ICON_RES_PATH,"app");
         var menuItemCallback = () => this.getMenuItems();
         var isRoot = true;
         return new TreeEntry(labelText, iconUrl, null, menuItemCallback,isRoot);

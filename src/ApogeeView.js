@@ -269,7 +269,7 @@ export default class ApogeeView {
 
         //apogee icon
         let apogeeIcon = document.createElement("img");
-        apogeeIcon.src = uiutil.getResourcePath("/shortlogo16.png");
+        apogeeIcon.src = uiutil.getResourcePath("/shortlogo16.png","app");
         apogeeIcon.className = "menu_bar_icon";
         menuBarLeft.appendChild(apogeeIcon);
         // apogeeIcon.onclick = () => {

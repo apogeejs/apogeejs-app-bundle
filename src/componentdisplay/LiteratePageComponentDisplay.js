@@ -331,7 +331,7 @@ export default class LiteratePageComponentDisplay {
                 var buttonElement = uiutil.createElementWithClass("div","visiui_litPage_componentButton",this.componentToolbarContainer);
                 //make the idon
                 var imageElement = document.createElement("img")
-                imageElement.src = uiutil.getResourcePath(componentViewClass.ICON_RES_PATH);
+                imageElement.src = uiutil.getResourcePath(componentViewClass.ICON_RES_PATH,"app");
                 var iconElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonIcon",buttonElement);
                 iconElement.appendChild(imageElement);
                 //label

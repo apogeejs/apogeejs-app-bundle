@@ -225,7 +225,7 @@ export default class ModelView {
             return menuItemList;
         }
 
-        var iconUrl = uiutil.getResourcePath(ICON_RES_PATH);
+        var iconUrl = uiutil.getResourcePath(ICON_RES_PATH,"app");
         var isRoot = true;
         return new TreeEntry(MODEL_FOLDER_LABEL, iconUrl, null, menuItemCallback, isRoot);
     }
@@ -234,4 +234,4 @@ export default class ModelView {
 
 let MODEL_FOLDER_LABEL = "Code";
 
-let ICON_RES_PATH = "/icons3/folder.png";   
+let ICON_RES_PATH = "/icons3/folderIcon.png";   

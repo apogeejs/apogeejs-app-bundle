@@ -54,7 +54,7 @@ export default class ReferenceListView {
     //===============================================
 
     _setTreeEntry(viewState) {
-        var iconUrl = uiutil.getResourcePath(this.displayInfo.LIST_ICON_PATH);
+        var iconUrl = uiutil.getResourcePath(this.displayInfo.LIST_ICON_PATH,"app");
         var menuItemCallback = () => this._getListMenuItems();
         this.treeEntry = new TreeEntry(this.displayInfo.LIST_NAME, iconUrl, null, menuItemCallback, false);
 

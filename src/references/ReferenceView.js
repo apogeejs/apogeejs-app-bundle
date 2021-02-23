@@ -117,7 +117,7 @@ export default class ReferenceView {
 
     /** @private */
     _createTreeEntry(viewState) {
-        var iconUrl = uiutil.getResourcePath(REFERENCES_ICON_PATH);
+        var iconUrl = uiutil.getResourcePath(REFERENCES_ICON_PATH,"app");
         let treeEntry = new TreeEntry("Libraries", iconUrl, null, null, false);
 
         if((viewState)&&(viewState.treeState !== undefined)) {

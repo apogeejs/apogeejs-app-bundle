@@ -265,7 +265,7 @@ export default class PageChildComponentDisplay {
         //icon/menu
         var iconSrc = this.componentView.getIconUrl();
         if(!iconSrc) {
-            iconSrc = uiutil.getResourcePath(uiutil.GENERIC_CELL_ICON);
+            iconSrc = uiutil.getResourcePath(uiutil.GENERIC_CELL_ICON,"app");
         }
 
         this.iconContainerElement = uiutil.createElementWithClass("div", "visiui-pageChild-icon-container",this.titleBarContainer);
@@ -280,7 +280,7 @@ export default class PageChildComponentDisplay {
         let menuItemCallback = () => {
             return this.componentView.getMenuItems();
         }
-        let menuImage = uiutil.getResourcePath(uiutil.DOT_MENU_IMAGE);
+        let menuImage = uiutil.getResourcePath(uiutil.DOT_MENU_IMAGE,"ui-lib");
         this.menu = Menu.createMenuFromImage(menuImage);
         this.menu.setAsOnTheFlyMenu(menuItemCallback);
         let menuElement = this.menu.getElement();
