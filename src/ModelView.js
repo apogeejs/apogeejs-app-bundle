@@ -234,4 +234,4 @@ export default class ModelView {
 
 let MODEL_FOLDER_LABEL = "Code";
 
-let ICON_RES_PATH = "/componentIcons/folder.png";   
+let ICON_RES_PATH = "/icons3/folder.png";   
