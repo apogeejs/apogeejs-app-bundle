@@ -2,26 +2,26 @@
 //create the schema
 //===========================
 
-import ApogeeToolbar from "/apogeejs-appview-lib/src/editor/toolbar/ApogeeToolbar.js";
-import MarkToggleItem from "/apogeejs-appview-lib/src/editor/toolbar/MarkToggleItem.js";
-import MarkDropdownItem from "/apogeejs-appview-lib/src/editor/toolbar/MarkDropdownItem.js";
-import ActionButton from "/apogeejs-appview-lib/src/editor/toolbar/ActionButton.js";
+import ApogeeToolbar from "/apogeejs-app-bundle/src/editor/toolbar/ApogeeToolbar.js";
+import MarkToggleItem from "/apogeejs-app-bundle/src/editor/toolbar/MarkToggleItem.js";
+import MarkDropdownItem from "/apogeejs-app-bundle/src/editor/toolbar/MarkDropdownItem.js";
+import ActionButton from "/apogeejs-app-bundle/src/editor/toolbar/ActionButton.js";
 
 
-import StateCheck from "/apogeejs-appview-lib/src/editor/StateCheck.js";
-import { getInteractiveNodePlugin } from "/apogeejs-appview-lib/src/editor/InteractiveNodeKeyHandler.js";
+import StateCheck from "/apogeejs-app-bundle/src/editor/StateCheck.js";
+import { getInteractiveNodePlugin } from "/apogeejs-app-bundle/src/editor/InteractiveNodeKeyHandler.js";
 
-import { baseKeymap } from "/apogeejs-appview-lib/src/editor/apogeeCommands.js";
+import { baseKeymap } from "/apogeejs-app-bundle/src/editor/apogeeCommands.js";
 
 import { Plugin } from "/prosemirror-admin/dist/prosemirror-state.es.js";
 import { EditorView } from "/prosemirror-admin/dist/prosemirror-view.es.js";
 import { keymap } from "/prosemirror-admin/dist/prosemirror-keymap.es.js";
 //import { gapCursor } from "/prosemirror-admin/dist/prosemirror-gapcursor.es.js";
-import { apogeeSelectionPlugin } from "/apogeejs-appview-lib/src/editor/selection/ApogeeSelectionPlugin.js";
+import { apogeeSelectionPlugin } from "/apogeejs-app-bundle/src/editor/selection/ApogeeSelectionPlugin.js";
 
-import ApogeeComponentView from "/apogeejs-appview-lib/src/editor/ApogeeComponentView.js";
+import ApogeeComponentView from "/apogeejs-app-bundle/src/editor/ApogeeComponentView.js";
 
-import { setBlockType } from "/apogeejs-appview-lib/src/editor/apogeeCommands.js";
+import { setBlockType } from "/apogeejs-app-bundle/src/editor/apogeeCommands.js";
 
 export function createProseMirrorManager(app, schema) {
 

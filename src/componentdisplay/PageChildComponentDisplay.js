@@ -1,4 +1,4 @@
-import PageDisplayContainer from "/apogeejs-appview-lib/src/componentdisplay/PageDisplayContainer.js";
+import PageDisplayContainer from "/apogeejs-app-bundle/src/componentdisplay/PageDisplayContainer.js";
 
 import {uiutil,Menu,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 

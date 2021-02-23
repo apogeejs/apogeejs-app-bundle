@@ -1,4 +1,4 @@
-import {setMark,clearMark} from "/apogeejs-appview-lib/src/editor/apogeeCommands.js";
+import {setMark,clearMark} from "/apogeejs-app-bundle/src/editor/apogeeCommands.js";
 
 /** This is a toolbar element for marks which have a single attribute key and multple attribute values. Arguments:
  * - markType - this is the schema mark type object.

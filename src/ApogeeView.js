@@ -3,7 +3,7 @@ import {createWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import {openWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import {saveWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
-import WorkspaceView from "/apogeejs-appview-lib/src/WorkspaceView.js";
+import WorkspaceView from "/apogeejs-app-bundle/src/WorkspaceView.js";
 
 import {uiutil,TabFrame,Menu,SplitPane,TreeControl,DisplayAndHeader,showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 

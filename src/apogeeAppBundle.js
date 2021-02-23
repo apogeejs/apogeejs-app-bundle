@@ -4,10 +4,10 @@ import * as apogee from "/apogeejs-model-lib/src/apogeeModelLib.js";
 import * as apogeeapp from "/apogeejs-app-lib/src/apogeeAppLib.js";
 import * as apogeeui from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 import * as apogeeview from "/apogeejs-view-lib/src/apogeeViewLib.js";
-import ApogeeView from "/apogeejs-appview-lib/src/ApogeeView.js";
+import ApogeeView from "/apogeejs-app-bundle/src/ApogeeView.js";
 
 //import the default parent component views
-import "/apogeejs-appview-lib/src/parentComponentViewConfig.js";
+import "/apogeejs-app-bundle/src/parentComponentViewConfig.js";
 
 //expose these apogee libraries globally so plugins can use them 
 __globals__.apogeeutil = apogeeutil;

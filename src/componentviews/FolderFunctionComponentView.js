@@ -1,5 +1,5 @@
-import ParentComponentView from "/apogeejs-appview-lib/src/componentdisplay/ParentComponentView.js";
-import LiteratePageComponentDisplay from "/apogeejs-appview-lib/src/componentdisplay/LiteratePageComponentDisplay.js";
+import ParentComponentView from "/apogeejs-app-bundle/src/componentdisplay/ParentComponentView.js";
+import LiteratePageComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/LiteratePageComponentDisplay.js";
 
 /** This component represents a folderFunction, which is a function that is programmed using
  *apogee tables rather than writing code. */

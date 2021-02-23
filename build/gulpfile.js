@@ -22,7 +22,7 @@ let resolveAbsoluteUrl = buildUtils.createResolveAbsoluteUrl(__dirname,PATH_TO_A
 let resolveId = buildUtils.createResolveId(resolveAbsoluteUrl); //used for rollup
 
 const dependencyMap = require(resolveAbsoluteUrl(DEPENDENCY_MAP_URL));
-const releasePackageJson = require(resolveAbsoluteUrl("/apogeejs-appview-lib/package.json"));
+const releasePackageJson = require(resolveAbsoluteUrl("/apogeejs-app-bundle/package.json"));
 
 const esOutputFolder = resolveAbsoluteUrl(buildUtils.getEsReleaseFolderUrl(repoName,version,isProductionRelease));
 const npmOutputFolder = resolveAbsoluteUrl(buildUtils.getNpmReleaseFolderUrl(repoName,version,isProductionRelease));
@@ -56,10 +56,10 @@ let copyNpmReleaseInfoTask = parallel(
 const CSS_BUNDLE_FILENAME = "cssBundle.css";
 const CSS_FILES_URLS = [
     "/apogeejs-view-lib/src/apogeeapp.css",
-    "/apogeejs-appview-lib/src/componentdisplay/LiteratePage.css",
+    "/apogeejs-app-bundle/src/componentdisplay/LiteratePage.css",
     "/apogeejs-webview-lib/src/componentdisplay/WebView.css",
     "/apogeejs-view-lib/src/componentdisplay/ComponentDisplay.css",
-    "/apogeejs-appview-lib/src/editor/toolbar/ApogeeToolbar.css",
+    "/apogeejs-app-bundle/src/editor/toolbar/ApogeeToolbar.css",
     "/apogeejs-ui-lib/src/window/dialog.css",
     "/apogeejs-ui-lib/src/displayandheader/DisplayAndHeader.css",
     "/apogeejs-ui-lib/src/menu/Menu.css",
@@ -93,7 +93,7 @@ function packageCssTask() {
 //----------------
 
 const RESOURCES_FOLDER_NAME = "resources";
-const RESOURCE_URL_PATTERN = "/apogeejs-appview-lib/resources/**/*";
+const RESOURCE_URL_PATTERN = "/apogeejs-app-bundle/resources/**/*";
 
 //convert for remapped directories
 let resourceSystemFilesPattern = resolveAbsoluteUrl(RESOURCE_URL_PATTERN);

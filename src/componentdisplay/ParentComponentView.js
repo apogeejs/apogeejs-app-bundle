@@ -1,10 +1,10 @@
 import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 import { ComponentView } from "/apogeejs-view-lib/src/apogeeViewLib.js";
-import { createProseMirrorManager } from "/apogeejs-appview-lib/src/componentdisplay/proseMirrorSetup.js";
+import { createProseMirrorManager } from "/apogeejs-app-bundle/src/componentdisplay/proseMirrorSetup.js";
 
 import { TextSelection, NodeSelection, EditorState, Selection } from "/prosemirror-admin/dist/prosemirror-state.es.js";
 import { Slice } from "/prosemirror-admin/dist/prosemirror-model.es.js"
-import { GapSelection } from "/apogeejs-appview-lib/src/editor/selection/GapSelection.js";
+import { GapSelection } from "/apogeejs-app-bundle/src/editor/selection/GapSelection.js";
 
 //this constant is used (or hopefully not) in correctCreateInfoforRepeatedNames
 const MAX_SUFFIX_INDEX = 99999;
