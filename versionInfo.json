@@ -1,0 +1,9 @@
+{
+    "version": "2.0.0-p1",
+    "isProductionRelease": false,
+    "buildInfoUrl": "/apogeejs-app-bundle/buildInfo.json", 
+    "pathMapping": {},
+    "replacementValues": {
+        "RELEASE_VERSION": "2.0.0-p1"
+    }
+}

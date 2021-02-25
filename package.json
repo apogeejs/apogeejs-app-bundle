@@ -1,12 +1,12 @@
 {
     "DEV_RELEASE": true,
     "name": "apogeejs-app-bundle",
-    "version": "2.0.0-p1",
+    "version": "[RELEASE_VERSION]",
     "description": "This is the bundled code for the apogeejs ide application.",
     "homepage": "https://www.apogeejs.com",
     "license": "MIT",
     "author": "Dave Sutter",
-    "main": "apogeejs-app-bundle.js",
+    "main": "./src/apogeejs-app-bundle.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/sutter-dave/apogeejs-app-bundle.git"
@@ -20,6 +20,7 @@
         "prosemirror-keymap": "^1.0.0",
         "prosemirror-commands": "^1.0.0",
         "ace-builds": "1.4.3",
-        "handsontable": "6.2.0"
+        "handsontable": "6.2.0",
+        "core-js": "^2.0.0"
     }
 }

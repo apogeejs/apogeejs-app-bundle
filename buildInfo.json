@@ -1,0 +1,107 @@
+{
+    "repoName": "apogeejs-app-bundle",
+
+    "esModule": {
+        "taskList": [
+            {
+                "type": "copyFileList",
+                "srcFileUrlList": [
+                    "/apogeejs-app-bundle/versionInfo.json"
+                ]
+            },
+            {
+                "type": "concatFileList",
+                "srcFileUrlList": [
+                    "/apogeejs-view-lib/style/apogeeapp.css",
+                    "/apogeejs-app-bundle/style/LiteratePage.css",
+                    "/apogeejs-view-lib/style/ComponentDisplay.css",
+                    "/apogeejs-app-bundle/style/ApogeeToolbar.css",
+                    "/apogeejs-ui-lib/style/dialog.css",
+                    "/apogeejs-ui-lib/style/DisplayAndHeader.css",
+                    "/apogeejs-ui-lib/style/Menu.css",
+                    "/apogeejs-ui-lib/style/SplitPane.css",
+                    "/apogeejs-ui-lib/style/TabFrame.css",
+                    "/apogeejs-ui-lib/style/TreeControl.css",
+                    "/apogeejs-ui-lib/style/ConfigurablePanel.css",
+                    "/apogeejs-ui-lib/style/listElement.css",
+                    "/apogeejs-ui-lib/style/tooltip.css",  
+                    "/prosemirror-admin/compiledCss/editor.css",    
+                    "/apogeejs-admin/ext/handsontable/handsontable_6.2.0/handsontable.full.min.css"
+                ],
+                "destFileName": "cssBundle.css",
+                "childFolder": "style"
+            },
+            {
+                "type": "copyFileList",
+                "srcFileUrlList": [
+                    "/apogeejs-ui-lib/resources/**/*",
+                    "/apogeejs-app-bundle/resources/**/*"
+                ],
+                "childFolder": "resources"
+            },
+            {
+                "type": "copyFileList",
+                "srcFileUrlList": [
+                    "/apogeejs-admin/ext/ace/ace_1.4.3/ace_includes/**/*"
+                ],
+                "childFolder": "ace_includes"
+            },
+            {
+                "type": "copyFileList",
+                "srcFileUrlList": [
+                    "/apogeejs-model-lib/src/debugHook.js",
+                    "/apogeejs-model-lib/src/webGlobals.js",
+                    "/apogeejs-model-lib/src/nodeGlobals.js"
+                ],
+                "childFolder": "src"
+            },
+            {
+                "type": "packageLib",
+                "esModuleFileName": "apogeeAppBundle.js"
+            }
+        ]
+    },
+    "npmModule": {
+        "taskList": [
+            {
+                "type": "copyAndReplace",
+                "srcFileUrl": "/apogeejs-app-bundle/package.json",
+                "replacementList": [
+                    {
+                        "marker": "[RELEASE_VERSION]",
+                        "name": "RELEASE_VERSION"
+                    }
+                ]
+            },
+            {
+                "type": "packageLib",
+                "esModuleFileName": "apogeeAppBundle.js",
+                "npmModuleFileName": "apogeejs-app-bundle.js",
+                "externalLibs": [
+                    "/apogeejs-admin/ext/esprima/esprima_2.7.3/esprima.es.js",
+                    "/prosemirror-admin/dist/prosemirror-model.es.js",
+                    "/prosemirror-admin/dist/prosemirror-state.es.js",
+                    "/prosemirror-admin/dist/prosemirror-transform.es.js",
+                    "/prosemirror-admin/dist/prosemirror-view.es.js",
+                    "/prosemirror-admin/dist/prosemirror-keymap.es.js",
+                    "/prosemirror-admin/dist/prosemirror-commands.es.js",
+                    "/prosemirror-admin/dist/prosemirror-gapcursor.es.js",
+                    "/apogeejs-admin/ext/ace/ace_1.4.3/ace.es.js",
+                    "/apogeejs-admin/ext/handsontable/handsontable_6.2.0/handsontable.es.js"
+                ],
+                "externalLibMapping": {
+                    "/apogeejs-admin/ext/esprima/esprima_2.7.3/esprima.es.js": "esprima",
+                    "/prosemirror-admin/dist/prosemirror-model.es.js": "prosemirror-model",
+                    "/prosemirror-admin/dist/prosemirror-state.es.js": "prosemirror-state",
+                    "/prosemirror-admin/dist/prosemirror-transform.es.js": "prosemirror-transform",
+                    "/prosemirror-admin/dist/prosemirror-view.es.js": "prosemirror-view",
+                    "/prosemirror-admin/dist/prosemirror-keymap.es.js": "prosemirror-keymap",
+                    "/prosemirror-admin/dist/prosemirror-commands.es.js": "prosemirror-commands",
+                    "/prosemirror-admin/dist/prosemirror-gapcursor.es.js": "prosemirror-gapcursor",
+                    "/apogeejs-admin/ext/ace/ace_1.4.3/ace.es.js": "ace-builds",
+                    "/apogeejs-admin/ext/handsontable/handsontable_6.2.0/handsontable.es.js": "handsontable"
+                }
+            }
+        ]
+    }
+}
