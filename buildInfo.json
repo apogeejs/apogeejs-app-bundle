@@ -69,7 +69,8 @@
                 "replacementList": [
                     {
                         "marker": "[RELEASE_VERSION]",
-                        "libVersion": "this"
+                        "type": "version",
+                        "lib": "this"
                     }
                 ]
             },

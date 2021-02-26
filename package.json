@@ -19,6 +19,7 @@
         "prosemirror-transform": "^1.0.0",
         "prosemirror-keymap": "^1.0.0",
         "prosemirror-commands": "^1.0.0",
+        "prosemirror-gapcursor": "^1.0.0",
         "ace-builds": "1.4.3",
         "handsontable": "6.2.0",
         "core-js": "^2.0.0"
