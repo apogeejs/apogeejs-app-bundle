@@ -28,7 +28,7 @@
                     "/prosemirror-admin/compiledCss/editor.css",    
                     "/apogeejs-admin/ext/handsontable/handsontable_6.2.0/handsontable.full.min.css"
                 ],
-                "destFileName": "cssBundle.css",
+                "destFileName": "apogeeAppBundle.css",
                 "childFolder": "style"
             },
             {
@@ -69,7 +69,7 @@
                 "replacementList": [
                     {
                         "marker": "[RELEASE_VERSION]",
-                        "name": "RELEASE_VERSION"
+                        "libVersion": "this"
                     }
                 ]
             },
