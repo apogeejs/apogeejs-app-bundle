@@ -12,7 +12,6 @@
         "url": "https://github.com/sutter-dave/apogeejs-app-bundle.git"
     },
     "dependencies": {
-        "esprima": "2.7.3",
         "prosemirror-model": "^1.0.0",
         "prosemirror-state": "^1.0.0",
         "prosemirror-view": "^1.0.0",
@@ -22,6 +21,12 @@
         "prosemirror-gapcursor": "^1.0.0",
         "ace-builds": "1.4.3",
         "handsontable": "6.2.0",
-        "core-js": "^2.0.0"
+        "core-js": "^2.0.0",
+        "apogeejs-util-lib": "[APOGEE_UTIL_DEP_VERSION]",
+        "apogeejs-base-lib": "[APOGEE_BASE_DEP_VERSION]",
+        "apogeejs-model-lib": "[APOGEE_MODEL_DEP_VERSION]",
+        "apogeejs-app-lib": "[APOGEE_APP_DEP_VERSION]",
+        "apogeejs-ui-lib": "[APOGEE_UI_DEP_VERSION]",
+        "apogeejs-view-lib": "[APOGEE_VIEW_DEP_VERSION]"
     }
 }

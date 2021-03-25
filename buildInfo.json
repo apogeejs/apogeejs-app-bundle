@@ -71,6 +71,36 @@
                         "marker": "[RELEASE_VERSION]",
                         "type": "version",
                         "lib": "this"
+                    },
+                    {
+                        "marker": "[APOGEE_UTIL_DEP_VERSION]",
+                        "lib": "apogeejs-util-lib",
+                        "type": "npmVersion"
+                    },
+                    {
+                        "marker": "[APOGEE_BASE_DEP_VERSION]",
+                        "lib": "apogeejs-base-lib",
+                        "type": "npmVersion"
+                    },
+                    {
+                        "marker": "[APOGEE_MODEL_DEP_VERSION]",
+                        "lib": "apogeejs-model-lib",
+                        "type": "npmVersion"
+                    },
+                    {
+                        "marker": "[APOGEE_APP_DEP_VERSION]",
+                        "lib": "apogeejs-app-lib",
+                        "type": "npmVersion"
+                    },
+                    {
+                        "marker": "[APOGEE_UI_DEP_VERSION]",
+                        "lib": "apogeejs-ui-lib",
+                        "type": "npmVersion"
+                    },
+                    {
+                        "marker": "[APOGEE_VIEW_DEP_VERSION]",
+                        "lib": "apogeejs-view-lib",
+                        "type": "npmVersion"
                     }
                 ]
             },
@@ -79,7 +109,12 @@
                 "esModuleFileName": "apogeeAppBundle.js",
                 "npmModuleFileName": "apogeejs-app-bundle.js",
                 "externalLibs": [
-                    "/apogeejs-admin/ext/esprima/esprima_2.7.3/esprima.es.js",
+                    "/apogeejs-base-lib/src/apogeeBaseLib.js",
+                    "/apogeejs-util-lib/src/apogeeUtilLib.js",
+                    "/apogeejs-model-lib/src/apogeeModelLib.js",
+                    "/apogeejs-app-lib/src/apogeeAppLib.js",
+                    "/apogeejs-ui-lib/src/apogeeUiLib.js",
+                    "/apogeejs-view-lib/src/apogeeViewLib.js",
                     "/prosemirror-admin/dist/prosemirror-model.es.js",
                     "/prosemirror-admin/dist/prosemirror-state.es.js",
                     "/prosemirror-admin/dist/prosemirror-transform.es.js",
@@ -91,7 +126,12 @@
                     "/apogeejs-admin/ext/handsontable/handsontable_6.2.0/handsontable.es.js"
                 ],
                 "externalLibMapping": {
-                    "/apogeejs-admin/ext/esprima/esprima_2.7.3/esprima.es.js": "esprima",
+                    "/apogeejs-base-lib/src/apogeeBaseLib.js": "apogeejs-base-lib",
+                    "/apogeejs-util-lib/src/apogeeUtilLib.js": "apogeejs-util-lib",
+                    "/apogeejs-model-lib/src/apogeeModelLib.js": "apogeejs-model-lib",
+                    "/apogeejs-app-lib/src/apogeeAppLib.js": "apogeejs-app-lib",
+                    "/apogeejs-ui-lib/src/apogeeUiLib.js": "apogeejs-ui-lib",
+                    "/apogeejs-view-lib/src/apogeeViewLib.js": "apogeejs-view-lib",
                     "/prosemirror-admin/dist/prosemirror-model.es.js": "prosemirror-model",
                     "/prosemirror-admin/dist/prosemirror-state.es.js": "prosemirror-state",
                     "/prosemirror-admin/dist/prosemirror-transform.es.js": "prosemirror-transform",
