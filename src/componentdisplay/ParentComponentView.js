@@ -2,8 +2,8 @@ import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 import { ComponentView } from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import { createProseMirrorManager } from "/apogeejs-app-bundle/src/componentdisplay/proseMirrorSetup.js";
 
-import { TextSelection, NodeSelection, EditorState, Selection } from "/prosemirror-admin/dist/prosemirror-state.es.js";
-import { Slice } from "/prosemirror-admin/dist/prosemirror-model.es.js"
+import { TextSelection, NodeSelection, EditorState, Selection } from "/apogeejs-releases/releases/ext/prosemirror-state/v1.3.3/prosemirror-state.es.js";
+import { Slice } from "/apogeejs-releases/releases/ext/prosemirror-model/v1.10.0/prosemirror-model.es.js"
 import { GapSelection } from "/apogeejs-app-bundle/src/editor/selection/GapSelection.js";
 
 //this constant is used (or hopefully not) in correctCreateInfoforRepeatedNames

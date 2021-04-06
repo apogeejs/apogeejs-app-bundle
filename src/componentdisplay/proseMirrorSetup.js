@@ -13,10 +13,9 @@ import { getInteractiveNodePlugin } from "/apogeejs-app-bundle/src/editor/Intera
 
 import { baseKeymap } from "/apogeejs-app-bundle/src/editor/apogeeCommands.js";
 
-import { Plugin } from "/prosemirror-admin/dist/prosemirror-state.es.js";
-import { EditorView } from "/prosemirror-admin/dist/prosemirror-view.es.js";
-import { keymap } from "/prosemirror-admin/dist/prosemirror-keymap.es.js";
-//import { gapCursor } from "/prosemirror-admin/dist/prosemirror-gapcursor.es.js";
+import { Plugin } from "/apogeejs-releases/releases/ext/prosemirror-state/v1.3.3/prosemirror-state.es.js";
+import { EditorView } from "/apogeejs-releases/releases/ext/prosemirror-view/v1.14.13/prosemirror-view.es.js";
+import { keymap } from "/apogeejs-releases/releases/ext/prosemirror-keymap/v1.1.4/prosemirror-keymap.es.js";
 import { apogeeSelectionPlugin } from "/apogeejs-app-bundle/src/editor/selection/ApogeeSelectionPlugin.js";
 
 import ApogeeComponentView from "/apogeejs-app-bundle/src/editor/ApogeeComponentView.js";

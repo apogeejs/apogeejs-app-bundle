@@ -1,5 +1,5 @@
-import {Selection, NodeSelection} from "/prosemirror-admin/dist/prosemirror-state.es.js"
-import {Slice} from "/prosemirror-admin/dist/prosemirror-model.es.js"
+import {Selection, NodeSelection} from "/apogeejs-releases/releases/ext/prosemirror-state/v1.3.3/prosemirror-state.es.js"
+import {Slice} from "/apogeejs-releases/releases/ext/prosemirror-model/v1.10.0/prosemirror-model.es.js"
 import {isLeafBlock} from "./selectionUtils.js"
 
 // ::- Gap cursor selections are represented using this class. Its
