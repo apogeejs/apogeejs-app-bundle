@@ -1,5 +1,5 @@
-import {Selection, NodeSelection} from "/apogeejs-releases/releases/ext/prosemirror-state/v1.3.3/prosemirror-state.es.js"
-import {Slice} from "/apogeejs-releases/releases/ext/prosemirror-model/v1.10.0/prosemirror-model.es.js"
+import {Selection, NodeSelection} from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-state.es.js"
+import {Slice} from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-model.es.js"
 
 // ::- Gap cursor selections are represented using this class. Its
 // `$anchor` and `$head` properties both point at the cursor position.

@@ -1,5 +1,5 @@
-import {keydownHandler}  from "/apogeejs-releases/releases/ext/prosemirror-keymap/v1.1.4/prosemirror-keymap.es.js";
-import {NodeSelection, Plugin}  from "/apogeejs-releases/releases/ext/prosemirror-state/v1.3.3/prosemirror-state.es.js";
+import {keydownHandler}  from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-keymap.es.js";
+import {NodeSelection, Plugin}  from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-state.es.js";
 
 const dummyFunction = () => true;
 

@@ -1,6 +1,6 @@
-import {keydownHandler} from "/apogeejs-releases/releases/ext/prosemirror-keymap/v1.1.4/prosemirror-keymap.es.js"
-import {TextSelection, NodeSelection, Plugin} from "/apogeejs-releases/releases/ext/prosemirror-state/v1.3.3/prosemirror-state.es.js"
-import {Decoration, DecorationSet} from "/apogeejs-releases/releases/ext/prosemirror-view/v1.14.13/prosemirror-view.es.js"
+import {keydownHandler} from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-keymap.es.js"
+import {TextSelection, NodeSelection, Plugin} from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-state.es.js"
+import {Decoration, DecorationSet} from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-view.es.js"
 
 import {GapSelection} from "./GapSelection.js"
 

@@ -6,9 +6,9 @@
 // - don't convert included lists to be the specified type
 // - don't handle tabs at the start of non-list items, beign converted to child lists
 
-import { findWrapping, /*ReplaceStep,*/ ReplaceAroundStep } from "/apogeejs-releases/releases/ext/prosemirror-transform/v1.2.6/prosemirror-transform.es.js";
-import { Slice, NodeRange, Fragment } from "/apogeejs-releases/releases/ext/prosemirror-model/v1.10.0/prosemirror-model.es.js"
-import { TextSelection } from "/apogeejs-releases/releases/ext/prosemirror-state/v1.3.3/prosemirror-state.es.js"
+import { findWrapping, /*ReplaceStep,*/ ReplaceAroundStep } from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-transform.es.js";
+import { Slice, NodeRange, Fragment } from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-model.es.js"
+import { TextSelection } from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-state.es.js"
 
 //--------------------------------------------------------
 // Commands
@@ -516,7 +516,7 @@ function insertParagraphAfterFirstApogeeNode(state,dispatch) {
 
 import { createParagraphNear, splitBlock, deleteSelection, 
   joinBackward, joinForward, selectAll,
-  chainCommands  }  from "/apogeejs-releases/releases/ext/prosemirror-commands/v1.1.4/prosemirror-commands.es.js";
+  chainCommands  }  from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-commands.es.js";
 
 let enter = chainCommands(exitEmptyList, insertParagraphAfterFirstApogeeNode, createParagraphNear, splitBlock);
 let backspace = chainCommands(exitEmptyList,deleteSelection, joinBackward, exitFromStartOfList);
