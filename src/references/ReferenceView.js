@@ -134,27 +134,14 @@ export default class ReferenceView {
             //set the proper entry type, and use that for the list name too
             listDisplayInfo.REFERENCE_TYPE = entryType;
             listDisplayInfo.LIST_NAME = entryType;
+            listDisplayInfo.DISPLAY_NAME = entryTYpe;
         }
         return new ReferenceListView(this.app,entryType,listDisplayInfo,viewState);
     }
 
 }
 
-
-
 let REFERENCES_ICON_PATH = "/icons3/folderIcon.png";
-
-/** This function gets the display info for a given list. */
-function _getListDisplayInfo(entryType) {
-    let listDisplayInfo = LIST_DISPLAY_INFO[entryType];
-    if(!listDisplayInfo) {
-        listDisplayInfo = apogeeutil.jsonCopy(DEFAULT_LIST_DISPLAY_INFO);
-        //set the proper entry type, and use that for the list name too
-        listDisplayInfo.REFERENCE_TYPE = entryType;
-        listDisplayInfo.LIST_NAME = entryType;
-    }
-    return listDisplayInfo;
-}
 
 /** This is the UI definition data for the added reference lists.
  * This should be placed somewhere else to make it easier for people to 
@@ -165,9 +152,21 @@ let LIST_DISPLAY_INFO = {
     "amd module": {
         "REFERENCE_TYPE": "amd module",
         "LIST_NAME": "Web Modules",
-        "ADD_ENTRY_TEXT":"Add Web Module",
-        "UPDATE_ENTRY_TEXT":"Update Web Module",
-        "REMOVE_ENTRY_TEXT":"Remove Web Module",
+        "DISPLAY_NAME":"Web Module",
+        "FORM_BODY": [
+            {
+                type: "textField",
+                label: "URL: ",
+                size: 100,
+                key: "url"
+            },
+            {
+                type: "textField",
+                label: "Display Name: ",
+                size: 50,
+                key: "nickname"
+            }
+        ],
         "LIST_ICON_PATH":"/icons3/folderIcon.png",
         "ENTRY_ICON_PATH":"/icons3/amdModuleIcon.png"
     },
@@ -175,9 +174,21 @@ let LIST_DISPLAY_INFO = {
     "css link": {
         "REFERENCE_TYPE": "css link",
         "LIST_NAME": "CSS Links",
-        "ADD_ENTRY_TEXT":"Add CSS Link",
-        "UPDATE_ENTRY_TEXT":"Update CSS Link",
-        "REMOVE_ENTRY_TEXT":"Remove CSS Link",
+        "DISPLAY_NAME":"CSS Link",
+        "FORM_BODY": [
+            {
+                type: "textField",
+                label: "URL: ",
+                size: 100,
+                key: "url"
+            },
+            {
+                type: "textField",
+                label: "Display Name: ",
+                size: 50,
+                key: "nickname"
+            }
+        ],
         "LIST_ICON_PATH":"/icons3/folderIcon.png",
         "ENTRY_ICON_PATH": "/icons3/cssLinkIcon.png"
     },
@@ -185,9 +196,29 @@ let LIST_DISPLAY_INFO = {
     "npm module": {
         "REFERENCE_TYPE": "npm module",
         "LIST_NAME": "NPM Modules",
-        "ADD_ENTRY_TEXT":"Add NPM Module",
-        "UPDATE_ENTRY_TEXT":"Update NPM Module",
-        "REMOVE_ENTRY_TEXT":"Remove NPM Module",
+        "DISPLAY_NAME":"NPM Module",
+        "FORM_BODY": [
+            {
+                type: "textField",
+                label: "NPM Module Name: ",
+                size: 50,
+                key: "url"
+            },
+            {
+                type: "textField",
+                label: "Display Name: ",
+                size: 50,
+                key: "nickname"
+            },
+            {
+                type: "textField",
+                label: "Server NPM Module Name: ",
+                size: 50,
+                key: "serverUrl",
+                hint: "Optional",
+                help: "This is used if a different module should be loaded when the workspace is run on the server."
+            },
+        ],
         "LIST_ICON_PATH":"/icons3/folderIcon.png",
         "ENTRY_ICON_PATH":"/icons3/npmModuleIcon.png"
     },
@@ -195,9 +226,21 @@ let LIST_DISPLAY_INFO = {
     "es module": {
         "REFERENCE_TYPE": "es module",
         "LIST_NAME": "Web Modules",
-        "ADD_ENTRY_TEXT":"Add ES Web Module",
-        "UPDATE_ENTRY_TEXT":"Update Web Module",
-        "REMOVE_ENTRY_TEXT":"Remove Web Module",
+        "DISPLAY_NAME":"ES Web Module",
+        "FORM_BODY": [
+            {
+                type: "textField",
+                label: "URL: ",
+                size: 100,
+                key: "url"
+            },
+            {
+                type: "textField",
+                label: "Display Name: ",
+                size: 50,
+                key: "nickname"
+            }
+        ],
         "LIST_ICON_PATH":"/icons3/folderIcon.png",
         "ENTRY_ICON_PATH":"/icons3/esModuleIcon.png"
     },
@@ -205,9 +248,21 @@ let LIST_DISPLAY_INFO = {
     "js link": {
         "REFERENCE_TYPE": "js link",
         "LIST_NAME": "JS Scripts",
-        "ADD_ENTRY_TEXT":"Add JS Script Link",
-        "UPDATE_ENTRY_TEXT":"Update JS Script Link",
-        "REMOVE_ENTRY_TEXT":"Remove JS Script Link",
+        "DISPLAY_NAME":"JS Script Link",
+        "FORM_BODY": [
+            {
+                type: "textField",
+                label: "URL: ",
+                size: 100,
+                key: "url"
+            },
+            {
+                type: "textField",
+                label: "Display Name: ",
+                size: 50,
+                key: "nickname"
+            }
+        ],
         "LIST_ICON_PATH":"/icons3/folderIcon.png",
         "ENTRY_ICON_PATH":"/icons3/jsLinkIcon.png"
     }
@@ -216,10 +271,22 @@ let LIST_DISPLAY_INFO = {
 //if this is used, replace the reference type and list name
 let DEFAULT_LIST_DISPLAY_INFO = {
     "REFERENCE_TYPE": "PUT THE ENTRY TYPE HERE!",
-    "LIST_NAME": "PUT THE ENTRY TYPE HERE!",
-    "ADD_ENTRY_TEXT":"Add Link",
-    "UPDATE_ENTRY_TEXT":"Update Link",
-    "REMOVE_ENTRY_TEXT":"Remove Link",
+    "LIST_NAME": "PUT THE LIST NAME HERE!",
+    "DISPLAY_NAME":"PUT THE DISPLAY NAME HERE!",
+    "FORM_BODY": [
+        {
+            type: "textField",
+            label: "URL: ",
+            size: 100,
+            key: "url"
+        },
+        {
+            type: "textField",
+            label: "Display Name: ",
+            size: 50,
+            key: "nickname"
+        }
+    ],
     "LIST_ICON_PATH":"/icons3/folderIcon.png",
     "ENTRY_ICON_PATH":"/icons3/javascriptLink.png"
 }

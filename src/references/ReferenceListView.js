@@ -70,7 +70,7 @@ export default class ReferenceListView {
 
         //add the standard entries
         var itemInfo = {};
-        itemInfo.title = this.displayInfo.ADD_ENTRY_TEXT;
+        itemInfo.title = "Add " + this.displayInfo.DISPLAY_NAME;
         itemInfo.callback = () => addLink(this.app,this.displayInfo);
         menuItemList.push(itemInfo);
         

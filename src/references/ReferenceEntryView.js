@@ -22,7 +22,7 @@ export default class ReferenceEntryView {
         if(referenceEntry.getId() != this.referenceEntry.getId()) return;
         
         this.referenceEntry = referenceEntry;
-        if(referenceEntry.isFieldUpdated("nickname")) {
+        if(referenceEntry.isFieldUpdated("data")) {
             let nickname = this.referenceEntry.getNickname();
             if(!nickname) nickname = "-unnamed entry-";
             this.treeEntry.setLabel(nickname);
@@ -53,13 +53,13 @@ export default class ReferenceEntryView {
 
         //add the standard entries
         var itemInfo = {};
-        itemInfo.title = this.displayInfo.UPDATE_ENTRY_TEXT;
+        itemInfo.title = "Update " + this.displayInfo.DISPLAY_NAME;
         itemInfo.callback = () => updateLink(this.app,this.referenceEntry,this.displayInfo);
         menuItemList.push(itemInfo);
 
         //add the standard entries
         var itemInfo = {};
-        itemInfo.title = this.displayInfo.REMOVE_ENTRY_TEXT;
+        itemInfo.title = "Remove " + this.displayInfo.DISPLAY_NAME;
         itemInfo.callback = () => removeLink(this.app,this.referenceEntry,this.displayInfo);
         menuItemList.push(itemInfo);
 
