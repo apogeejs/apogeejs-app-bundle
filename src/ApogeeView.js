@@ -345,7 +345,7 @@ export default class ApogeeView {
         let menuItems = [];
         let menuItem;
 
-        let fileAccessObject = this.app.getFileAccessObject();
+        let fileAccessObject = apogeeplatform.getFileAccessObject();
         
         menuItem = {};
         menuItem.title = "New";
