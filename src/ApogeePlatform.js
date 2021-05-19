@@ -14,21 +14,8 @@ export default class ApogeePlatform {
         return this.fileAccess;
     }
 
-    openModuleManager(app) {
-        if(this.moduleManagerClass) {
-            try {
-                let moduleManager = new this.moduleManagerClass(app);
-                moduleManager.openModuleManager();
-            }
-            catch(error) {
-                if(error.stack) console.error(error.stack);
-                let errorMsg = error.messsage ? error.message : error.toString();
-                apogeeUserAlert("Error opening module manager: " + errorMsg);
-            }
-        }
-        else {
-            apogeeUserAlert("Module manager service not available!");
-        }
+    getModuleManagerClass() {
+        return this.moduleManagerClass;
     }
 
     spawnWorkspaceFromUrl(url) {
