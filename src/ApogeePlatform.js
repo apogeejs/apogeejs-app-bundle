@@ -4,6 +4,7 @@ export default class ApogeePlatform {
     constructor() {
         this.fileAccess = null;
         this.moduleManagerClass = null;
+        this.moduleManagerOptions = null;
         this.externalOpener = null;
     }
 
@@ -14,8 +15,8 @@ export default class ApogeePlatform {
         return this.fileAccess;
     }
 
-    getModuleManagerClass() {
-        return this.moduleManagerClass;
+    getModuleManagerInstance(app) {
+        return new this.moduleManagerClass(app,this.moduleManagerOptions);
     }
 
     spawnWorkspaceFromUrl(url) {
@@ -58,11 +59,12 @@ export default class ApogeePlatform {
         this.fileAccess = fileAccess;
     }
 
-    setModuleManagerClass(moduleManagerClass) {
+    setModuleManagerClass(moduleManagerClass,options) {
         this.moduleManagerClass = moduleManagerClass;
+        this.moduleManagerOptions = options;
     }
 
-    setExteralOpener(externalOpener) {
+    setExternalOpener(externalOpener) {
         this.externalOpener = externalOpener;
     }
 
