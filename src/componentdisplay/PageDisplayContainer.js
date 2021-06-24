@@ -460,6 +460,14 @@ export default class PageDisplayContainer {
         //update the stored UI state json
         this.savedUiState = this.getStateJson();
 
+        //NOTE: This is probably not optimal treatment of edit mode
+        //We restrict reloading to data when we are in edit mode. Reloading of the display is not as simple 
+        //as currently coded. So we will just kick the display out of edit mode.
+        //It would be nive to get a better treatment 
+        if(this.inEditMode) {
+            this.endEditMode();
+        }
+
         //reset any data display specific parts of the ui
         this._cleanupDataDisplayUI();
 
