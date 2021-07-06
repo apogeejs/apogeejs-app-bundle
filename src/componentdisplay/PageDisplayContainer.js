@@ -524,7 +524,7 @@ export default class PageDisplayContainer {
 
     _getViewSourceText() {
         let viewSourceText;
-        if(this.viewModeInfo.sourceLayer == DATA_DISPLAY_CONSTANTS.VIEW_SOURCE_LAYER_MODEL) {
+        if((this.viewModeInfo.sourceLayer == DATA_DISPLAY_CONSTANTS.VIEW_SOURCE_LAYER_MODEL)&&(this.viewModeInfo.sourceType == "data")) {
             viewSourceText = this.componentView.getName();
             if(this.viewModeInfo.suffix) viewSourceText += this.viewModeInfo.suffix;
         }
