@@ -325,7 +325,7 @@ export default class LiteratePageComponentDisplay {
             let componentName = standardComponentNames[i];
 
             let componentClass = componentInfo.getComponentClass(componentName);
-            let componentViewClass = getComponentViewClass(componentClass.uniqueName);
+            let componentViewClass = getComponentViewClass(componentClass.getClassUniqueName());
             if(componentViewClass.hasChildEntry) {
 
                 var buttonElement = uiutil.createElementWithClass("div","visiui_litPage_componentButton",this.componentToolbarContainer);
@@ -336,8 +336,8 @@ export default class LiteratePageComponentDisplay {
                 iconElement.appendChild(imageElement);
                 //label
                 var textElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonText",buttonElement);
-                textElement.innerHTML = componentClass.displayName;
-                buttonElement.title = "Insert " + componentClass.displayName;
+                textElement.innerHTML = componentClass.getClassDisplayName();
+                buttonElement.title = "Insert " + componentClass.getClassDisplayName();
                 //add handler
                 buttonElement.onclick = () => {
 

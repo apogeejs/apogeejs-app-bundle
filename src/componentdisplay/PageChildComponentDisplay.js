@@ -293,7 +293,8 @@ export default class PageChildComponentDisplay {
 
         //cell type label
         this.cellTypeLabel = uiutil.createElementWithClass("div","visiui_pageChild_cellTypeLabelClass visiui_hideSelection",this.titleBarContainer);
-        this.cellTypeLabel.innerHTML = this.componentView.getComponent().constructor.displayName;
+        this.cellTypeLabel.innerHTML = this.componentView.getComponent().constructor.getClassDisplayName();
+
 
     }
 

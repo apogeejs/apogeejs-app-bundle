@@ -80,7 +80,7 @@ export default class ModelView {
     onComponentCreated(component) {
         try {
             //create the component view
-            let componentViewClass = getComponentViewClass(component.constructor.uniqueName);
+            let componentViewClass = getComponentViewClass(component.constructor.getClassUniqueName());
             let componentView;
             if(componentViewClass) {
                 componentView = new componentViewClass(this,component);
@@ -217,7 +217,7 @@ export default class ModelView {
             pageComponents.forEach(pageComponentName => {
                 let childMenuItem = {};
                 let pageComponentClass = componentInfo.getComponentClass(pageComponentName);
-                childMenuItem.title = "Add Child " + pageComponentClass.displayName;
+                childMenuItem.title = "Add Child " + pageComponentClass.getClassDisplayName();
                 childMenuItem.callback = () => addComponent(this,app,pageComponentClass,initialValues);
                 menuItemList.push(childMenuItem);
             })
