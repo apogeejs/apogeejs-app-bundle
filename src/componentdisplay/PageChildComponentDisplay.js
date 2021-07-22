@@ -224,9 +224,7 @@ export default class PageChildComponentDisplay {
         this.viewContainer = uiutil.createElementWithClass("div","visiui_pageChild_viewContainerClass",this.mainElement);
         
         //add the view elements
-        var settings = this.componentView.getTableEditSettings();
-        var viewModes = settings.viewModes;
-        
+        var viewModes = this.componentView.getViewModeEntries();
         this.displayContainerMap = {};  
         if(viewModes.length > 0) {
             for(var i = 0; i < viewModes.length; i++) {
