@@ -347,7 +347,7 @@ export default class LiteratePageComponentDisplay {
                     var parentMember = pageComponent.getParentFolderForChildren();
                     initialValues.parentId = parentMember.getId();
 
-                    addComponent(appViewInterface,app,componentClass,initialValues,null,null);
+                    addComponent(appViewInterface,app,componentClass,initialValues);
                 }
 
                 //for cleanup
@@ -371,7 +371,7 @@ export default class LiteratePageComponentDisplay {
             let appViewInterface = this.componentView.getAppViewInterface();
 
             //I tacked on a piggyback for testing!!!
-            addAdditionalComponent(appViewInterface,app,initialValues,null,null);
+            addAdditionalComponent(appViewInterface,app,initialValues);
         }
         //for cleanup
         this.elementsWithOnclick.push(buttonElement);
