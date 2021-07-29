@@ -843,10 +843,3 @@ export default class ParentComponentView extends ComponentView {
 
 /** This is used to flag this as an edit component. */
 ParentComponentView.isParentComponentView = true;
-
-
-//temporary? See if we need this. 
-function selectionBetween(view, $anchor, $head, bias) {
-    return view.someProp("createSelectionBetween", f => f(view, $anchor, $head))
-      || TextSelection.between($anchor, $head, bias)
-  }
