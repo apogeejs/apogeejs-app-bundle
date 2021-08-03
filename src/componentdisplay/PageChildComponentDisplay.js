@@ -13,7 +13,7 @@ export default class PageChildComponentDisplay {
         this.inEditMode = false;
         
         //these are the header elements
-        this.iconOverlayElement
+        this.iconOverlayElement = null;
         this.mainElement = null;
         this.bannerContainer = null;
 
@@ -29,12 +29,12 @@ export default class PageChildComponentDisplay {
         this.isHighlighted = false;
     
         //this is the window in which the component is displayed
-        if(componentView) this.loadComponentDisplay();
+        if(componentView) this._loadComponentDisplay();
         
         //connect to parent
-        this.setIsPageShowing(this.parentComponentDisplay.getIsShowing());
-        this.onShow = () => this.setIsPageShowing(true);
-        this.onHide = () => this.setIsPageShowing(false);
+        this._setIsPageShowing(this.parentComponentDisplay.getIsShowing());
+        this.onShow = () => this._setIsPageShowing(true);
+        this.onHide = () => this._setIsPageShowing(false);
         this.parentComponentDisplay.addListener(uiutil.SHOWN_EVENT,this.onShow);
         this.parentComponentDisplay.addListener(uiutil.HIDDEN_EVENT,this.onHide);
     }
@@ -45,8 +45,8 @@ export default class PageChildComponentDisplay {
 
     setComponentView(componentView) {
         this.componentView = componentView;
-        this.loadComponentDisplay();
-        this.updateChildDisplayStates();
+        this._loadComponentDisplay();
+        this._updateChildDisplayStates();
     }
 
     getComponentView() {
@@ -190,6 +190,24 @@ export default class PageChildComponentDisplay {
         }  
     }
 
+    /** This method should be called when a given view type enters of exits edit mode */
+    notifyEditMode(viewInEditMode,viewTypeName) {
+        if(viewInEditMode) {
+            if(this.editModeViews.indexOf(viewTypeName) < 0) {
+                this.editModeViews.push(viewTypeName);
+            }
+        }
+        else {
+            let index = this.editModeViews.indexOf(viewTypeName);
+            if(index >= 0) {
+                this.editModeViews.splice(index,1);
+            }
+        }
+        let inEditMode = (this.editModeViews.length > 0);
+
+        if(inEditMode != this.inEditMode) this._setEditMode(inEditMode);
+    }
+
 
     //===============================
     // Private Functions
@@ -198,7 +216,7 @@ export default class PageChildComponentDisplay {
 
     /** This is the standard window for the component.  
      * @private */
-    loadComponentDisplay() {
+    _loadComponentDisplay() {
         if(!this.componentView) return;
 
         //add the click handler, to select this node if it is clicked
@@ -215,7 +233,7 @@ export default class PageChildComponentDisplay {
         }
         
         //add title bar
-        this.addTitleBar();
+        this._addTitleBar();
         
         //add banner container
         this.bannerContainer = uiutil.createElementWithClass("div","visiui_pageChild_bannerContainerClass",this.mainElement);
@@ -256,7 +274,7 @@ export default class PageChildComponentDisplay {
     }
 
     /** This makes the title bar, and installs it inline */
-    addTitleBar() {
+    _addTitleBar() {
         
         this.titleBarContainer = uiutil.createElementWithClass("div","visiui_pageChild_titleBarClass",this.mainElement);
 
@@ -296,29 +314,11 @@ export default class PageChildComponentDisplay {
 
     }
 
-    setIsPageShowing(isPageShowing) {
+    _setIsPageShowing(isPageShowing) {
         if(this.isPageShowing != isPageShowing) {
             this.isPageShowing = isPageShowing;
-            this.updateChildDisplayStates();
+            this._updateChildDisplayStates();
         }
-    }
-
-    /** This method should be called when a given view type enters of exits edit mode */
-    notifyEditMode(viewInEditMode,viewTypeName) {
-        if(viewInEditMode) {
-            if(this.editModeViews.indexOf(viewTypeName) < 0) {
-                this.editModeViews.push(viewTypeName);
-            }
-        }
-        else {
-            let index = this.editModeViews.indexOf(viewTypeName);
-            if(index >= 0) {
-                this.editModeViews.splice(index,1);
-            }
-        }
-        let inEditMode = (this.editModeViews.length > 0);
-
-        if(inEditMode != this.inEditMode) this._setEditMode(inEditMode);
     }
 
     _setEditMode(inEditMode) {
@@ -337,7 +337,7 @@ export default class PageChildComponentDisplay {
         }
     }
 
-    updateChildDisplayStates() {
+    _updateChildDisplayStates() {
         var componentBodyShowing = this.isPageShowing;
         for(var viewType in this.displayContainerMap) {
             var displayContainer = this.displayContainerMap[viewType];
@@ -352,16 +352,16 @@ export default class PageChildComponentDisplay {
 
     /** This sets the given element as the icon overlay. If null or other [false} is passed
      * this will just clear the icon overlay. */
-    setIconOverlay(element) {
+    _setIconOverlay(element) {
         if(this.iconOverlayElement) {
-            this.clearIconOverlay();
+            this._clearIconOverlay();
             if(element) {
                 this.iconOverlayElement.appendChild(element);
             }
         }
     }
 
-    clearIconOverlay() {
+    _clearIconOverlay() {
         if(this.iconOverlayElement) {
             uiutil.removeAllChildren(this.iconOverlayElement);
         }
@@ -396,10 +396,10 @@ export default class PageChildComponentDisplay {
         //update the icon overlay
         var iconOverlay = getIconOverlay(bannerState,bannerMessage);
         if(iconOverlay) {
-            this.setIconOverlay(iconOverlay);
+            this._setIconOverlay(iconOverlay);
         }
         else {
-            this.clearIconOverlay();
+            this._clearIconOverlay();
         }
     }
 
