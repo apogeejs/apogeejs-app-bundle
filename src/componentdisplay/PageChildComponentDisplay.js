@@ -2,11 +2,10 @@ import PageDisplayContainer from "/apogeejs-app-bundle/src/componentdisplay/Page
 
 import {uiutil,Menu,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
-/** This component represents a json table object. */
+/** This component represents a cell on a page. */
 export default class PageChildComponentDisplay {
 
-    constructor(componentView, parentComponentDisplay) {
-        this.componentView = componentView;
+    constructor(parentComponentDisplay) {
         this.parentComponentDisplay = parentComponentDisplay;
 
         this.editModeViews = [];
@@ -27,9 +26,6 @@ export default class PageChildComponentDisplay {
         //make the container
         this.mainElement = uiutil.createElementWithClass("div","visiui_pageChild_mainClass",null);
         this.isHighlighted = false;
-    
-        //this is the window in which the component is displayed
-        if(componentView) this._loadComponentDisplay();
         
         //connect to parent
         this._setIsPageShowing(this.parentComponentDisplay.getIsShowing());

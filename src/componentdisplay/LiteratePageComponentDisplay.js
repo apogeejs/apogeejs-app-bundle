@@ -8,7 +8,7 @@ import {getComponentViewClass} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 import {uiutil,Tab,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
-/** This component represents a json table object. */
+/** This component represents page display. */
 export default class LiteratePageComponentDisplay {
     
     constructor(componentView) {
@@ -99,7 +99,7 @@ export default class LiteratePageComponentDisplay {
             let childComponentDisplay = this.childDisplayMap[childComponentId];
             if((!childComponentDisplay)&&(createIfMissing)) {
                 //we don't haven't added it yet, but we will pre-create it
-                childComponentDisplay = new PageChildComponentDisplay(null, this);
+                childComponentDisplay = new PageChildComponentDisplay(this);
                 this.childDisplayMap[childComponentId] = childComponentDisplay;
             }
             return childComponentDisplay;
@@ -128,7 +128,8 @@ export default class LiteratePageComponentDisplay {
                 childComponentDisplay.setComponentView(childComponentView);
             }
             else {
-                childComponentDisplay = new PageChildComponentDisplay(childComponentView,this);
+                childComponentDisplay = new PageChildComponentDisplay(this);
+                childComponentDisplay.setComponentView(childComponentView);
                 this.childDisplayMap[componentId] = childComponentDisplay;
             }
         }

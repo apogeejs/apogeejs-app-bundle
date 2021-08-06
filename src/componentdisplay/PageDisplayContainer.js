@@ -41,9 +41,29 @@ export default class PageDisplayContainer {
         this.inEditMode = false;
         
         this.componentDisplay = componentDisplay;
-        this.componentView = componentDisplay.getComponentView();
         this.viewTypeName = viewModeInfo.name;
         this.viewTypeLabel = viewModeInfo.label;
+
+        //TESTING!!!////////
+        //change this to getMainComponentView?
+        this.mainComponentView = componentDisplay.getComponentView();
+
+        let mainComponent = this.mainComponentView.getComponent();
+        this.mainComponentId = mainComponent.getId();
+        if((!this.viewModeInfo.childPath)||(this.viewModeInfo.childPath == ".")) {
+            this.viewComponentId = this.mainComponentId;
+        }
+        else {
+            //is this ready yet?
+            let folderMember = mainComponent.getParentFolderForChildren ();
+let childName = this.viewModeInfo.childPath; //FIX THIS!!!
+            let childMemberId = folderMember.lookupChildId(childName)           
+            let modelManager = this.mainComponentView.getApp().getModelManager();
+            this.viewComponentId = modelManager.getComponentIdByMemberId(childMemberId);
+
+        }
+
+        ////////////////
 
         this.dataDisplay = null;
         this.dataDisplayLoaded = false;
@@ -62,8 +82,9 @@ export default class PageDisplayContainer {
         this._initUI();
     }
 
+    /** This returns the main component view for the display container */
     getComponentView() {
-        return this.componentView;
+        return this.mainComponentView;
     }
 
     getComponentDisplay() {
@@ -176,6 +197,12 @@ export default class PageDisplayContainer {
 
         //update the data display
         if(this.dataDisplay) {
+
+            //TESTING!!!////////
+            if(this.viewDomponentId == component.getId()) {
+            ////////////////////////
+
+
             let {reloadData,reloadDataDisplay} = this.dataDisplay.doUpdate();
             if(reloadDataDisplay) {
                 //this will also reload data
@@ -184,10 +211,14 @@ export default class PageDisplayContainer {
             else if(reloadData) {
                 this._updateDataDisplay();
             }
+
+            //TESTING!!!////////
+            }
+            /////////////////////
         }
 
         //update name label on view heading if needed
-        if((this.hasViewSourceText)&&(this.componentView.getComponent().isMemberFieldUpdated("member","name"))) {
+        if( (this.hasViewSourceText) && (this.mainComponentId == component.getId()) && (component.isMemberFieldUpdated("member","name"))) {
             this.viewSource.innerHTML = this._getViewSourceText();
         }
     }
@@ -279,7 +310,7 @@ export default class PageDisplayContainer {
             this.componentDisplay.notifyEditMode(false,this.viewTypeName);
         }
         //select the associated node in the document.
-        let parentComponentView = this.componentView.getParentComponentView();
+        let parentComponentView = this.mainComponentView.getParentComponentView();
         if(parentComponentView) {
             //give the editor focus
             parentComponentView.giveEditorFocusIfShowing();
@@ -525,7 +556,7 @@ export default class PageDisplayContainer {
     _getViewSourceText() {
         let viewSourceText;
         if((this.viewModeInfo.sourceLayer == DATA_DISPLAY_CONSTANTS.VIEW_SOURCE_LAYER_MODEL)&&(this.viewModeInfo.sourceType == "data")) {
-            viewSourceText = this.componentView.getName();
+            viewSourceText = this.mainComponentView.getName();
             if(this.viewModeInfo.suffix) viewSourceText += this.viewModeInfo.suffix;
         }
         else {
@@ -623,7 +654,7 @@ export default class PageDisplayContainer {
             if(!this.dataDisplayLoaded) {
                 if(!this.dataDisplay) {
                     //the display should be created only when it is made visible
-                    this.dataDisplay =  this.componentView.getDataDisplay(this,this.viewTypeName);
+                    this.dataDisplay =  this.mainComponentView.getDataDisplay(this,this.viewTypeName);
                     if(this.dataDisplay) {
                         this.dataDisplay.readUiStateData(this.savedUiState);
                         this._setDataContent(this.dataDisplay.getContent());
