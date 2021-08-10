@@ -45,6 +45,11 @@ export default class PageChildComponentDisplay {
         this._updateChildDisplayStates();
     }
 
+    addChildComponentView(childComponentView) {
+        this._addComponentDisplayChildComponentView(childComponentView);
+        this._updateChildDisplayStates();
+    }
+
     getComponentView() {
         return this.componentView;
     }
@@ -253,6 +258,7 @@ export default class PageChildComponentDisplay {
                 }
 
                 var displayContainer = new PageDisplayContainer(this, viewModeInfo);
+                displayContainer.setMainComponentView(this.componentView);
                 
                 //add the view title element to the title bar
                 this.titleBarViewsElement.appendChild(displayContainer.getViewSelectorContainer());
@@ -267,6 +273,16 @@ export default class PageChildComponentDisplay {
 
         this._setTitle();
         this._setBannerState();
+    }
+
+    /** This adds the child component view to any relevent view display containers */
+    _addComponentDisplayChildComponentView(childComponentView) {
+        if(this.displayContainerMap) {
+            for(let viewName in this.displayContainerMap) {
+                var displayContainer = this.displayContainerMap[viewName];
+                displayContainer.addChildComponentView(childComponentView);
+            }
+        }
     }
 
     /** This makes the title bar, and installs it inline */

@@ -92,10 +92,10 @@ export default class ModelView {
 
             this.componentViewMap[component.getId()] = componentView;
 
-            //find the parent
-            let parentComponent = component.getParentComponent(this.modelManager);
             if(this.hasParentDisplays()) {
+                let parentComponent = component.getParentComponent(this.modelManager);
                 if(parentComponent) {
+                    //add to parent component
                     let parentComponentView = this.getComponentViewByComponentId(parentComponent.getId());
                     if(parentComponentView) {
                         parentComponentView.addChild(componentView);

@@ -44,26 +44,10 @@ export default class PageDisplayContainer {
         this.viewTypeName = viewModeInfo.name;
         this.viewTypeLabel = viewModeInfo.label;
 
-        //TESTING!!!////////
-        //change this to getMainComponentView?
-        this.mainComponentView = componentDisplay.getComponentView();
-
-        let mainComponent = this.mainComponentView.getComponent();
-        this.mainComponentId = mainComponent.getId();
-        if((!this.viewModeInfo.childPath)||(this.viewModeInfo.childPath == ".")) {
-            this.viewComponentId = this.mainComponentId;
-        }
-        else {
-            //is this ready yet?
-            let folderMember = mainComponent.getParentFolderForChildren ();
-let childName = this.viewModeInfo.childPath; //FIX THIS!!!
-            let childMemberId = folderMember.lookupChildId(childName)           
-            let modelManager = this.mainComponentView.getApp().getModelManager();
-            this.viewComponentId = modelManager.getComponentIdByMemberId(childMemberId);
-
-        }
-
-        ////////////////
+        this.mainComponentView = null;
+        this.viewComponentView = null;
+        this.mainComponentId = null;
+        this.viewComponentId = null;
 
         this.dataDisplay = null;
         this.dataDisplayLoaded = false;
@@ -80,6 +64,31 @@ let childName = this.viewModeInfo.childPath; //FIX THIS!!!
         
         //initialize
         this._initUI();
+    }
+
+    setMainComponentView(componentView) {
+        this.mainComponentView = componentView;
+        this._setViewSourceText(); //add name label to ui if needed for "view source"
+
+        let mainComponent = this.mainComponentView.getComponent();
+        this.mainComponentId = mainComponent.getId();
+        if((!this.viewModeInfo.childPath)||(this.viewModeInfo.childPath == ".")) {
+            this.viewComponentId = this.mainComponentId;
+        }
+        else {
+            let folderMember = mainComponent.getParentFolderForChildren ();
+let childName = this.viewModeInfo.childPath; //FIX THIS!!!
+            let childMemberId = folderMember.lookupChildId(childName)           
+            let modelManager = this.mainComponentView.getApp().getModelManager();
+            this.viewComponentId = modelManager.getComponentIdByMemberId(childMemberId);
+        }
+    }
+
+    addChildComponentView(childComponentView) {
+        let childComponent = childComponentView.getComponent();
+        if(childComponent.getId() == this.viewComponentId) {
+            this.viewComponentView = childComponentView;
+        }
     }
 
     /** This returns the main component view for the display container */
@@ -199,7 +208,7 @@ let childName = this.viewModeInfo.childPath; //FIX THIS!!!
         if(this.dataDisplay) {
 
             //TESTING!!!////////
-            if(this.viewDomponentId == component.getId()) {
+            if(this.viewComponentId == component.getId()) {
             ////////////////////////
 
 
@@ -355,7 +364,6 @@ let childName = this.viewModeInfo.childPath; //FIX THIS!!!
         if(hasViewSourceText) {
             //this is saved so we can update the name if it changes
             this.viewSource = uiutil.createElementWithClass("span","visiui_displayContainer_viewSourceClass",this.viewHeadingElement);
-            this.viewSource.innerHTML = this._getViewSourceText();
         }
         if(viewTypeText) {
             let viewType = uiutil.createElementWithClass("span",viewTypeClassName,this.viewHeadingElement);
@@ -553,18 +561,6 @@ let childName = this.viewModeInfo.childPath; //FIX THIS!!!
         return {viewTitleText,hasViewSourceText,viewTypeText,viewTypeClassName,viewDescText};
     }
 
-    _getViewSourceText() {
-        let viewSourceText;
-        if((this.viewModeInfo.sourceLayer == DATA_DISPLAY_CONSTANTS.VIEW_SOURCE_LAYER_MODEL)&&(this.viewModeInfo.sourceType == "data")) {
-            viewSourceText = this.mainComponentView.getName();
-            if(this.viewModeInfo.suffix) viewSourceText += this.viewModeInfo.suffix;
-        }
-        else {
-            viewSourceText = "";
-        }
-        return viewSourceText;
-    }
-
     /** This method configures the toolbar for the view display. */
     _configureSizingElement() {
 
@@ -652,8 +648,8 @@ let childName = this.viewModeInfo.childPath; //FIX THIS!!!
         
         if((this.isComponentShowing)&&(this.isViewActive)) {
             if(!this.dataDisplayLoaded) {
-                if(!this.dataDisplay) {
-                    //the display should be created only when it is made visible
+                if((!this.dataDisplay)&&(this.viewComponentView)) {
+                    //the display should be created only when it is made visible, and only when the associated (view) component view is loaded
                     this.dataDisplay =  this.mainComponentView.getDataDisplay(this,this.viewTypeName);
                     if(this.dataDisplay) {
                         this.dataDisplay.readUiStateData(this.savedUiState);
@@ -693,6 +689,13 @@ let childName = this.viewModeInfo.childPath; //FIX THIS!!!
         this._updateViewSizeButtons();
     }
 
+    _setViewSourceText() {
+        if((this.viewSource)&&(this.viewModeInfo.sourceLayer == DATA_DISPLAY_CONSTANTS.VIEW_SOURCE_LAYER_MODEL)&&(this.viewModeInfo.sourceType == "data")) {
+            let viewSourceText = this.mainComponentView.getName();
+            if(this.viewModeInfo.suffix) viewSourceText += this.viewModeInfo.suffix;
+            this.viewSource.innerHTML = viewSourceText;
+        }
+    }
     
 
     _updateDataDisplay() {
