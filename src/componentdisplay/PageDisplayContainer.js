@@ -70,18 +70,10 @@ export default class PageDisplayContainer {
         this.mainComponentView = componentView;
         this._setViewSourceText(); //add name label to ui if needed for "view source"
 
+        let modelManager = this.mainComponentView.getApp().getModelManager();
         let mainComponent = this.mainComponentView.getComponent();
-        this.mainComponentId = mainComponent.getId();
-        if((!this.viewModeInfo.childPath)||(this.viewModeInfo.childPath == ".")) {
-            this.viewComponentId = this.mainComponentId;
-        }
-        else {
-            let folderMember = mainComponent.getParentFolderForChildren ();
-let childName = this.viewModeInfo.childPath; //FIX THIS!!!
-            let childMemberId = folderMember.lookupChildId(childName)           
-            let modelManager = this.mainComponentView.getApp().getModelManager();
-            this.viewComponentId = modelManager.getComponentIdByMemberId(childMemberId);
-        }
+        let childComponent = mainComponent.getChildComponent(modelManager,this.viewModeInfo.childPath);
+        this.viewComponentId = childComponent.getId();
     }
 
     addChildComponentView(childComponentView) {
