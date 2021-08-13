@@ -267,12 +267,23 @@ export default class PageChildComponentDisplay {
                 this.viewContainer.appendChild(displayContainer.getDisplayElement());
                 
                 //store the display container object
-                this.displayContainerMap[viewModeInfo.name] = displayContainer;
+                let storageName = this._getViewStorageName(viewModeInfo);
+                this.displayContainerMap[storageName] = displayContainer;
             }
         }
 
         this._setTitle();
         this._setBannerState();
+    }
+
+    /** This gets the name for storing the view mode, making it unique if it is a child view mode. */
+    _getViewStorageName(viewModeInfo) {
+        if((!viewModeInfo.childPath)||(viewModeInfo.childPath == ".")) {
+            return viewModeInfo.name;
+        }
+        else {
+            return viewModeInfo.childPath + "." + viewModeInfo.name;
+        }
     }
 
     /** This adds the child component view to any relevent view display containers */

@@ -648,7 +648,7 @@ export default class PageDisplayContainer {
             if(!this.dataDisplayLoaded) {
                 if((!this.dataDisplay)&&(this.viewComponentView)) {
                     //the display should be created only when it is made visible, and only when the associated (view) component view is loaded
-                    this.dataDisplay =  this.mainComponentView.getDataDisplay(this,this.viewTypeName);
+                    this.dataDisplay =  this.viewComponentView.getDataDisplay(this,this.viewTypeName);
                     if(this.dataDisplay) {
                         this.dataDisplay.readUiStateData(this.savedUiState);
                         this._setDataContent(this.dataDisplay.getContent());
