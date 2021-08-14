@@ -51,6 +51,7 @@ FolderFunctionComponentView.TREE_ENTRY_SORT_ORDER = ParentComponentView.FOLDER_C
 
 FolderFunctionComponentView.propertyDialogEntries = [
     {
+        member: ".",
         propertyKey: "argList",
         dialogElement: {
             "type":"textField",
