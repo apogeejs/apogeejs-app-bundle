@@ -1,5 +1,6 @@
 import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 import { ComponentView } from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import LiteratePageComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/LiteratePageComponentDisplay.js";
 import { createProseMirrorManager } from "/apogeejs-app-bundle/src/componentdisplay/proseMirrorSetup.js";
 
 import { TextSelection, NodeSelection, EditorState, Selection } from "/apogeejs-releases/releases/ext/prosemirror/a2.0.0/prosemirror-state.es.js";
@@ -11,7 +12,7 @@ const MAX_SUFFIX_INDEX = 99999;
 
 /** This is the base class for a parent component (an object that has children),
  * It extends the component class. */
-export default class ParentComponentView extends ComponentView {
+export default class DocumentParentComponentView extends ComponentView {
 
     constructor(appViewInterface,component) {
         //base constructor
@@ -19,6 +20,10 @@ export default class ParentComponentView extends ComponentView {
 
         //ccreate the editor manager
         this.editorManager = createProseMirrorManager(this.getApp(),component.getSchema());
+    }
+
+    instantiateTabDisplay() {
+        return new LiteratePageComponentDisplay(this); 
     }
 
     createTreeDisplay() {
@@ -840,6 +845,3 @@ export default class ParentComponentView extends ComponentView {
     //############################################################################################################
 
 }
-
-/** This is used to flag this as an edit component. */
-ParentComponentView.isParentComponentView = true;

@@ -1,30 +1,8 @@
-import ParentComponentView from "/apogeejs-app-bundle/src/componentdisplay/ParentComponentView.js";
-import LiteratePageComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/LiteratePageComponentDisplay.js";
+import DocumentParentComponentView from "/apogeejs-app-bundle/src/componentdisplay/DocumentParentComponentView.js";
 
 /** This component represents a folderFunction, which is a function that is programmed using
  *apogee tables rather than writing code. */
-export default class FolderFunctionComponentView extends ParentComponentView {
-        
-    constructor(appViewInterface,component) {
-        //extend parent component
-        super(appViewInterface,component);
-    }
-
-    instantiateTabDisplay() {
-        return new LiteratePageComponentDisplay(this); 
-    }
-
-    //==============================
-    // Child Display
-    //==============================
-
-    /**  This method retrieves the table edit settings for this component instance
-     * @protected */
-    getTableEditSettings() {
-        return FolderFunctionComponentView.TABLE_EDIT_SETTINGS;
-    }
-
-}
+export default class FolderFunctionComponentView extends DocumentParentComponentView {}
 
 //=======================
 // Child View SEttings
@@ -46,7 +24,7 @@ FolderFunctionComponentView.componentName = "apogeeapp.PageFunctionComponent";
 FolderFunctionComponentView.hasTabEntry = true;
 FolderFunctionComponentView.hasChildEntry = true;
 FolderFunctionComponentView.ICON_RES_PATH = "/icons3/pageFunctionIcon.png";
-FolderFunctionComponentView.TREE_ENTRY_SORT_ORDER = ParentComponentView.FOLDER_COMPONENT_TYPE_SORT_ORDER;
+FolderFunctionComponentView.TREE_ENTRY_SORT_ORDER = DocumentParentComponentView.FOLDER_COMPONENT_TYPE_SORT_ORDER; //defined in component
 
 
 FolderFunctionComponentView.propertyDialogEntries = [
