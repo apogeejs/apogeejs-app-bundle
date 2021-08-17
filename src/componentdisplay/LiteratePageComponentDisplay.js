@@ -321,12 +321,11 @@ export default class LiteratePageComponentDisplay {
         var appViewInterface = this.componentView.getAppViewInterface();
         
 
-        let standardComponentNames = componentInfo.getStandardComponentNames();
-        for(var i = 0; i < standardComponentNames.length; i++) {
-            let componentName = standardComponentNames[i];
+        let standardComponentTypes = componentInfo.getStandardComponentTypes();
+        for(var i = 0; i < standardComponentTypes.length; i++) {
+            let componentType = standardComponentTypes[i];
 
-            let componentClass = componentInfo.getComponentClass(componentName);
-            let componentViewClass = getComponentViewClass(componentClass.getClassUniqueName());
+            let componentViewClass = getComponentViewClass(componentType);
             if(componentViewClass.hasChildEntry) {
 
                 var buttonElement = uiutil.createElementWithClass("div","visiui_litPage_componentButton",this.componentToolbarContainer);
@@ -337,8 +336,9 @@ export default class LiteratePageComponentDisplay {
                 iconElement.appendChild(imageElement);
                 //label
                 var textElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonText",buttonElement);
-                textElement.innerHTML = componentClass.getClassDisplayName();
-                buttonElement.title = "Insert " + componentClass.getClassDisplayName();
+                let componentDislayName = componentInfo.getComponentDisplayName(componentType);
+                textElement.innerHTML = componentDislayName;
+                buttonElement.title = "Insert " +componentDislayName;
                 //add handler
                 buttonElement.onclick = () => {
 
@@ -348,7 +348,7 @@ export default class LiteratePageComponentDisplay {
                     var parentMember = pageComponent.getParentFolderForChildren();
                     initialValues.parentId = parentMember.getId();
 
-                    addComponent(appViewInterface,app,componentClass,initialValues);
+                    addComponent(appViewInterface,app,componentType,initialValues);
                 }
 
                 //for cleanup
