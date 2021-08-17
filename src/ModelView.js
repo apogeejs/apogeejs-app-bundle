@@ -1,7 +1,7 @@
 import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 import {addComponent} from "/apogeejs-view-lib/src/apogeeViewLib.js";
-import {getComponentViewClass,ERROR_COMPONENT_VIEW_CLASS} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {getComponentViewInstance} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 /** This class manages the user interface for a workspace object. */
 export default class ModelView {
@@ -80,16 +80,7 @@ export default class ModelView {
     onComponentCreated(component) {
         try {
             //create the component view
-            let componentViewClass = getComponentViewClass(component.getComponentType());
-            let componentView;
-            if(componentViewClass) {
-                componentView = new componentViewClass(this,component);
-            }
-
-            if(!componentView) {
-                componentView = new ERROR_COMPONENT_VIEW_CLASS(this,component);
-            }
-
+            let componentView = getComponentViewInstance(this,component); 
             this.componentViewMap[component.getId()] = componentView;
 
             if(this.hasParentDisplays()) {

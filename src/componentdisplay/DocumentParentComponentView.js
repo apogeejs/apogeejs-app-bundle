@@ -14,9 +14,9 @@ const MAX_SUFFIX_INDEX = 99999;
  * It extends the component class. */
 export default class DocumentParentComponentView extends ComponentView {
 
-    constructor(appViewInterface,component) {
+    constructor(appViewInterface,component,viewConfig) {
         //base constructor
-        super(appViewInterface,component);
+        super(appViewInterface,component,viewConfig);
 
         //ccreate the editor manager
         this.editorManager = createProseMirrorManager(this.getApp(),component.getSchema());

@@ -4,7 +4,7 @@ import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
 import {addComponent, addAdditionalComponent} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import PageChildComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/PageChildComponentDisplay.js"
-import {getComponentViewClass} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {getComponentViewConfig} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 import {uiutil,Tab,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
@@ -120,7 +120,7 @@ export default class LiteratePageComponentDisplay {
         let componentId = childComponentView.getComponent().getId();
 
         //create a new component display for this child
-        if(childComponentView.constructor.hasChildEntry) {
+        if(childComponentView.getViewConfig().hasChildEntry) {
             //check if there is a component display already waiting, pre-created
             childComponentDisplay = this.childDisplayMap[componentId];
             if(childComponentDisplay) {
@@ -325,20 +325,20 @@ export default class LiteratePageComponentDisplay {
         for(var i = 0; i < standardComponentTypes.length; i++) {
             let componentType = standardComponentTypes[i];
 
-            let componentViewClass = getComponentViewClass(componentType);
-            if(componentViewClass.hasChildEntry) {
+            let componentViewConfig = getComponentViewConfig(componentType);
+            if(componentViewConfig.hasChildEntry) {
 
                 var buttonElement = uiutil.createElementWithClass("div","visiui_litPage_componentButton",this.componentToolbarContainer);
                 //make the idon
                 var imageElement = document.createElement("img")
-                imageElement.src = uiutil.getResourcePath(componentViewClass.ICON_RES_PATH,"app");
+                imageElement.src = uiutil.getResourcePath(componentViewConfig.iconResPath,"app");
                 var iconElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonIcon",buttonElement);
                 iconElement.appendChild(imageElement);
                 //label
                 var textElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonText",buttonElement);
-                let componentDislayName = componentInfo.getComponentDisplayName(componentType);
-                textElement.innerHTML = componentDislayName;
-                buttonElement.title = "Insert " +componentDislayName;
+                let componentDisplayName = componentInfo.getComponentDisplayName(componentType);
+                textElement.innerHTML = componentDisplayName;
+                buttonElement.title = "Insert " + componentDisplayName;
                 //add handler
                 buttonElement.onclick = () => {
 

@@ -457,25 +457,9 @@ export default class ApogeeView {
         
         return menuItems;
     }
-    
-    //========================================
-    // Static Functions
-    //========================================
 
-    // /** This method is used to register a new component view class for the user interface. */
-    // static registerComponentView(viewClass) {
-    //     componentClassMap[viewClass.componentName] = viewClass;
-    // }
-
-    // /** This method retrieves a component view class using the component unique name. */
-    // static getComponentViewClass(componentName) {
-    //     return componentClassMap[componentName];
-    // }
 
 }
-
-
-//let componentClassMap = {};
 
 const RESIZE_TIMER_PERIOD_MS = 500;
 
