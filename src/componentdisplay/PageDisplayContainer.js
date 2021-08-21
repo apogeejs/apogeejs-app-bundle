@@ -29,8 +29,8 @@ export default class PageDisplayContainer {
         this.viewSource = null;
         
         this.isComponentShowing = false;
-        this.isViewActive = viewModeInfo.isActive;
-        this.isViewRemoved = viewModeInfo.isTransient; //start removed for transient displays
+        this.isViewActive = viewModeInfo.isActive ? true : false;
+        this.isViewRemoved = viewModeInfo.isTransient ? true : false; //start removed for transient displays
         this.isViewHidden = false;
         this.message = "";
         this.messageType = DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE;  //start with an empty message
@@ -205,23 +205,30 @@ export default class PageDisplayContainer {
         //update the data display
         if(this.dataDisplay) {
 
-            //TESTING!!!////////
             if(this.viewComponentId == component.getId()) {
-            ////////////////////////
 
+                let {reloadData,reloadDataDisplay,removeView} = this.dataDisplay.doUpdate();
 
-            let {reloadData,reloadDataDisplay} = this.dataDisplay.doUpdate();
-            if(reloadDataDisplay) {
-                //this will also reload data
-                this._reloadDataDisplay();
-            }
-            else if(reloadData) {
-                this._updateDataDisplay();
-            }
+                //set the remove view flag
+                let removeViewBool = removeView ? true : false; //account for no removeView returned
+                if(removeViewBool != this.isViewRemoved) {
+                    this.isViewRemoved = removeViewBool;
+                    this._updateViewState();
+                }
+                else if(this.isViewRemoved) {
+                    //if we are still removed, skip further procsseing
+                    return;
+                }
 
-            //TESTING!!!////////
+                if(reloadDataDisplay) {
+                    //this will also reload data
+                    this._reloadDataDisplay();
+                }
+                else if(reloadData) {
+                    this._updateDataDisplay();
+                }
+
             }
-            /////////////////////
         }
 
         //update name label on view heading if needed
@@ -236,6 +243,7 @@ export default class PageDisplayContainer {
     //------------------------------
 
     setHideDisplay(doHide) {
+        doHide = doHide ? true : false; //make sure we have a boolean 
         if(doHide != this.isViewHidden) {
             this.isViewHidden = doHide;
             this._updateViewState();
@@ -246,23 +254,17 @@ export default class PageDisplayContainer {
         return this.isViewHidden;
     }
 
-    setRemoveView(doRemove) {
-        if(doRemove != this.isViewRemoved) {
-            this.isViewRemoved = doRemove;
-            this._updateViewState();
-        }
-    }
-
     getViewRemoved() {
         return this.isViewRemoved;
     }
 
     setMessage(messageType,message) {
+        if(!messageType) messageType == DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE
         this.messageType = messageType;
 
         this.messageContainer.className = MESSAGE_CONTAINER_BASE_CLASS;
         let messageTypeClass = MESSAGE_TYPE_CLASS_MAP[messageType];
-        if(!messageTypeClass) messageTypeClass = DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE;
+        if(!messageTypeClass) messageTypeClass = MESSAGE_TYPE_CLASS_MAP[DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE];
 
         this.messageContainer.classList.add(messageTypeClass);
 
@@ -397,7 +399,7 @@ export default class PageDisplayContainer {
 
         //make the selector for the view, displayed in the component title bar
         this.viewSelectorContainer = uiutil.createElementWithClass("div","visiui_displayContainer_viewSelectorContainerClass",null);
-        if(this.viewModeInfo.isInfoView) {
+        if(this.viewModeInfo.isErrorView) {
             this.viewSelectorContainer.classList.add("visiui_displayContainer_viewSelectorContainerClass_info");
         }
         //this is set from link to div so it can not get focus. later, we _do_ want it to get focuus, but if it does we need to make
@@ -644,10 +646,12 @@ export default class PageDisplayContainer {
      * private */
     _updateDataDisplayLoadedState() {
         
-        if((this.isComponentShowing)&&(this.isViewActive)) {
+        if((this.isComponentShowing)&&((this.isViewActive)||(this.viewModeInfo.isTransient))) {
+            //creat the data display when the component is showing and it is active OR it is transient. for the
+            //transient case we need to keep the display around to decide when to add or remove the view, even if it is not showing. 
             if(!this.dataDisplayLoaded) {
                 if((!this.dataDisplay)&&(this.viewComponentView)) {
-                    //the display should be created only when it is made visible, and only when the associated (view) component view is loaded
+                    //only create if the view component is present
                     this.dataDisplay =  this.viewComponentView.getDataDisplay(this,this.viewTypeName);
                     if(this.dataDisplay) {
                         this.dataDisplay.readUiStateData(this.savedUiState);
