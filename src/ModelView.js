@@ -207,7 +207,7 @@ export default class ModelView {
             let pageComponents = componentInfo.getPageComponentTypes();
             pageComponents.forEach(pageComponentType => {
                 let childMenuItem = {};
-                childMenuItem.title = "Add Child " + componentInfo.getComponentDislay(pageComponentType);
+                childMenuItem.title = "Add Child " + componentInfo.getComponentDisplayName(pageComponentType);
                 childMenuItem.callback = () => addComponent(this,app,pageComponentType,initialValues);
                 menuItemList.push(childMenuItem);
             })
