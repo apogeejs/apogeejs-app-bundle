@@ -1,7 +1,7 @@
 import DocumentParentComponentView from "/apogeejs-app-bundle/src/componentdisplay/DocumentParentComponentView.js";
 
 //======================================
-// This is the component generator, to register the component
+// This is the component view config, to register the component
 //======================================
 
 const FolderComponentViewConfig = {
