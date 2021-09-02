@@ -43,11 +43,35 @@ export default class PageChildComponentDisplay {
         this.componentView = componentView;
         this._loadComponentDisplay();
         this._updateChildDisplayStates();
+
+        //set any current child component views
+        this._processChildComponentViews(this.componentView)
     }
 
     addChildComponentView(childComponentView) {
         this._addComponentDisplayChildComponentView(childComponentView);
         this._updateChildDisplayStates();
+
+        //set any current child component views
+        this._processChildComponentViews(childComponentView)
+    }
+
+    /** @private */
+    _processChildComponentViews(componentView) {
+        let component = componentView.getComponent();
+        if(component.getIsParent()) {
+            let folder = component.getParentFolderForChildren();
+            var appViewInterface = componentView.getAppViewInterface();
+            var childrenIds = folder.getChildIdMap();
+            for(var childName in childrenIds) {
+                var childMemberId = childrenIds[childName];
+                var childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId);
+                if(childComponentView) {
+                    this.addChildComponentView(childComponentView);
+                    childComponentView.setComponentDisplay(this);
+                }
+            }
+        }
     }
 
     getComponentView() {
