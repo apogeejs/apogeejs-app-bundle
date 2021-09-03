@@ -120,7 +120,7 @@ export default class LiteratePageComponentDisplay {
         let componentId = childComponentView.getComponent().getId();
 
         //create a new component display for this child
-        if(childComponentView.getViewConfig().hasChildEntry) {
+        if(childComponentView.isChildEntry()) {
             //check if there is a component display already waiting, pre-created
             childComponentDisplay = this.childDisplayMap[componentId];
             if(childComponentDisplay) {
@@ -319,14 +319,13 @@ export default class LiteratePageComponentDisplay {
         let pageComponent = this.componentView.getComponent();
         var app = this.componentView.getApp();
         var appViewInterface = this.componentView.getAppViewInterface();
-        
 
         let standardComponentTypes = componentInfo.getStandardComponentTypes();
         for(var i = 0; i < standardComponentTypes.length; i++) {
             let componentType = standardComponentTypes[i];
 
             let componentViewConfig = getComponentViewConfig(componentType);
-            if(componentViewConfig.hasChildEntry) {
+            if(componentViewConfig.viewModes !== undefined) {
 
                 var buttonElement = uiutil.createElementWithClass("div","visiui_litPage_componentButton",this.componentToolbarContainer);
                 //make the idon

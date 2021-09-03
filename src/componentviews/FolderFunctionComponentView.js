@@ -4,10 +4,8 @@ const FolderFunctionComponentViewConfig = {
     componentType: "apogeeapp.PageFunctionComponent",
     viewClass: DocumentParentComponentView,
     viewModes: [],
-    hasTabEntry: true,
-    hasChildEntry: true,
+    isParentOfChildEntries: true,
     iconResPath: "/icons3/pageFunctionIcon.png",
-    treeEntrySortOrder: DocumentParentComponentView.FOLDER_COMPONENT_TYPE_SORT_ORDER,
     propertyDialogEntries: [
         {
             member: ".",

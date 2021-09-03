@@ -7,9 +7,7 @@ import DocumentParentComponentView from "/apogeejs-app-bundle/src/componentdispl
 const FolderComponentViewConfig = {
     componentType: "apogeeapp.PageComponent",
     viewClass: DocumentParentComponentView,
-    hasTabEntry: true,
-    hasChildEntry: false,
-    iconResPath: "/icons3/pageIcon.png",
-    treeEntrySortOrder: DocumentParentComponentView.FOLDER_COMPONENT_TYPE_SORT_ORDER
+    isParentOfChildEntries: true,
+    iconResPath: "/icons3/pageIcon.png"
 }
 export default FolderComponentViewConfig;
