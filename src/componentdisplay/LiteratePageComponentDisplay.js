@@ -358,8 +358,8 @@ export default class LiteratePageComponentDisplay {
         //add the additional component item
         var buttonElement = uiutil.createElementWithClass("div","visiui_litPage_componentButton",this.componentToolbarContainer);
         var textElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonText",buttonElement);
-        textElement.innerHTML = "Additional Components...";
-        buttonElement.title = "Additional Cells to Insert"
+        textElement.innerHTML = "All Components...";
+        buttonElement.title = "All Cells to Insert"
         buttonElement.onclick = () => {
 
             this.editorView.focus();
