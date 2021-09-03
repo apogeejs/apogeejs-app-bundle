@@ -320,9 +320,9 @@ export default class LiteratePageComponentDisplay {
         var app = this.componentView.getApp();
         var appViewInterface = this.componentView.getAppViewInterface();
 
-        let standardComponentTypes = componentInfo.getStandardComponentTypes();
-        for(var i = 0; i < standardComponentTypes.length; i++) {
-            let componentType = standardComponentTypes[i];
+        let preferredComponentTypes = componentInfo.getPreferredComponentTypes();
+        for(var i = 0; i < preferredComponentTypes.length; i++) {
+            let componentType = preferredComponentTypes[i];
 
             let componentViewConfig = getComponentViewConfig(componentType);
             if(componentViewConfig.viewModes !== undefined) {
