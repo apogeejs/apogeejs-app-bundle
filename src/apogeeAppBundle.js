@@ -21,6 +21,7 @@ __globals__.apogeeview = apogeeview;
 __globals__.apogeeplatform = new ApogeePlatform();
 
 //some user message utilities
+__globals__.apogeeLog = (msg) => console.log(message);
 __globals__.apogeeUserAlert = (msg) => apogeeui.showSimpleActionDialog(msg,null,["OK"]);
 __globals__.apogeeUserConfirm = (msg,okText,cancelText,okAction,cancelAction,defaultToOk) => apogeeui.showSimpleActionDialog(msg,null,[okText,cancelText],[okAction,cancelAction]);
 __globals__.apogeeUserConfirmSynchronous = (msg,okText,cancelText,defaultToOk) => confirm(msg);

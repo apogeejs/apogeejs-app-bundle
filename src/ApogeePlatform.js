@@ -13,14 +13,11 @@ export default class ApogeePlatform {
     }
 
     //===============================
-    // Accessors
+    // File and Web Accessors
     //===============================
+
     getFileAccessObject() {
         return this.fileAccess;
-    }
-
-    getModuleManagerInstance(app) {
-        return new this.moduleManagerClass(app,this.moduleManagerOptions);
     }
 
     spawnWorkspaceFromUrl(url) {
@@ -55,9 +52,33 @@ export default class ApogeePlatform {
         }
     }
 
-    ////////////////////////////////////////////////
-    // TEMP PLATFORM GLOBALS
-    getGlobal(variableName) {
+    setFileAccessObject(fileAccess) {
+        this.fileAccess = fileAccess;
+    }
+
+    setExternalOpener(externalOpener) {
+        this.externalOpener = externalOpener;
+    }
+
+
+    //===============================
+    // Apogee Module Manager
+    //===============================
+
+    getModuleManagerInstance(app) {
+        return new this.moduleManagerClass(app,this.moduleManagerOptions);
+    }
+
+    setModuleManagerClass(moduleManagerClass,options) {
+        this.moduleManagerClass = moduleManagerClass;
+        this.moduleManagerOptions = options;
+    }
+
+    //===============================
+    // Globals and Modules Management
+    //===============================
+
+    getModelGlobal(variableName) {
         if(this.platformGlobals[variableName] !== undefined) {
             return this.platformGlobals[variableName];
         }
@@ -65,6 +86,69 @@ export default class ApogeePlatform {
             return __globals__[variableName];
         }
     }
+
+    //Model globals white list
+
+    addNameToModelGlobals(variableName,isPermanent) {
+
+    }
+
+    removeNameFromModelGlobals(variableName) {
+
+    }
+
+    //Model added global values
+
+    addValueToModelGlobals(variableName,value,isPermanent) {
+
+    }
+
+    removeValueFromModelGlobals(variableName) {
+
+    }
+
+    //Whitelist modules for model
+
+    /** This should be called after the global loadModule function is defined, to initialize the model
+     * verions of loadModule. */
+    initModelLoadModule() {
+        this.moduleLoadModule = (moduleName,flags) => {
+            if(this.whiteListedModuleNames[moduleName] !== undefined) {
+                return __globals__.loadModule(moduleName,flags);
+            }
+            else {
+                return null;
+            }
+        }
+    }
+
+    getModuleLoadModule() {
+        return this.moduleLoadModule;
+    }
+
+    addNameToModelModules(moduleName,isPermanent) {
+    }
+
+    removeNameFromModelModules(moduleName,isPermanent) {
+
+    }
+
+    //apogee module data
+
+    apogeeModuleExport(moduleName) {
+
+    }
+
+    addApogeeModuleExport(moduleName,isPermanent) {
+
+    }
+
+    removeApogeeModuleExport(moduleName) {
+
+    }
+
+    ////////////////////////////////////////////////
+    // OLD TEMP LOGIC
 
     _initPlatformGlobals() {
         this.globalWhiteList = {
@@ -76,13 +160,6 @@ export default class ApogeePlatform {
         this.platformGlobals.geolocation = navigator.geolocation;
         this.platformGlobals.GET_IMPORT = importName => this.getImport(importName);
     }
-
-    //END TEMP PLATFORM GLOBALS
-    //////////////////////////////////////////////////
-
-    /////////////////////////////////////////////////
-    // TEMP IMPORT LOGIC
-    // (I think security is important here. I need to add that.)
 
     getImport(importName) {
         return this.imports[importName];
@@ -96,24 +173,14 @@ export default class ApogeePlatform {
     removeImport(importName) {
         delete this.imports[importName];
     }
-    //END TEMP IMPORT LOGIC
+    //END OLD TEMP LOGIC
     /////////////////////////////////////////////////
 
     //================================
     // initialization functions
     //================================
 
-    setFileAccessObject(fileAccess) {
-        this.fileAccess = fileAccess;
-    }
+    
 
-    setModuleManagerClass(moduleManagerClass,options) {
-        this.moduleManagerClass = moduleManagerClass;
-        this.moduleManagerOptions = options;
-    }
-
-    setExternalOpener(externalOpener) {
-        this.externalOpener = externalOpener;
-    }
 
 }
