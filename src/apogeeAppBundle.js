@@ -11,7 +11,7 @@ import ApogeePlatform from "/apogeejs-app-bundle/src/ApogeePlatform.js";
 import "/apogeejs-app-bundle/src/parentComponentViewConfig.js";
 
 //expose these apogee libraries globally so plugins can use them 
-__globals__._ = aogeeutil._;
+__globals__._ = apogeeutil._;
 __globals__.apogeeutil = apogeeutil;
 __globals__.apogeebase = apogeebase;
 __globals__.apogee = apogee;
