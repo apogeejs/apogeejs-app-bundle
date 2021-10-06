@@ -11,7 +11,7 @@ import ApogeePlatform from "/apogeejs-app-bundle/src/ApogeePlatform.js";
 import "/apogeejs-app-bundle/src/parentComponentViewConfig.js";
 
 //expose these apogee libraries globally so plugins can use them 
-__globals__._ = apogeeutil._;
+__globals__._ = aogeeutil._;
 __globals__.apogeeutil = apogeeutil;
 __globals__.apogeebase = apogeebase;
 __globals__.apogee = apogee;
@@ -20,11 +20,18 @@ __globals__.apogeeui = apogeeui;
 __globals__.apogeeview = apogeeview;
 __globals__.apogeeplatform = new ApogeePlatform();
 
+__globals__.addNameToModelGlobals("_",true);
+__globals__.addNameToModelGlobals("apogeeutil",true);
+
 //some user message utilities
 __globals__.apogeeLog = (msg) => console.log(message);
 __globals__.apogeeUserAlert = (msg) => apogeeui.showSimpleActionDialog(msg,null,["OK"]);
 __globals__.apogeeUserConfirm = (msg,okText,cancelText,okAction,cancelAction,defaultToOk) => apogeeui.showSimpleActionDialog(msg,null,[okText,cancelText],[okAction,cancelAction]);
 __globals__.apogeeUserConfirmSynchronous = (msg,okText,cancelText,defaultToOk) => confirm(msg);
+
+__globals__.addNameToModelGlobals("apogeeLog",true);
+__globals__.addNameToModelGlobals("apogeeUserAlert",true);
+__globals__.addNameToModelGlobals("apogeeUserConfirm",true);
 
 let appView;
 
