@@ -23,9 +23,9 @@ export default class ReferenceEntryView {
         
         this.referenceEntry = referenceEntry;
         if(referenceEntry.isFieldUpdated("data")) {
-            let nickname = this.referenceEntry.getNickname();
-            if(!nickname) nickname = "-unnamed entry-";
-            this.treeEntry.setLabel(nickname);
+            var displayName = this.referenceEntry.getDisplayName();
+            if(!displayName) displayName = this.referenceEntry.getId();
+            this.treeEntry.setLabel(displayName);
         }
 
         if((referenceEntry.isFieldUpdated("state"))||(referenceEntry.isFieldUpdated("stateMsg"))) {
@@ -39,10 +39,10 @@ export default class ReferenceEntryView {
 
     _createTreeEntry() {
         var iconUrl = uiutil.getResourcePath(this.displayInfo.ENTRY_ICON_PATH,"app");
-        var label = this.referenceEntry.getNickname();
+        var displayName = this.referenceEntry.getDisplayName();
         var menuItemsCallback = () => this._getMenuItems();
 
-        var treeEntry = new TreeEntry(label, iconUrl, null, menuItemsCallback, false);
+        var treeEntry = new TreeEntry(displayName, iconUrl, null, menuItemsCallback, false);
         treeEntry.setBannerState(this.referenceEntry.getState(),this.referenceEntry.getStateMsg());
         return treeEntry;
     }
@@ -53,13 +53,13 @@ export default class ReferenceEntryView {
 
         //add the standard entries
         var itemInfo = {};
-        itemInfo.title = "Update " + this.displayInfo.DISPLAY_NAME;
+        itemInfo.title = "Edit Properties";
         itemInfo.callback = () => updateLink(this.app,this.referenceEntry,this.displayInfo);
         menuItemList.push(itemInfo);
 
         //add the standard entries
         var itemInfo = {};
-        itemInfo.title = "Remove " + this.displayInfo.DISPLAY_NAME;
+        itemInfo.title = "Delete";
         itemInfo.callback = () => removeLink(this.app,this.referenceEntry,this.displayInfo);
         menuItemList.push(itemInfo);
 

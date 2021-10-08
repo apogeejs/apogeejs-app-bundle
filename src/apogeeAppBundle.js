@@ -22,6 +22,12 @@ __globals__.apogeeplatform = new ApogeePlatform();
 
 __globals__.addNameToModelGlobals("_",true);
 __globals__.addNameToModelGlobals("apogeeutil",true);
+__globals__.addNameToModelGlobals("apogeebase",true);
+__globals__.addNameToModelGlobals("apogee",true);
+__globals__.addNameToModelGlobals("apogeeapp",true);
+__globals__.addNameToModelGlobals("apogeeui",true);
+__globals__.addNameToModelGlobals("apogeeview",true);
+__globals__.addNameToModelGlobals("apogeeplatform",true);
 
 //some user message utilities
 __globals__.apogeeLog = (msg) => console.log(message);
