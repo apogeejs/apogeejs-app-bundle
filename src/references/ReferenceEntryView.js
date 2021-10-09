@@ -3,10 +3,10 @@ import {updateLink, removeLink} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 export default class ReferenceEntryView {
 
-    constructor(app, referenceEntry,displayInfo) {
+    constructor(app,referenceEntry,viewConfig) {
         this.app = app;
         this.referenceEntry = referenceEntry;
-        this.displayInfo = displayInfo;
+        this.viewConfig = viewConfig;
         this.treeEntry = this._createTreeEntry();
     }
 
@@ -38,7 +38,7 @@ export default class ReferenceEntryView {
     //===========================================
 
     _createTreeEntry() {
-        var iconUrl = uiutil.getResourcePath(this.displayInfo.ENTRY_ICON_PATH,"app");
+        var iconUrl = uiutil.getResourcePath(this.viewConfig.ENTRY_ICON_PATH,"app");
         var displayName = this.referenceEntry.getDisplayName();
         var menuItemsCallback = () => this._getMenuItems();
 
@@ -54,13 +54,13 @@ export default class ReferenceEntryView {
         //add the standard entries
         var itemInfo = {};
         itemInfo.title = "Edit Properties";
-        itemInfo.callback = () => updateLink(this.app,this.referenceEntry,this.displayInfo);
+        itemInfo.callback = () => updateLink(this.app,this.referenceEntry,this.viewConfig);
         menuItemList.push(itemInfo);
 
         //add the standard entries
         var itemInfo = {};
         itemInfo.title = "Delete";
-        itemInfo.callback = () => removeLink(this.app,this.referenceEntry,this.displayInfo);
+        itemInfo.callback = () => removeLink(this.app,this.referenceEntry,this.viewConfig);
         menuItemList.push(itemInfo);
 
         return menuItemList;

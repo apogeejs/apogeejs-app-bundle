@@ -1,4 +1,3 @@
-import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
 import ReferenceListView from "/apogeejs-app-bundle/src/references/ReferenceListView.js";
@@ -42,6 +41,10 @@ export default class ReferenceView {
 
     closeWorkspace() {
         //no action in ui for references
+    }
+
+    static setReferenceViewConfigMap(referenceViewConfigMap) {
+        ReferenceView.referenceViewConfigMap = referenceViewConfigMap
     }
 
     //-----------------------------------
@@ -128,13 +131,9 @@ export default class ReferenceView {
     }
 
     _createReferenceListView(entryType,viewState) {
-        let listDisplayInfo = LIST_DISPLAY_INFO[entryType];
+        let listDisplayInfo = ReferenceView.referenceViewConfigMap[entryType];
         if(!listDisplayInfo) {
-            listDisplayInfo = apogeeutil.jsonCopy(DEFAULT_LIST_DISPLAY_INFO);
-            //set the proper entry type, and use that for the list name too
-            listDisplayInfo.REFERENCE_TYPE = entryType;
-            listDisplayInfo.LIST_NAME = entryType;
-            listDisplayInfo.DISPLAY_NAME = entryTYpe;
+            apogeeUserAlert(`Error: The display for the reference type ${entryType} was not found!`)
         }
         return new ReferenceListView(this.app,entryType,listDisplayInfo,viewState);
     }
@@ -142,6 +141,9 @@ export default class ReferenceView {
 }
 
 let REFERENCES_ICON_PATH = "/icons3/folderIcon.png";
+
+//these are the reference views we have
+ReferenceView.referenceViewConfigMap = {};
 
 /** This is the UI definition data for the added reference lists.
  * This should be placed somewhere else to make it easier for people to 
