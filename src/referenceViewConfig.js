@@ -10,7 +10,7 @@ import ReferenceView from "/apogeejs-app-bundle/src/references/ReferenceView.js"
 
 let referenceViewConfigMap = {};
 if(__APOGEE_ENVIRONMENT__ == "WEB") {
-    //referenceViewConfigMap[WebApogeeModuleEntryViewConfig.REFERENCE_TYPE] = WebApogeeModuleEntryViewConfig;
+    referenceViewConfigMap[WebApogeeModuleEntryViewConfig.referenceType] = WebApogeeModuleEntryViewConfig;
     referenceViewConfigMap[EsModuleEntryViewConfig.referenceType] = EsModuleEntryViewConfig;
     referenceViewConfigMap[JsScriptEntryViewConfig.referenceType] = JsScriptEntryViewConfig;
     referenceViewConfigMap[CssEntryViewConfig.referenceType] = CssEntryViewConfig;

@@ -1,24 +1,20 @@
+const menuItems = [
+    {
+        text: "Manage...",
+        callback: app => app.openModuleManager()
+    }
+]
+
+
 const entryConfig = {
-    "REFERENCE_TYPE": "web apogee module",
-    "LIST_NAME": "Apogee Modules",
-    "DISPLAY_NAME":"Apogee Module",
-    "PROPERTY_FORM_LAYOUT": [
-        {
-            "type": "textField",
-            "label": "Module Name: ",
-            "key": "name",
-            "hint": "name to use in loadModule()",
-            "size": 50
-        },
-        {
-            "type": "textField",
-            "label": "URL: ",
-            "key": "url",
-            "size": 100
-        }
-    ],
-    "LIST_ICON_PATH":"/icons3/folderIcon.png",
-    "ENTRY_ICON_PATH":"/icons3/workspaceIcon.png"
+    referenceType: "web apogee module",
+    listName: "Apogee Modules",
+    listIconPath:"/icons3/folderIcon.png",
+    listMenuItems: menuItems,
+    entryIconPath:"/icons3/workspaceIcon.png",
+    entryMenuItems: menuItems
 }
 
 export default entryConfig;
+
+
