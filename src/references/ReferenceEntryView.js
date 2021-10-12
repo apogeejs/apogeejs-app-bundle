@@ -1,5 +1,4 @@
 import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
-import {updateLink, removeLink} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 export default class ReferenceEntryView {
 
@@ -38,7 +37,7 @@ export default class ReferenceEntryView {
     //===========================================
 
     _createTreeEntry() {
-        var iconUrl = uiutil.getResourcePath(this.viewConfig.ENTRY_ICON_PATH,"app");
+        var iconUrl = uiutil.getResourcePath(this.viewConfig.entryIconPath,"app");
         var displayName = this.referenceEntry.getDisplayName();
         var menuItemsCallback = () => this._getMenuItems();
 
@@ -48,24 +47,12 @@ export default class ReferenceEntryView {
     }
 
     _getMenuItems() {
-        //menu items
-        var menuItemList = [];
-
-        //add the standard entries
-        var itemInfo = {};
-        itemInfo.title = "Edit Properties";
-        itemInfo.callback = () => updateLink(this.app,this.referenceEntry,this.viewConfig);
-        menuItemList.push(itemInfo);
-
-        //add the standard entries
-        var itemInfo = {};
-        itemInfo.title = "Delete";
-        itemInfo.callback = () => removeLink(this.app,this.referenceEntry,this.viewConfig);
-        menuItemList.push(itemInfo);
-
-        return menuItemList;
+        return this.viewConfig.entryMenuItems.map(menuItemConfig => {
+            let itemInfo = {};
+            itemInfo.title = menuItemConfig.text;
+            itemInfo.callback = () => menuItemConfig.callback(this.app,this.referenceEntry);
+            return itemInfo;
+        })
     }
-
-
 
 }
