@@ -1,11 +1,10 @@
 const entryConfig = {
-    "REFERENCE_TYPE": "npm module",
-    "LIST_NAME": "NPM Modules",
-    "DISPLAY_NAME":"NPM Module",
-    "FORM_BODY": [
-    ],
-    "LIST_ICON_PATH":"/icons3/folderIcon.png",
-    "ENTRY_ICON_PATH":"/icons3/npmModuleIcon.png"
+    referenceType: "npm module",
+    listName: "NPM Modules",
+    listIconPath:"/icons3/folderIcon.png",
+    listMenuItems: [],
+    entryIconPath:"/icons3/npmModuleIcon.png",
+    entryMenuItems: []
 }
 
 export default entryConfig;

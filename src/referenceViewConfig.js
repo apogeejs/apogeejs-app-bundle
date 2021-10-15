@@ -1,4 +1,5 @@
 import WebApogeeModuleEntryViewConfig from "/apogeejs-app-bundle/src/references/WebApogeeModuleEntryViewConfig.js";
+import NodeApogeeModuleEntryViewConfig from "/apogeejs-app-bundle/src/references/NodeApogeeModuleEntryViewConfig.js";
 import EsModuleEntryViewConfig from "/apogeejs-app-bundle/src/references/EsModuleEntryViewConfig.js";
 import NpmModuleEntryViewConfig from "/apogeejs-app-bundle/src/references/NpmModuleEntryViewConfig.js";
 import JsScriptEntryViewConfig from "/apogeejs-app-bundle/src/references/JsScriptEntryViewConfig.js";
@@ -16,6 +17,7 @@ if(__APOGEE_ENVIRONMENT__ == "WEB") {
     referenceViewConfigMap[CssEntryViewConfig.referenceType] = CssEntryViewConfig;
 }
 else if(__APOGEE_ENVIRONMENT__ == "NODE") {
+    referenceViewConfigMap[NodeApogeeModuleEntryViewConfig.referenceType] = NodeApogeeModuleEntryViewConfig;
     referenceViewConfigMap[NpmModuleEntryViewConfig.referenceType] = NpmModuleEntryViewConfig;
 }
 else {
