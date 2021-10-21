@@ -7,7 +7,7 @@ const menuItems = [
 
 
 const entryConfig = {
-    referenceType: "web apogee module",
+    referenceType: "apogee module",
     listName: "Apogee Modules",
     listIconPath:"/icons3/folderIcon.png",
     listMenuItems: menuItems,
