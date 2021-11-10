@@ -20,16 +20,16 @@ export default class StateCheck {
       var doc = this.editorView.state.doc;
       /////////////////////////////////////////////
       //temp printout to examine selection
-      console.log("================");
-      if(empty) console.log(empty);
-      if($cursor) {
-        this._printResolvedPosition("$cursor",$cursor);
-      }
-      else {
-        this._printResolvedPosition("$from",ranges[0].$from);
-        this._printResolvedPosition("$to",ranges[0].$to);
-      }
-      console.log("================");
+      // console.log("================");
+      // if(empty) console.log(empty);
+      // if($cursor) {
+      //   this._printResolvedPosition("$cursor",$cursor);
+      // }
+      // else {
+      //   this._printResolvedPosition("$from",ranges[0].$from);
+      //   this._printResolvedPosition("$to",ranges[0].$to);
+      // }
+      // console.log("================");
       return;
       //////////////////////////////////////////
   
