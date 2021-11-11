@@ -76,10 +76,10 @@ export function createProseMirrorManager(app, schema) {
         },
 
         props: {
-            createSelectionBetween(_view, $anchor, $head) {
-                console.log("XXX Create Selection between: " + $anchor.pos + " - " + $head.pos);
-                return false;
-              },
+            // createSelectionBetween(_view, $anchor, $head) {
+            //     console.log("XXX Create Selection between: " + $anchor.pos + " - " + $head.pos);
+            //     return false;
+            // },
         }
     })
 
