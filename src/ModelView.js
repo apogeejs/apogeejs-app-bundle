@@ -1,7 +1,7 @@
 import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
-import {addComponent} from "/apogeejs-view-lib/src/apogeeViewLib.js";
-import {getComponentViewConfig,getComponentViewInstance} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {addComponent, ComponentView} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import DocumentParentComponentView from "/apogeejs-app-bundle/src/componentdisplay/DocumentParentComponentView.js";
 
 /** This class manages the user interface for a workspace object. */
 export default class ModelView {
@@ -80,8 +80,17 @@ export default class ModelView {
     onComponentCreated(component) {
         try {
             //create the component view
-            let componentView = getComponentViewInstance(this,component); 
+            let componentConfig = component.getComponentConfig()
+            let componentView
+            if(componentConfig.isParentOfChildEntries) {
+                componentView = new DocumentParentComponentView(this,component)
+            }
+            else {
+                componentView = new ComponentView(this,component)
+            }
+
             this.componentViewMap[component.getId()] = componentView;
+
 
             if(this.hasParentDisplays()) {
                 let parentComponent = component.getParentComponent(this.modelManager);
@@ -204,13 +213,12 @@ export default class ModelView {
             var menuItemList = [];
             var app = this.getApp();
             let initialValues = {parentId: this.getModelManager().getModel().getId()};
-            let components = componentInfo.getComponentTypes();
-            components.forEach(componentType => {
-                let componentViewConfig = getComponentViewConfig(componentType);
-                if((componentViewConfig.isParentOfChildEntries)&&(componentViewConfig.viewModes === undefined)) {
+            let componentConfigs = componentInfo.getComponentConfigs();
+            componentConfigs.forEach(componentConfig => {
+                if((componentConfig.isParentOfChildEntries)&&(componentConfig.viewModes === undefined)) {
                     let childMenuItem = {};
-                    childMenuItem.title = "Add Child " + componentInfo.getComponentDisplayName(componentType);
-                    childMenuItem.callback = () => addComponent(this,app,componentType,initialValues);
+                    childMenuItem.title = "Add Child " + componentConfig.displayName;
+                    childMenuItem.callback = () => addComponent(this,app,componentConfig,initialValues);
                     menuItemList.push(childMenuItem);
                 }
             })

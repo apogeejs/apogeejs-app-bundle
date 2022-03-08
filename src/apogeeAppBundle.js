@@ -7,8 +7,7 @@ import * as apogeeview from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import ApogeeView from "/apogeejs-app-bundle/src/ApogeeView.js";
 import ApogeePlatform from "/apogeejs-app-bundle/src/ApogeePlatform.js";
 
-//import the default parent component views
-import "/apogeejs-app-bundle/src/parentComponentViewConfig.js";
+//import the reference views
 import "/apogeejs-app-bundle/src/referenceViewConfig.js";
 
 //expose these apogee libraries globally so plugins can use them 

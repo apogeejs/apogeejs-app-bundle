@@ -4,7 +4,6 @@ import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
 import {addComponent, addAdditionalComponent} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import PageChildComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/PageChildComponentDisplay.js"
-import {getComponentViewConfig} from "/apogeejs-view-lib/src/apogeeViewLib.js";
 
 import {uiutil,Tab,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
@@ -320,24 +319,22 @@ export default class LiteratePageComponentDisplay {
         var app = this.componentView.getApp();
         var appViewInterface = this.componentView.getAppViewInterface();
 
-        let preferredComponentTypes = componentInfo.getPreferredComponentTypes();
-        for(var i = 0; i < preferredComponentTypes.length; i++) {
-            let componentType = preferredComponentTypes[i];
+        let preferredComponentConfigs = componentInfo.getPreferredComponentConfigs();
+        for(var i = 0; i < preferredComponentConfigs.length; i++) {
+            let componentConfig = preferredComponentConfigs[i];
 
-            let componentViewConfig = getComponentViewConfig(componentType);
-            if(componentViewConfig.viewModes !== undefined) {
+            if(componentConfig.viewModes !== undefined) {
 
                 var buttonElement = uiutil.createElementWithClass("div","visiui_litPage_componentButton",this.componentToolbarContainer);
                 //make the idon
                 var imageElement = document.createElement("img")
-                imageElement.src = uiutil.getResourcePath(componentViewConfig.iconResPath,"app");
+                imageElement.src = uiutil.getResourcePath(componentConfig.iconResPath,"app");
                 var iconElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonIcon",buttonElement);
                 iconElement.appendChild(imageElement);
                 //label
                 var textElement = uiutil.createElementWithClass("div","visiui_litPage_componentButtonText",buttonElement);
-                let componentDisplayName = componentInfo.getComponentDisplayName(componentType);
-                textElement.innerHTML = componentDisplayName;
-                buttonElement.title = "Insert " + componentDisplayName;
+                textElement.innerHTML = componentConfig.displayName;
+                buttonElement.title = "Insert " + componentConfig.displayName;
                 //add handler
                 buttonElement.onclick = () => {
 
@@ -347,7 +344,7 @@ export default class LiteratePageComponentDisplay {
                     var parentMember = pageComponent.getParentFolderForChildren();
                     initialValues.parentId = parentMember.getId();
 
-                    addComponent(appViewInterface,app,componentType,initialValues);
+                    addComponent(appViewInterface,app,componentConfig,initialValues);
                 }
 
                 //for cleanup
