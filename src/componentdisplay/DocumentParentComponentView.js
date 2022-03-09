@@ -1,5 +1,5 @@
 import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
-import { ComponentView } from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import ComponentView from "/apogeejs-app-bundle/src/componentdisplay/ComponentView.js";
 import LiteratePageComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/LiteratePageComponentDisplay.js";
 import { createProseMirrorManager } from "/apogeejs-app-bundle/src/componentdisplay/proseMirrorSetup.js";
 

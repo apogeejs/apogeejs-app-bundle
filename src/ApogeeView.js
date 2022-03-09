@@ -1,7 +1,7 @@
-import {closeWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
-import {createWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
-import {openWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
-import {saveWorkspace} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {closeWorkspace} from "/apogeejs-app-bundle/src/commandseq/closeworkspaceseq.js";
+import {createWorkspace} from "/apogeejs-app-bundle/src/commandseq/createworkspaceseq.js";
+import {openWorkspace} from "/apogeejs-app-bundle/src/commandseq/openworkspaceseq.js";
+import {saveWorkspace} from "/apogeejs-app-bundle/src/commandseq/saveworkspaceseq.js";
 
 import WorkspaceView from "/apogeejs-app-bundle/src/WorkspaceView.js";
 

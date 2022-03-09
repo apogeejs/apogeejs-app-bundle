@@ -1,6 +1,7 @@
 import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
-import {addComponent, ComponentView} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js";
+import ComponentView from "/apogeejs-app-bundle/src/componentdisplay/ComponentView.js";
 import DocumentParentComponentView from "/apogeejs-app-bundle/src/componentdisplay/DocumentParentComponentView.js";
 
 /** This class manages the user interface for a workspace object. */

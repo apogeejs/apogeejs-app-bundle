@@ -2,7 +2,7 @@ import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 import {EventManager} from "/apogeejs-base-lib/src/apogeeBaseLib.js";
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
-import {addComponent, addAdditionalComponent} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {addComponent, addAdditionalComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js";
 import PageChildComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/PageChildComponentDisplay.js"
 
 import {uiutil,Tab,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";

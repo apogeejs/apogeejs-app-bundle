@@ -1,4 +1,4 @@
-import {addLinkSeq,updateLinkSeq,removeLinkSeq} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {addLinkSeq, updateLinkSeq, removeLinkSeq} from "/apogeejs-app-bundle/src/commandseq/updatelinkseq.js";
 
 const ADD_MODULE_NAME_LINE = {
     "type": "textField",

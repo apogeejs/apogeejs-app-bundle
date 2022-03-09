@@ -1,4 +1,4 @@
-import {addLinkSeq,updateLinkSeq,removeLinkSeq} from "/apogeejs-view-lib/src/apogeeViewLib.js";
+import {addLinkSeq, updateLinkSeq, removeLinkSeq} from "/apogeejs-app-bundle/src/commandseq/updatelinkseq.js";
 
 const PROPERTIES_CONFIG = {
     dialogTitle: "JS Script Link",

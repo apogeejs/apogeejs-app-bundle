@@ -3,7 +3,6 @@ import * as apogeebase from "/apogeejs-base-lib/src/apogeeBaseLib.js";
 import * as apogee from "/apogeejs-model-lib/src/apogeeModelLib.js";
 import * as apogeeapp from "/apogeejs-app-lib/src/apogeeAppLib.js";
 import * as apogeeui from "/apogeejs-ui-lib/src/apogeeUiLib.js";
-import * as apogeeview from "/apogeejs-view-lib/src/apogeeViewLib.js";
 import ApogeeView from "/apogeejs-app-bundle/src/ApogeeView.js";
 import ApogeePlatform from "/apogeejs-app-bundle/src/ApogeePlatform.js";
 
@@ -17,7 +16,6 @@ __globals__.apogeebase = apogeebase;
 __globals__.apogee = apogee;
 __globals__.apogeeapp = apogeeapp;
 __globals__.apogeeui = apogeeui;
-__globals__.apogeeview = apogeeview;
 __globals__.apogeeplatform = new ApogeePlatform();
 
 __globals__.addNameToModelGlobals("_",true);
@@ -26,7 +24,6 @@ __globals__.addNameToModelGlobals("apogeebase",true);
 __globals__.addNameToModelGlobals("apogee",true);
 __globals__.addNameToModelGlobals("apogeeapp",true);
 __globals__.addNameToModelGlobals("apogeeui",true);
-__globals__.addNameToModelGlobals("apogeeview",true);
 __globals__.addNameToModelGlobals("apogeeplatform",true);
 
 //some user message utilities
@@ -43,7 +40,7 @@ let appView;
 
 /** This function starts the application */
 __globals__.appInit = function(includePathInfo) {
-    apogeeview.initIncludePath(includePathInfo);
+    apogeeapp.initIncludePath(includePathInfo);
     appView = new ApogeeView("appContainer");
 }
 
