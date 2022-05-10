@@ -43,6 +43,142 @@ export default class ComponentView {
         this.errorInfoList = null;
     }
 
+    /////////////////////////////////////////////
+    // REACT STUFF
+    getId() { 
+        return this.component.getId()
+    }
+    getName() {
+        return this.component.getName()
+    }
+
+    getStatus() {
+        return "normal"
+    }
+
+    //getIconUrl() - alredy defined for the class
+
+    /*
+    var menuItemCallback = () => {
+        //open menu item
+        var menuItemList = [];
+        var openMenuItem = this.componentView.getOpenMenuItem();
+        if(openMenuItem) {
+            menuItemList.push(openMenuItem);
+        }
+
+        var component = this.componentView.getComponent();
+
+        //add child folder menu item
+        if(this.componentView.getViewConfig().isParentOfChildEntries) {
+            let app = this.componentView.getApp();
+            var appViewInterface = this.componentView.getAppViewInterface();
+            let initialValues = {parentId: component.getMemberId()};
+            let componentConfigs = componentInfo.getComponentConfigs();
+            componentConfigs.forEach(componentConfig => {
+                if(componentConfig.isParentOfChildEntries) {
+                    let childMenuItem = {};
+                    let pageComponentConfig = componentInfo.getComponentConfig(componentType);
+                    childMenuItem.title = "Add Child " + pageComponentConfig.displayName;
+                    childMenuItem.callback = () => addComponent(appViewInterface,app,componentConfig,initialValues);
+                    menuItemList.push(childMenuItem);
+                }
+            })
+        }
+
+        return this.componentView.getMenuItems(menuItemList);
+    }
+    
+    //double click callback
+    var openCallback = this.componentView.createOpenCallback();
+    
+    var component = this.componentView.getComponent();
+    var modelManager = this.componentView.getApp().getModelManager();
+    var labelText = this.componentView.getName();
+    var iconUrl = this.componentView.getIconUrl();
+    var isRoot = component.getParentComponent(modelManager) ? true : false;
+    return new TreeEntry(labelText, iconUrl, openCallback, menuItemCallback,isRoot);
+
+    */
+
+    //tree interface
+    hasChildren() {
+        // @TODO this is really clumsy - i calcualte the same thing as getting the children
+
+        if(this.getViewConfig().isParentOfChildEntries) {
+            let count = 0
+            let parentFolder = this.component.getParentFolderForChildren();
+            let appViewInterface = this.getAppViewInterface();
+            let childIdMap = parentFolder.getChildIdMap();
+            for(let childKey in childIdMap) {
+                let childMemberId = childIdMap[childKey];
+                let childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId);
+                if(childComponentView) {
+                    count++
+                }
+            }
+
+            return count > 0
+        }
+        else {
+            return false
+        }
+    }
+
+    getChildren() {
+        let childComponentViews = []
+
+        let parentFolder = this.component.getParentFolderForChildren();
+        let appViewInterface = this.getAppViewInterface();
+        let childIdMap = parentFolder.getChildIdMap();
+        for(let childKey in childIdMap) {
+            let childMemberId = childIdMap[childKey];
+            let childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId);
+            if(childComponentView) {
+                childComponentViews.push(childComponentView)
+            }
+        }
+        
+        return childComponentViews
+    }
+
+    hasMenu() {
+        return true
+    }
+
+    getMenuItems() {
+        //for parents, add "add child" items
+        return [
+            {text: "Edit Properties", action: () => updateComponentProperties(this)},
+            {text: "Delete", action: () => deleteComponent(this)}
+        ]
+    }
+
+    hasTab() { 
+        return this.viewConfig.isParentOfChildEntries
+    }
+
+    tabOpened() {
+        this.createTabDisplay()
+    }
+
+    tabClosed() {
+        this.closeTabDisplay()
+    }
+
+    getTabElement() {      
+        if(this.viewConfig.isParentOfChildEntries) {
+            return getComponentTab(this)
+        }
+        else {
+            console.log("Requesting tab for non-parent component")
+            return null
+        }
+    }
+
+    // END REACT STUFF
+    ///////////////////////////////////////////////
+
     //==============================
     // Public Instance Methods
     //==============================
@@ -284,6 +420,9 @@ export default class ComponentView {
 
     /** This method reads the UI state from the component. */
     loadViewStateFromComponent() {
+//dont' use initial view state
+if(true) return;
+
         let json = this.component.getCachedViewState();
         if(!json) return;
 
@@ -331,28 +470,28 @@ export default class ComponentView {
     //-------------------
     // tree entry methods - this is the element in the tree view
     //-------------------
-    getTreeEntry() {
-        if(!this.treeDisplay) {
-            this.treeDisplay = this.createTreeDisplay();
-        }
-        return this.treeDisplay.getTreeEntry();
-    }
+    // getTreeEntry() {
+    //     if(!this.treeDisplay) {
+    //         this.treeDisplay = this.createTreeDisplay();
+    //     }
+    //     return this.treeDisplay.getTreeEntry();
+    // }
 
     /** @protected */
-    createTreeDisplay() {
-        var treeDisplay = new TreeComponentDisplay(this);
+    // createTreeDisplay() {
+    //     var treeDisplay = new TreeComponentDisplay(this);
 
-        if((this.treeState !== undefined)&&(this.treeState !== null)) {
-            treeDisplay.setState(this.treeState);
-        }
+    //     if((this.treeState !== undefined)&&(this.treeState !== null)) {
+    //         treeDisplay.setState(this.treeState);
+    //     }
         
-        //default sort order within parent
-        let treeEntrySortOrder = this.viewConfig.isParentOfChildEntries ? 
-            ComponentView.FOLDER_COMPONENT_TYPE_SORT_ORDER : ComponentView.DEFAULT_COMPONENT_TYPE_SORT_ORDER;
-        treeDisplay.setComponentTypeSortOrder(treeEntrySortOrder);
+    //     //default sort order within parent
+    //     let treeEntrySortOrder = this.viewConfig.isParentOfChildEntries ? 
+    //         ComponentView.FOLDER_COMPONENT_TYPE_SORT_ORDER : ComponentView.DEFAULT_COMPONENT_TYPE_SORT_ORDER;
+    //     treeDisplay.setComponentTypeSortOrder(treeEntrySortOrder);
         
-        return treeDisplay;
-    }
+    //     return treeDisplay;
+    // }
 
     //-------------------
     // component display methods - this is the element in the parent tab (main display)
@@ -402,15 +541,15 @@ export default class ComponentView {
 
     createTabDisplay(makeActive) {
         if((this.viewConfig.isParentOfChildEntries)&&(!this.tabDisplay)) {
-            var tabFrame = this.appViewInterface.getTabFrame();
-            if(tabFrame) {
+//            var tabFrame = this.appViewInterface.getTabFrame();
+//            if(tabFrame) {
 
                 this.tabDisplay = this.instantiateTabDisplay();
 
                 //add the tab display to the tab frame
-                let tab = this.tabDisplay.getTab();
-                tabFrame.addTab(tab,makeActive);
-            }
+//                let tab = this.tabDisplay.getTab();
+//                tabFrame.addTab(tab,makeActive);
+//            }
         }
     }
 
@@ -431,7 +570,7 @@ export default class ComponentView {
     //-------------------
     // Menu methods
     //-------------------
-
+/*
     getMenuItems(optionalMenuItemList) {
         //menu items
         var menuItemList = optionalMenuItemList ? optionalMenuItemList : [];
@@ -449,7 +588,7 @@ export default class ComponentView {
         
         return menuItemList;
     }
-
+*/
     getOpenMenuItem () {
         var openCallback = this.createOpenCallback();
         if(openCallback) {

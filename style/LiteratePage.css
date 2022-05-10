@@ -25,6 +25,12 @@
     z-index: 1;
 }
 .visiui_litPage_body {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 200px;
+}
+/*.visiui_litPage_body {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -34,7 +40,7 @@
     overflow-x: hidden;
     z-index: 0;
     padding-bottom: 300px;
-}
+} */
 .visiui_litPage_componentButton {
     position:relative;
     display: inline-block;

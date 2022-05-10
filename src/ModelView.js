@@ -13,7 +13,7 @@ export default class ModelView {
         this.modelManager = modelManager;
         this.workspaceView = workspaceView;
 
-        this.treeEntry = null;
+        //this.treeEntry = null;
 
         this.componentViewMap = {};
 
@@ -29,9 +29,99 @@ export default class ModelView {
         this.modelManager.setViewStateCallback(() => this.getViewState());
     }
 
-    getTreeEntry() {
-        return this.treeEntry;
+    /////////////////////////////////////////////
+    // REACT STUFF
+    getId() { 
+        return this.modelManager.getId()
     }
+    getName() {
+        return MODEL_FOLDER_LABEL
+    }
+
+    getStatus() {
+        return "normal"
+    }
+
+    getIconUrl() {
+        return apogeeui.uiutil.getResourcePath(ICON_RES_PATH,"app")
+    }
+
+    //tree interface
+    hasChildren() {
+        // @TODO this is really clumsy - i calcualte the same thing as getting the children
+        let count = 0
+
+        let model = this.modelManager.getModel();
+        let childIdMap = model.getChildIdMap();
+        for(let childKey in childIdMap) {
+            let childMemberId = childIdMap[childKey];
+            let childComponentView = this.getComponentViewByMemberId(childMemberId);
+            if(childComponentView) {
+                count++
+            }
+        }
+        
+        return count > 0
+    }
+
+    getChildren() {
+        let childComponentViews = []
+
+        let model = this.modelManager.getModel();
+        let childIdMap = model.getChildIdMap();
+        for(let childKey in childIdMap) {
+            let childMemberId = childIdMap[childKey];
+            let childComponentView = this.getComponentViewByMemberId(childMemberId);
+            if(childComponentView) {
+                childComponentViews.push(childComponentView)
+            }
+        }
+        
+        return childComponentViews
+    }
+
+    hasMenu() {
+        return true
+    }
+
+    getMenuItems() {
+
+        var menuItemList = [];
+        var app = this.getApp();
+        let initialValues = {parentId: this.getModelManager().getModel().getId()};
+        let componentConfigs = componentInfo.getComponentConfigs();
+        componentConfigs.forEach(componentConfig => {
+            if((componentConfig.isParentOfChildEntries)&&(componentConfig.viewModes === undefined)) {
+                let childMenuItem = {};
+                childMenuItem.text = "Add Child " + componentConfig.displayName;
+                childMenuItem.action = () => addComponent(this,app,componentConfig,initialValues);
+                menuItemList.push(childMenuItem);
+            }
+        })
+
+        return menuItemList
+    }
+
+    hasTab() { 
+        return true
+    }
+
+    tabOpened() {
+    }
+
+    tabClosed() {
+    }
+
+    getTabElement() {
+        return React.createElement("div",{key: this.modelManager.getId()},"This is Tom's tab")
+    }
+
+    // END REACT STUFF
+    ///////////////////////////////////////////////
+
+    // getTreeEntry() {
+    //     return this.treeEntry;
+    // }
 
     getTabFrame() {
         return this.workspaceView.getTabFrame();
@@ -179,11 +269,11 @@ export default class ModelView {
     }
 
     addChildToRoot(componentView) {
-        this.treeEntry.addChild(componentView.getTreeEntry());
+        //this.treeEntry.addChild(componentView.getTreeEntry());
     }
 
     removeChildFromRoot(componentView) {
-        this.treeEntry.removeChild(componentView.getTreeEntry());
+        //this.treeEntry.removeChild(componentView.getTreeEntry());
     }
 
     //====================================
@@ -191,21 +281,21 @@ export default class ModelView {
     //====================================
 
     getViewState() {
-        if(this.treeEntry) {
-            return {treeState: this.treeEntry.getState()};
-        }
+        // if(this.treeEntry) {
+        //     return {treeState: this.treeEntry.getState()};
+        // }
     }
 
     init() {
-        this.treeEntry = this.createTreeEntry();
-        this.treeEntry.setState(TreeEntry.EXPANDED);
+        //this.treeEntry = this.createTreeEntry();
+        //this.treeEntry.setState(TreeEntry.EXPANDED);
 
         let viewState = this.modelManager.getCachedViewState();
         if((viewState)&&(viewState.treeState !== undefined)) {
-            this.treeEntry.setState(viewState.treeState)
+            //this.treeEntry.setState(viewState.treeState)
         }
     }
-
+/*
     createTreeEntry() {
 
         //menu item callback
@@ -231,7 +321,7 @@ export default class ModelView {
         var isRoot = true;
         return new TreeEntry(MODEL_FOLDER_LABEL, iconUrl, null, menuItemCallback, isRoot);
     }
-
+*/
 }
 
 let MODEL_FOLDER_LABEL = "Code";

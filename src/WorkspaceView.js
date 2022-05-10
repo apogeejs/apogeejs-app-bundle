@@ -16,7 +16,7 @@ export default class WorkspaceView {
         this.appView = appView;
         this.modelView = null;
 
-        this.treeEntry = null;
+        //this.treeEntry = null;
 
         this.init();
 
@@ -26,9 +26,53 @@ export default class WorkspaceView {
         this.workspaceManager.setViewStateCallback(() => this.getViewState());
     }
 
-    getTreeEntry() {
-        return this.treeEntry;
+    /////////////////////////////////////////////
+    // REACT STUFF
+    getId() {
+        return this.workspaceManager.getId()
     }
+    getName() {
+        let modelManager = this.workspaceManager.getModelManager()
+        let model = modelManager.getModel()
+        return model ? model.getName() : Workspace_OPENING_NAME
+    }
+    getStatus () {
+        return "normal"
+    }
+    getIconUrl() {
+        return uiutil.getResourcePath(WorkspaceView.ICON_RES_PATH,"app")
+    }
+
+    //tree interface
+    hasChildren() {
+        return true
+    }
+
+    getChildren() {
+        return [this.modelView]
+    }
+
+    hasMenu() {
+        return true
+    }
+
+    getMenuItems() {
+        return [
+            {text: "Edit Properties", action: () => updateWorkspaceProperties(this.getWorkspaceManager()) },
+            {text: "Print Dependencies", action: () => this.showDependencies() }
+        ]
+    }
+
+    hasTab() {
+        return false
+    }
+
+    // END REACT STUFF
+    ///////////////////////////////////////////////
+
+    // getTreeEntry() {
+    //     return this.treeEntry;
+    // }
 
     getTabFrame() {
         return this.appView.getTabFrame();
@@ -48,7 +92,7 @@ export default class WorkspaceView {
 
     /** This sets the name label on the workspace. The name comes from the model, however, we will display it on the workspace object. */
     setName(name) {
-        this.treeEntry.setLabel(name);
+        //this.treeEntry.setLabel(name);
     }
 
     /** This method takes any actions on workspace close. */
@@ -65,6 +109,11 @@ export default class WorkspaceView {
         try {
             this.workspaceManager = workspaceManager;
             this.workspaceManager.setViewStateCallback(() => this.getViewState());
+            
+            //@TODO should this go somwhere else?
+            // @TODO FIX THIS!!! - the downstream components are not updated yet.
+            setTimeout(() => this.appView.render(),10)
+            //this.appView.render()
         }
         catch(error) {
             if(error.stack) console.error(error.stack);
@@ -79,34 +128,35 @@ export default class WorkspaceView {
 
     /** Thie methor retrieves a serialized UI state, to be used during save. */
     getViewState() {
-        if(this.treeEntry) {
-            return {treeState: this.treeEntry.getState()};
-        }
+        // if(this.treeEntry) {
+        //     return {treeState: this.treeEntry.getState()};
+        // }
     }
 
     init() {
-        this.treeEntry = this.createTreeEntry();
+        //this.treeEntry = this.createTreeEntry();
 
         //model manager
         this.modelView = new ModelView(this,this.workspaceManager.getModelManager());
-        let modelTreeEntry = this.modelView.getTreeEntry();
-        this.treeEntry.addChild(modelTreeEntry);
+        //let modelTreeEntry = this.modelView.getTreeEntry();
+        //this.treeEntry.addChild(modelTreeEntry);
 
         //reference mamageger
         this.referenceView = new ReferenceView(this.app,this.workspaceManager.getReferenceManager());
-        let refTreeEntry = this.referenceView.getTreeEntry();
-        this.treeEntry.addChild(refTreeEntry);
+        //let refTreeEntry = this.referenceView.getTreeEntry();
+        //this.treeEntry.addChild(refTreeEntry);
 
         //set the view state
         let viewState = this.workspaceManager.getCachedViewState();
+
         if((viewState)&&(viewState.treeState !== undefined)) {
-            this.treeEntry.setState(viewState.treeState)
+            //this.treeEntry.setState(viewState.treeState)
         }
         else {
-            this.treeEntry.setState(TreeEntry.EXPANDED);
+            //this.treeEntry.setState(TreeEntry.EXPANDED);
         }
     }
-
+/*
     createTreeEntry() {
         //generally we expct the workspace not to exist yet. We will update this when it opens.
         let modelManager = this.workspaceManager.getModelManager();
@@ -137,7 +187,7 @@ export default class WorkspaceView {
         return menuItemList;
     }
 
-
+*/
 }
 
 let Workspace_OPENING_NAME = "opening...";

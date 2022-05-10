@@ -23,12 +23,194 @@ export default class ApogeeView {
         this.containerId = containerId;
         this.app = new Apogee(appConfigManager);
         
-        if(containerId) {
-            this._loadUI(containerId);
-        }
+        ///////////////////////////////////
+        //REACT VERSION SUPPORT
+
+        //comment out!
+        // if(containerId) {
+        //     this._loadUI(containerId);
+        // }
+
+        // END REACT VERSION SUPPORT
 
         this._subscribeToAppEvents();
     }
+
+    ////////////////////////////////////
+    // React Version additions section
+    render() {
+        renderApp(this)
+    }
+
+    /** @TODO I don't think the menu items are efficient. See how much overhead we have from redefining them
+     * and see if it is worth making this more effiecient, such as making a single menu object that only changes
+     * when the menu changes. (First, this probably doesn't matter. Second, is this even the criteria rect usees for a rerender?)
+     */
+    getMenuItems() {
+        return [
+            this._getWorkspaceMenuData(),
+            this._getEditMenuData(),
+            this._getAboutMenuData()
+        ]
+    }
+
+    getChildren() {
+        if(this.workspaceView) {
+            return [this.workspaceView]
+        }
+        else {
+            return []
+        }
+    }
+
+    getTabObject(tabObjectId) {
+        if(this.workspaceView) {
+            if(tabObjectId == this.workspaceView.getModelView().getModelManager().getId()) {
+                return this.workspaceView.getModelView()
+            }
+            else {
+                return this.workspaceView.getModelView().getComponentViewByComponentId(tabObjectId)
+            }
+        }
+        else {
+            alert("No workspace present")
+        }
+    }
+
+    //-----------------
+    // react-support private methods
+    //-----------------
+
+    /** This method gets the workspace menu items. This is created on the fly because the
+     * items will change depending on the state of the workspace. */
+    _getWorkspaceMenuData() {
+
+        let menuItems = [];
+        let menuData = {
+            text: "File",
+            items: menuItems
+        }
+
+        let fileAccessObject = apogeeplatform.getFileAccessObject();
+
+        menuItems.push({
+            text: "New",
+            action: () => {
+                console.log("In create workspace!")
+                createWorkspace(this.app)
+            }
+        })
+
+        menuItems.push({
+            text: "Open",
+            action: () => openWorkspace(this.app,fileAccessObject)
+        })
+
+        let workspaceManager = this.app.getWorkspaceManager()
+        if(workspaceManager) {
+            var fileMetadata = workspaceManager.getFileMetadata()
+
+            if(fileAccessObject.directSaveOk(fileMetadata)) {
+                menuItems.push({
+                    text: "Save",
+                    action: () => saveWorkspace(this.app,fileAccessObject,true)
+                })
+            }
+
+            menuItems.push({
+                text: "Save as",
+                action: () => saveWorkspace(this.app,fileAccessObject,false)
+            })
+        }  
+
+        menuItems.push({
+            text: "Close",
+            action: () => closeWorkspace(this.app)
+        })
+        
+        return menuData;
+    }
+
+    /** This method gets the workspace menu items. This is created on the fly because the
+     * items will change depending on the state of the workspace. */
+    _getEditMenuData() {
+        
+        var menuItems = [];
+        let menuData = {
+            text: "Edit",
+            items: menuItems
+        }
+
+        let commandManager = this.app.getCommandManager();
+        let commandHistory = commandManager.getCommandHistory();
+        
+        //populate the undo menu item
+        var undoLabel;
+        var undoCallback;
+        var nextUndoDesc = commandHistory.getNextUndoDesc();
+        if(nextUndoDesc === null) {
+            undoLabel = "-no undo-"
+            undoCallback = null;
+        }
+        else {
+            if(nextUndoDesc == "") {
+                undoLabel = "Undo"
+            }
+            else {
+                undoLabel = "Undo: " + nextUndoDesc;
+            }
+            undoCallback = () => commandHistory.undo();
+        }
+
+        menuItems.push({
+            text: undoLabel,
+            action: undoCallback
+        })
+        
+        //populate the redo menu item
+        var redoLabel;
+        var redoCallback;
+        var nextRedoDesc = commandHistory.getNextRedoDesc();
+        if(nextRedoDesc === null) {
+            redoLabel = "-no redo-"
+            redoCallback = null;
+        }
+        else {
+            if(nextRedoDesc == "") {
+                redoLabel = "Redo"
+            }
+            else {
+                redoLabel = "Redo: " + nextRedoDesc;
+            }
+            redoCallback = () => commandHistory.redo();
+        }
+        menuItems.push({
+            text: redoLabel,
+            action: redoCallback
+        })
+        
+        return menuData;
+    }
+
+    _getAboutMenuData() {
+        return {
+            text: "About",
+            items: [
+                {
+                    text: "Apogee Help",
+                    action: helpCallback
+                },
+                {
+                    text: "About",
+                    action: aboutCallback
+                }
+            ] 
+        }
+    }
+
+
+    //end react version additions section
+    /////////////////////////////
 
     getTreePane() {
         return this.treePane;
@@ -146,10 +328,12 @@ export default class ApogeeView {
         this.workspaceView = new WorkspaceView(workspaceManager,this);
 
         //load the tree entry, if needed
-        if(this.containerId) {
-            let treeEntry = this.workspaceView.getTreeEntry();
-            this.tree.setRootEntry(treeEntry);
-        }
+        // if(this.containerId) {
+        //     let treeEntry = this.workspaceView.getTreeEntry();
+        //     this.tree.setRootEntry(treeEntry);
+        // }
+
+        this.render()
     }
 
     _onWorkspaceClosed(workspaceManager) {
@@ -160,9 +344,9 @@ export default class ApogeeView {
         }
 
         //clear the tree
-        if(this.containerId) {
-            this.tree.clearRootEntry();
-        }
+        // if(this.containerId) {
+        //     this.tree.clearRootEntry();
+        // }
 
         //rather than rely on people to clear their own workspace handlers from the app
         //I clear them all here
@@ -173,6 +357,8 @@ export default class ApogeeView {
         this.app.clearListenersAndHandlers();
         this.app.subscribeToAppEvents();
         this._subscribeToAppEvents();
+
+        this.render()
     }
 
     /** This is called whenever a component in the model, or the model, changes. If the display name
@@ -181,14 +367,14 @@ export default class ApogeeView {
      * its title changes, or just that it was udpated. */
     _onComponentUpdated(component) {
         //tab id for components is the component id
-        if((component.getId() == this.tabFrame.getActiveTab())) {
-            //this is pretty messy too... 
-            let model = this.app.getModel();
-            if((component.isDisplayNameUpdated())||(component.getMember().isFullNameUpdated(model))) {
-                let tab = this.tabFrame.getTab(component.getId());
-                this._onTabShown(tab);
-            }
-        }
+//        if((component.getId() == this.tabFrame.getActiveTab())) {
+//            //this is pretty messy too... 
+//            let model = this.app.getModel();
+//            if((component.isDisplayNameUpdated())||(component.getMember().isFullNameUpdated(model))) {
+//                let tab = this.tabFrame.getTab(component.getId());
+//                this._onTabShown(tab);
+//           }
+//        }
     }
 
 
@@ -249,214 +435,214 @@ export default class ApogeeView {
     // Menu Functions
     //=================================
 
-    /** This method creates the creates the menu bar, with the attached functionality. 
-     * @private */
-    _createMenuBar() {
+    // /** This method creates the creates the menu bar, with the attached functionality. 
+    //  * @private */
+    // _createMenuBar() {
         
-        //-------------------
-        //create menus
-        //-----------------------
+    //     //-------------------
+    //     //create menus
+    //     //-----------------------
         
-        //create the menus
-        var menu;
-        var name;
-        var menus = {};
+    //     //create the menus
+    //     var menu;
+    //     var name;
+    //     var menus = {};
         
-        //creat menu  bar with left elements (menus) and right elements (active tab display)
-        var menuBar = uiutil.createElementWithClass("div","menu_bar");
-        var menuBarLeft = uiutil.createElementWithClass("div","menu_bar_left",menuBar);
-        var menuBarRight = uiutil.createElementWithClass("div","menu_bar_right",menuBar);
+    //     //creat menu  bar with left elements (menus) and right elements (active tab display)
+    //     var menuBar = uiutil.createElementWithClass("div","menu_bar");
+    //     var menuBarLeft = uiutil.createElementWithClass("div","menu_bar_left",menuBar);
+    //     var menuBarRight = uiutil.createElementWithClass("div","menu_bar_right",menuBar);
 
-        //apogee icon
-        let apogeeIcon = document.createElement("img");
-        apogeeIcon.src = uiutil.getResourcePath("/shortlogo16.png","app");
-        apogeeIcon.className = "menu_bar_icon";
-        menuBarLeft.appendChild(apogeeIcon);
-        // apogeeIcon.onclick = () => {
-        //     this.minimizeContent();
-        // }
+    //     //apogee icon
+    //     let apogeeIcon = document.createElement("img");
+    //     apogeeIcon.src = uiutil.getResourcePath("/shortlogo16.png","app");
+    //     apogeeIcon.className = "menu_bar_icon";
+    //     menuBarLeft.appendChild(apogeeIcon);
+    //     // apogeeIcon.onclick = () => {
+    //     //     this.minimizeContent();
+    //     // }
 
-        //Workspace menu
-        name = "File";
-        this.workspaceMenu = Menu.createMenu(name);
-        //add custom spacing
-        let workspaceMenuElement = this.workspaceMenu.getElement();
-        workspaceMenuElement.style.marginLeft = "8px";
-        workspaceMenuElement.style.marginRight = "2px";
-        workspaceMenuElement.style.marginTop = "2px";
-        workspaceMenuElement.style.marginBottom = "2px";
-        menuBarLeft.appendChild(workspaceMenuElement);
-        menus[name] = this.workspaceMenu;
+    //     //Workspace menu
+    //     name = "File";
+    //     this.workspaceMenu = Menu.createMenu(name);
+    //     //add custom spacing
+    //     let workspaceMenuElement = this.workspaceMenu.getElement();
+    //     workspaceMenuElement.style.marginLeft = "8px";
+    //     workspaceMenuElement.style.marginRight = "2px";
+    //     workspaceMenuElement.style.marginTop = "2px";
+    //     workspaceMenuElement.style.marginBottom = "2px";
+    //     menuBarLeft.appendChild(workspaceMenuElement);
+    //     menus[name] = this.workspaceMenu;
         
-        //populate the workspace menu on the fly - depends on workspace state
-        var getWorkspaceMenuCallback = () => this._getWorkspaceMenuItems();
-        this.workspaceMenu.setAsOnTheFlyMenu(getWorkspaceMenuCallback);
+    //     //populate the workspace menu on the fly - depends on workspace state
+    //     var getWorkspaceMenuCallback = () => this._getWorkspaceMenuItems();
+    //     this.workspaceMenu.setAsOnTheFlyMenu(getWorkspaceMenuCallback);
         
-        //Edit menu
-        name = "Edit";
-        this.editMenu = Menu.createMenu(name);
-        //add custom spacing
-        let editMenuElement = this.editMenu.getElement();
-        editMenuElement.style.marginLeft = "8px";
-        editMenuElement.style.marginRight = "2px";
-        editMenuElement.style.marginTop = "2px";
-        editMenuElement.style.marginBottom = "2px";
-        menuBarLeft.appendChild(editMenuElement);
-        menus[name] = this.editMenu;
+    //     //Edit menu
+    //     name = "Edit";
+    //     this.editMenu = Menu.createMenu(name);
+    //     //add custom spacing
+    //     let editMenuElement = this.editMenu.getElement();
+    //     editMenuElement.style.marginLeft = "8px";
+    //     editMenuElement.style.marginRight = "2px";
+    //     editMenuElement.style.marginTop = "2px";
+    //     editMenuElement.style.marginBottom = "2px";
+    //     menuBarLeft.appendChild(editMenuElement);
+    //     menus[name] = this.editMenu;
         
-        //populate the workspace menu on the fly - depends on workspace state
-        var getEditMenuCallback = () => this._getEditMenuItems();
-        this.editMenu.setAsOnTheFlyMenu(getEditMenuCallback);
+    //     //populate the workspace menu on the fly - depends on workspace state
+    //     var getEditMenuCallback = () => this._getEditMenuItems();
+    //     this.editMenu.setAsOnTheFlyMenu(getEditMenuCallback);
 
-        //Edit menu
-        name = "Help";
-        this.helpMenu = Menu.createMenu(name);
-        //add custom spacing
-        let helpMenuElement = this.helpMenu.getElement();
-        helpMenuElement.style.marginLeft = "8px";
-        helpMenuElement.style.marginRight = "2px";
-        helpMenuElement.style.marginTop = "2px";
-        helpMenuElement.style.marginBottom = "2px";
-        menuBarLeft.appendChild(helpMenuElement);
-        menus[name] = this.helpMenu;
+    //     //Edit menu
+    //     name = "Help";
+    //     this.helpMenu = Menu.createMenu(name);
+    //     //add custom spacing
+    //     let helpMenuElement = this.helpMenu.getElement();
+    //     helpMenuElement.style.marginLeft = "8px";
+    //     helpMenuElement.style.marginRight = "2px";
+    //     helpMenuElement.style.marginTop = "2px";
+    //     helpMenuElement.style.marginBottom = "2px";
+    //     menuBarLeft.appendChild(helpMenuElement);
+    //     menus[name] = this.helpMenu;
         
-        //populate the workspace menu on the fly - depends on workspace state
-        var getHelpMenuCallback = () => this._getHelpMenuItems();
-        this.helpMenu.setAsOnTheFlyMenu(getHelpMenuCallback);
+    //     //populate the workspace menu on the fly - depends on workspace state
+    //     var getHelpMenuCallback = () => this._getHelpMenuItems();
+    //     this.helpMenu.setAsOnTheFlyMenu(getHelpMenuCallback);
         
-        //allow the implementation to add more menus or menu items
-        if(this.addToMenuBar) {
-            this.addToMenuBar(menuBar,menus);
-        }
+    //     //allow the implementation to add more menus or menu items
+    //     if(this.addToMenuBar) {
+    //         this.addToMenuBar(menuBar,menus);
+    //     }
         
-        //add the active tab display
-        this.activeTabIconDisplay = uiutil.createElementWithClass("img","tab-icon-display",menuBarRight);
-        this.activeTabIconDisplay.style.display = "none";
-        this.activeTabTitleDisplay = uiutil.createElementWithClass("div","tab-title-display",menuBarRight);
-        this.activeTabTitleDisplay.style.display = "none";
-        return menuBar;
+    //     //add the active tab display
+    //     this.activeTabIconDisplay = uiutil.createElementWithClass("img","tab-icon-display",menuBarRight);
+    //     this.activeTabIconDisplay.style.display = "none";
+    //     this.activeTabTitleDisplay = uiutil.createElementWithClass("div","tab-title-display",menuBarRight);
+    //     this.activeTabTitleDisplay.style.display = "none";
+    //     return menuBar;
         
-    }
+    // }
 
-    /** This method gets the workspace menu items. This is created on the fly because the
-     * items will change depending on the state of the workspace. */
-    _getWorkspaceMenuItems() {
+    // /** This method gets the workspace menu items. This is created on the fly because the
+    //  * items will change depending on the state of the workspace. */
+    // _getWorkspaceMenuItems() {
         
-        let menuItems = [];
-        let menuItem;
+    //     let menuItems = [];
+    //     let menuItem;
 
-        let fileAccessObject = apogeeplatform.getFileAccessObject();
+    //     let fileAccessObject = apogeeplatform.getFileAccessObject();
         
-        menuItem = {};
-        menuItem.title = "New";
-        menuItem.callback = () => createWorkspace(this.app);
-        menuItems.push(menuItem);
+    //     menuItem = {};
+    //     menuItem.title = "New";
+    //     menuItem.callback = () => createWorkspace(this.app);
+    //     menuItems.push(menuItem);
         
-        menuItem = {};
-        menuItem.title = "Open";
-        menuItem.callback = () => openWorkspace(this.app,fileAccessObject);
-        menuItems.push(menuItem);
+    //     menuItem = {};
+    //     menuItem.title = "Open";
+    //     menuItem.callback = () => openWorkspace(this.app,fileAccessObject);
+    //     menuItems.push(menuItem);
 
-        let workspaceManager = this.app.getWorkspaceManager();
-        if(workspaceManager) {
-            var fileMetadata = workspaceManager.getFileMetadata();
+    //     let workspaceManager = this.app.getWorkspaceManager();
+    //     if(workspaceManager) {
+    //         var fileMetadata = workspaceManager.getFileMetadata();
 
-            if(fileAccessObject.directSaveOk(fileMetadata)) {
-                menuItem = {};
-                menuItem.title = "Save";
-                menuItem.callback = () => saveWorkspace(this.app,fileAccessObject,true);
-                menuItems.push(menuItem);
-            }
+    //         if(fileAccessObject.directSaveOk(fileMetadata)) {
+    //             menuItem = {};
+    //             menuItem.title = "Save";
+    //             menuItem.callback = () => saveWorkspace(this.app,fileAccessObject,true);
+    //             menuItems.push(menuItem);
+    //         }
 
-            menuItem = {};
-            menuItem.title = "Save as";
-            menuItem.callback = () => saveWorkspace(this.app,fileAccessObject,false);
-            menuItems.push(menuItem);
-        }  
+    //         menuItem = {};
+    //         menuItem.title = "Save as";
+    //         menuItem.callback = () => saveWorkspace(this.app,fileAccessObject,false);
+    //         menuItems.push(menuItem);
+    //     }  
 
-        menuItem = {};
-        menuItem.title = "Close";
-        menuItem.callback = () => closeWorkspace(this.app);
-        menuItems.push(menuItem);
+    //     menuItem = {};
+    //     menuItem.title = "Close";
+    //     menuItem.callback = () => closeWorkspace(this.app);
+    //     menuItems.push(menuItem);
         
-        return menuItems;
-    }
+    //     return menuItems;
+    // }
 
-    /** This method gets the workspace menu items. This is created on the fly because the
-     * items will change depending on the state of the workspace. */
-    _getEditMenuItems() {
+    // /** This method gets the workspace menu items. This is created on the fly because the
+    //  * items will change depending on the state of the workspace. */
+    // _getEditMenuItems() {
         
-        var menuItems = [];
-        var menuItem;
+    //     var menuItems = [];
+    //     var menuItem;
 
-        let commandManager = this.app.getCommandManager();
-        let commandHistory = commandManager.getCommandHistory();
+    //     let commandManager = this.app.getCommandManager();
+    //     let commandHistory = commandManager.getCommandHistory();
         
-        //populate the undo menu item
-        var undoLabel;
-        var undoCallback;
-        var nextUndoDesc = commandHistory.getNextUndoDesc();
-        if(nextUndoDesc === null) {
-            undoLabel = "-no undo-"
-            undoCallback = null;
-        }
-        else {
-            if(nextUndoDesc == "") {
-                undoLabel = "Undo"
-            }
-            else {
-                undoLabel = "Undo: " + nextUndoDesc;
-            }
-            undoCallback = () => commandHistory.undo();
-        }
-        menuItem = {};
-        menuItem.title = undoLabel;
-        menuItem.callback = undoCallback;
-        menuItems.push(menuItem);
+    //     //populate the undo menu item
+    //     var undoLabel;
+    //     var undoCallback;
+    //     var nextUndoDesc = commandHistory.getNextUndoDesc();
+    //     if(nextUndoDesc === null) {
+    //         undoLabel = "-no undo-"
+    //         undoCallback = null;
+    //     }
+    //     else {
+    //         if(nextUndoDesc == "") {
+    //             undoLabel = "Undo"
+    //         }
+    //         else {
+    //             undoLabel = "Undo: " + nextUndoDesc;
+    //         }
+    //         undoCallback = () => commandHistory.undo();
+    //     }
+    //     menuItem = {};
+    //     menuItem.title = undoLabel;
+    //     menuItem.callback = undoCallback;
+    //     menuItems.push(menuItem);
         
-        //populate the redo menu item
-        var redoLabel;
-        var redoCallback;
-        var nextRedoDesc = commandHistory.getNextRedoDesc();
-        if(nextRedoDesc === null) {
-            redoLabel = "-no redo-"
-            redoCallback = null;
-        }
-        else {
-            if(nextRedoDesc == "") {
-                redoLabel = "Redo"
-            }
-            else {
-                redoLabel = "Redo: " + nextRedoDesc;
-            }
-            redoCallback = () => commandHistory.redo();
-        }
-        menuItem = {};
-        menuItem.title = redoLabel;
-        menuItem.callback = redoCallback;
-        menuItems.push(menuItem);
+    //     //populate the redo menu item
+    //     var redoLabel;
+    //     var redoCallback;
+    //     var nextRedoDesc = commandHistory.getNextRedoDesc();
+    //     if(nextRedoDesc === null) {
+    //         redoLabel = "-no redo-"
+    //         redoCallback = null;
+    //     }
+    //     else {
+    //         if(nextRedoDesc == "") {
+    //             redoLabel = "Redo"
+    //         }
+    //         else {
+    //             redoLabel = "Redo: " + nextRedoDesc;
+    //         }
+    //         redoCallback = () => commandHistory.redo();
+    //     }
+    //     menuItem = {};
+    //     menuItem.title = redoLabel;
+    //     menuItem.callback = redoCallback;
+    //     menuItems.push(menuItem);
         
-        return menuItems;
-    }
+    //     return menuItems;
+    // }
 
-    _getHelpMenuItems() {
-        var menuItems = [];
-        var menuItem;
+    // _getHelpMenuItems() {
+    //     var menuItems = [];
+    //     var menuItem;
 
-        //help entry
-        menuItem = {};
-        menuItem.title = "Apogee Help";
-        menuItem.callback = helpCallback;
-        menuItems.push(menuItem);
+    //     //help entry
+    //     menuItem = {};
+    //     menuItem.title = "Apogee Help";
+    //     menuItem.callback = helpCallback;
+    //     menuItems.push(menuItem);
         
-        //about entry
-        menuItem = {};
-        menuItem.title = "About";
-        menuItem.callback = aboutCallback;
-        menuItems.push(menuItem);
+    //     //about entry
+    //     menuItem = {};
+    //     menuItem.title = "About";
+    //     menuItem.callback = aboutCallback;
+    //     menuItems.push(menuItem);
         
-        return menuItems;
-    }
+    //     return menuItems;
+    // }
 
 
 }

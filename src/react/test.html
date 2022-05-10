@@ -1,0 +1,203 @@
+<html>
+    <head>   
+        <link rel="stylesheet" type="text/css" href="../../style/react/app.css">
+        <link rel="stylesheet" type="text/css" href="../../style/react/selectMenu.css">
+        <link rel="stylesheet" type="text/css" href="../../style/react/splitFrame.css">
+        <link rel="stylesheet" type="text/css" href="../../style/react/treeView.css">
+        <link rel="stylesheet" type="text/css" href="../../style/react/tabView.css">
+        <link rel="stylesheet" type="text/css" href="../../style/react/iconWithStatus.css">
+        <link rel="stylesheet" type="text/css" href="../../style/react/test.css">
+        <script src="https://unpkg.com/react@16.12.0/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@16.12.0/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone@7.8.3/babel.js"></script>
+        <script>
+            let apogeeui = {}
+        </script>
+        <script type="module">
+            import {uiutil} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
+
+            apogeeui.uiutil = uiutil
+
+            const resourceInfo = {
+                "defaultResourcePath": "/apogeejs-app-bundle/resources",
+                "domainMap": {
+                    "ui-lib": "/apogeejs-ui-lib/resources",
+                    "app": "/apogeejs-app-bundle/resources",
+                    "combined-file-access": "/apogeejs-combined-file-access/resources"
+                }
+            }
+
+            uiutil.initResourcePath(resourceInfo)
+        </script>
+        <script type="text/babel" src="iconWithStatus.js"></script>
+        <script type="text/babel" src="splitFrame.js"></script>
+        <script type="text/babel" src="treeView.js"></script>
+        <script type="text/babel" src="selectMenu.js"></script>
+        <script type="text/babel" src="tabView.js"></script>
+        <script type="text/babel" src="app.js"></script>
+        <script type="text/babel">
+
+//===========================
+// Tree Contents
+//===========================
+// treeObject functions:
+// - string getName()
+// - boolean hasChildren()
+// - [treeObject] getChildren()
+// - boolean hasMenu()
+// - [menuItems] getMenuItems()
+// - string(url) getIconUrl()
+// - string(status) getStatus()
+// menu items format:
+//  - text: text
+//  - action: function() 
+let tabObjects = {};
+
+let appObject = {
+    getMenuItems: () => menuItems,
+    getChildren: () => [workspaceObject],
+    getTabObject: tabObjectId => {
+        return tabObjects[tabObjectId];
+    }
+}
+
+/* Menu Items */
+const menuItems = [
+    {
+        text: "File", 
+        items: [
+            {text: "Open", action: () => alert("Open pressed")},
+            {text: "Save", action: () => alert("Save pressed")},
+            {text: "Save As", action: () => alert("Save As pressed")},
+            {text: "Close", action: () => alert("Close pressed")}
+        ]
+    },
+    {
+        text: "Edit",
+        items: [
+            {text: "Copy", action: () => alert("Copy pressed")},
+            {text: "Cut", action: () => alert("Cut pressed")},
+            {text: "Paste", action: () => alert("Paste pressed")},
+        ]
+    },
+    {
+        text: "About",
+        items: [
+            {text: "Help", action: () => alert("Help pressed")},
+            {text: "About", action: () => alert("About pressed")}
+        ]
+    }
+]
+
+/* Tree View 
+* Creates a tree from a TreeObject. TreeObject interface:
+* - boolean hasChildren() - returns true if there are 0 children
+* - [TreeObject] getChildren() - returns a list of children.
+* - boolean hasMenu() - returns true if the tree entry has a menu
+* - boolean getMenuItems() - returns the menu items for the menu
+* = boolean hasTab() - returns true if the entry has a tab item
+* TO CLEAN UP
+* - better interface. Do I need all these "has*" functions?
+* - icons! status!
+* - click name action!
+*/
+
+// tabObject functions:
+// - int/string getId() - a unique id for the tab object
+// - string getName() - the name for the tab
+// - element getTabElement() - Returns the tab content element
+
+/* workspace object */
+let workspaceObject = {
+    getId: () => "workspace|1",
+    getName: () => "Workspace",
+    getStatus: () => "normal",
+    getIconUrl: () => apogeeui.uiutil.getResourcePath("/shortLogo16.png","app"),
+
+    //tree interface
+    hasChildren: () => true,
+    getChildren: () => [
+            workspaceChild1,
+            workspaceChild2,
+            workspaceChild3
+        ],
+
+    hasMenu: () => false,
+
+    hasTab: () => false
+}
+
+let workspaceChild1 = {
+    getId: () => "component|2",
+    getName: () => "Tom",
+    getStatus: () => "error",
+    getIconUrl: () => apogeeui.uiutil.getResourcePath("/icons3/jsonCellIcon.png","app"),
+
+    //tree interface
+    hasChildren: () => false,
+
+    hasMenu: () => true,
+    getMenuItems: () => [
+        {text: "Edit Properties", action: () => alert("Edit properties for Tom clicked")},
+        {text: "Delete", action: () => alert("Delete Tom clicked")}
+    ],
+
+    hasTab: () => true,
+    getTabElement: () => "This is Tom's tab"
+}
+
+let workspaceChild2 = {
+    getId: () => "component|3",
+    getName: () => "Dick",
+    getStatus: () => "invalid",
+    getIconUrl: () => apogeeui.uiutil.getResourcePath("/icons3/pageIcon.png","app"),
+
+    //tree interface
+    hasChildren: () => false,
+
+    hasMenu: () => true,
+    getMenuItems: () => [
+        {text: "Edit Properties", action: () => alert("Edit properties for Dick clicked")},
+        {text: "Delete", action: () => alert("Delete Dick clicked")}
+    ],
+
+    hasTab: () => true,
+    getTabElement: () => "This is Dick's tab"
+}
+
+let workspaceChild3 = {
+    getId: () => "component|4",
+    getName: () => "Harry",
+    getStatus: () => "pending",
+    getIconUrl: () => apogeeui.uiutil.getResourcePath("/icons3/functionCellIcon.png","app"),
+
+    //tree interface
+    hasChildren: () => false,
+
+    hasMenu: () => true,
+    getMenuItems: () => [
+        {text: "Edit Properties", action: () => alert("Edit properties for Harry clicked")},
+        {text: "Delete", action: () => alert("Delete Harry clicked")}
+    ],
+
+    hasTab: () => true,
+    getTabElement: () => (
+        <div style={{padding: "10px"}}>
+            <h1>Harry's Tab</h1>
+            <p>This is Harry's tab.</p>
+        </div>
+    )
+}
+
+//add tab objects to tab objects
+tabObjects[workspaceChild1.getId()] = workspaceChild1
+tabObjects[workspaceChild2.getId()] = workspaceChild2
+tabObjects[workspaceChild3.getId()] = workspaceChild3
+
+            ReactDOM.render(<App appObject={appObject}/>,document.getElementById("container"))
+        </script>
+    </head>
+    <body id="body">
+        <div id="container" class="appContainer"></div></div>
+    </body>
+</html>

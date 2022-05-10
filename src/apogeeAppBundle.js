@@ -42,6 +42,13 @@ let appView;
 __globals__.appInit = function(includePathInfo) {
     apogeeapp.initIncludePath(includePathInfo);
     appView = new ApogeeView("appContainer");
+
+    //////////////////////////
+    //REACT SUPPORT
+    appView.render()
+
+    //END REACT SUPPORT
+    ///////////////////////////
 }
 
 /** This function can be used to detect if a save is needed. */

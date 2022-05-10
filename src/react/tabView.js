@@ -1,0 +1,60 @@
+/** TabView 
+* TabObject functions:
+* - int/string getId() - a unique id for the tab object
+* - string getName() - the name for the tab
+* - element getTabElement() - Returns the tab content element
+*/
+function TabView({appObject, tabObjectIds, selectedTabId, closeTab, selectTabId}) {
+
+    let tabObjects = tabObjectIds.map(tabId => appObject.getTabObject(tabId))
+
+    return (
+        <div className="tabView">
+            <div className="tabView_head">
+                {tabObjects.map(tabObject => TabTab({
+                        tabObject, 
+                        closeTab, 
+                        selectTabId, 
+                        selected: selectedTabId == tabObject.getId()
+                    }))}
+            </div>
+            <div className="tabView_body">
+                {tabObjects.map(tabObject => TabFrame({
+                    tabObject,
+                    selected: selectedTabId == tabObject.getId()
+                }))}
+            </div>
+        </div>
+    )
+}
+
+function TabTab({tabObject, closeTab, selectTabId, selected}) {
+    function closeClicked(event) {
+        closeTab(tabObject)
+        event.stopPropagation() //prevent click from going to tab
+    }
+
+    function tabClicked(event) {
+        selectTabId(tabObject.getId())
+        event.stopPropagation()
+    }
+
+    let className = "tabView_tab " + (selected ? "tabView_selected" : "tabView_deselected")
+
+    let imageUrl = apogeeui.uiutil.getResourcePath("/close_gray.png","ui-lib");
+
+
+    return (
+        <div key={tabObject.getId()} onClick={tabClicked} className={className}>
+            <IconWithStatus iconObject={tabObject} />
+            <span>{tabObject.getName()}</span>
+            <input type="image" onClick={closeClicked} src={imageUrl}/>    
+        </div>
+    )
+}
+
+function TabFrame({tabObject, selected}) {
+    return (
+        <div key={tabObject.getId()} style={{display: selected ? '' : "none"}} className="tabView_frame">{tabObject.getTabElement()}</div>
+    )
+}

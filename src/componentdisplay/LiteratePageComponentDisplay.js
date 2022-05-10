@@ -49,19 +49,19 @@ export default class LiteratePageComponentDisplay {
     }
 
 
-    getTab() {
-        return this.tab;
-    }
+    // getTab() {
+    //     return this.tab;
+    // }
 
     getEditorView() {
         return this.editorView;
     }
 
     closeTab() {
-        if(this.tab) {
-            this.tab.close();
-            this.tab = null;
-        }
+        // if(this.tab) {
+        //     this.tab.close();
+        //     this.tab = null;
+        // }
     }
 
     getIsShowing() {
@@ -70,9 +70,9 @@ export default class LiteratePageComponentDisplay {
 
     componentUpdated(component) {
 
-        if(component.isMemberFieldUpdated("member","name")) {
-            this.tab.setTitle(this.componentView.getName());
-        }
+        // if(component.isMemberFieldUpdated("member","name")) {
+        //     this.tab.setTitle(this.componentView.getName());
+        // }
 
         if(component.isFieldUpdated("editorState")) {
             let editorData = this.componentView.getEditorState();
@@ -210,38 +210,38 @@ export default class LiteratePageComponentDisplay {
     /** @private */
     loadTabEntry() {
         let component = this.componentView.getComponent();
-        this.tab = new Tab(component.getId());    
+//        this.tab = new Tab(component.getId());    
 
         //-----------------------
         //set the content
         //-----------------------
         this.createDisplayContent();
 
-        if(this.tab.getIsShowing()) {
-            this.tabShown()
-        }
-        else {
-            this.tabHidden()
-        }
+        // if(this.tab.getIsShowing()) {
+        //     this.tabShown()
+        // }
+        // else {
+        //     this.tabHidden()
+        // }
 
-        this.tabShownListener = () => this.tabShown();
-        this.tabHiddenListener = () => this.tabHidden();
-        this.tabClosedListener = () => this.tabClosed();
-        this.beforeTabCloseHandler = () => this.beforeTabClose();
-        this.tab.addListener(uiutil.SHOWN_EVENT,this.tabShownListener);
-        this.tab.addListener(uiutil.HIDDEN_EVENT,this.tabHiddenListener);
-        this.tab.addListener(uiutil.CLOSE_EVENT,this.tabClosedListener);
-        this.tab.addHandler(uiutil.REQUEST_CLOSE,this.beforeTabCloseHandler);
+        // this.tabShownListener = () => this.tabShown();
+        // this.tabHiddenListener = () => this.tabHidden();
+        // this.tabClosedListener = () => this.tabClosed();
+        // this.beforeTabCloseHandler = () => this.beforeTabClose();
+        // this.tab.addListener(uiutil.SHOWN_EVENT,this.tabShownListener);
+        // this.tab.addListener(uiutil.HIDDEN_EVENT,this.tabHiddenListener);
+        // this.tab.addListener(uiutil.CLOSE_EVENT,this.tabClosedListener);
+        // this.tab.addHandler(uiutil.REQUEST_CLOSE,this.beforeTabCloseHandler);
 
         //------------------
         // set icon
         //------------------
-        this.tab.setIconUrl(this.componentView.getIconUrl());
+//        this.tab.setIconUrl(this.componentView.getIconUrl());
 
         //-----------------
         //set the tab title
         //-----------------
-        this.tab.setTitle(this.componentView.getName());
+//        this.tab.setTitle(this.componentView.getName());
 
         //-----------------
         // apply the banner state
@@ -262,25 +262,31 @@ export default class LiteratePageComponentDisplay {
             this.bannerContainer.appendChild(banner);
         }
 
-        if(this.tab) {
-            var iconOverlay = getIconOverlay(bannerState,bannerMessage);
-            if(iconOverlay) {
-                this.tab.setIconOverlay(iconOverlay);
-            }
-            else {
-                this.tab.clearIconOverlay();
-            }
-        }
+        // if(this.tab) {
+        //     var iconOverlay = getIconOverlay(bannerState,bannerMessage);
+        //     if(iconOverlay) {
+        //         this.tab.setIconOverlay(iconOverlay);
+        //     }
+        //     else {
+        //         this.tab.clearIconOverlay();
+        //     }
+        // }
     }
 
      /** @private */
     createDisplayContent() {
 
+this.pageContent = document.createElement("div");
+this.pageContent.style.position = "relative"
+
+
         //-----------
         //page header
         //------------
         this.headerElement = uiutil.createElementWithClass("div","visiui_litPage_header",null);
-        this.tab.setHeaderContent(this.headerElement);
+
+//        this.tab.setHeaderContent(this.headerElement);
+this.pageContent.appendChild(this.headerElement);
 
         this.editorToolbarContainer = uiutil.createElementWithClass("div","visiui_litPage_editorToolbar",this.headerElement);
         this.componentToolbarContainer = uiutil.createElementWithClass("div","visiui_litPage_componentToolbar",this.headerElement);
@@ -292,7 +298,8 @@ export default class LiteratePageComponentDisplay {
         //page body
         //-------------------
         this.contentElement = uiutil.createElementWithClass("div","visiui_litPage_body",null);
-        this.tab.setContent(this.contentElement);
+//        this.tab.setContent(this.contentElement);
+this.pageContent.appendChild(this.contentElement);
 
         let pageComponent = this.componentView.getComponent();
         let folder = pageComponent.getParentFolderForChildren();
@@ -455,7 +462,7 @@ export default class LiteratePageComponentDisplay {
         if(this.isDestroyed) return;
 
         //close tab if it is still present
-        if(this.tab) this.closeTab();
+//        if(this.tab) this.closeTab();
 
         //child components
         //we should probably have a less cumbesome way of doing this
@@ -539,18 +546,18 @@ export default class LiteratePageComponentDisplay {
 
     tabClosed() {
         //delete the page
-        if(this.tabShownListener) {
-            this.tab.removeListener(uiutil.SHOWN_EVENT,this.tabShownListener);
-            this.tabShownListener = null;
-        }
-        if(this.tabHiddenListener) {
-            this.tab.removeListener(uiutil.HIDDEN_EVENT,this.tabHiddenListener);
-            this.tabHiddenListener = null;
-        }
-        if(this.tabClosedListener) {
-            this.tab.removeListener(uiutil.CLOSE_EVENT,this.tabClosedListener);
-            this.tabClosedListener = null;
-        }
+        // if(this.tabShownListener) {
+        //     this.tab.removeListener(uiutil.SHOWN_EVENT,this.tabShownListener);
+        //     this.tabShownListener = null;
+        // }
+        // if(this.tabHiddenListener) {
+        //     this.tab.removeListener(uiutil.HIDDEN_EVENT,this.tabHiddenListener);
+        //     this.tabHiddenListener = null;
+        // }
+        // if(this.tabClosedListener) {
+        //     this.tab.removeListener(uiutil.CLOSE_EVENT,this.tabClosedListener);
+        //     this.tabClosedListener = null;
+        // }
         this.componentView.closeTabDisplay();
         this.dispatchEvent(uiutil.CLOSE_EVENT,this);
     }
