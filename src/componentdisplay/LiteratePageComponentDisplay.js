@@ -5,7 +5,7 @@ import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 import {addComponent, addAdditionalComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js";
 import PageChildComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/PageChildComponentDisplay.js"
 
-import {uiutil,Tab,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
+import {uiutil,bannerConstants,getBanner} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
 /** This component represents page display. */
 export default class LiteratePageComponentDisplay {
@@ -27,6 +27,7 @@ export default class LiteratePageComponentDisplay {
         this.editorToolbarView = null;
 
         //elements
+        this.pageContent = null;
         this.contentElement = null;
         this.editorToolbarContainer = null;
         this.componentToolbarContainer = null;
@@ -48,13 +49,12 @@ export default class LiteratePageComponentDisplay {
         return this.componentView;
     }
 
-
-    // getTab() {
-    //     return this.tab;
-    // }
-
     getEditorView() {
         return this.editorView;
+    }
+
+    getElement() {
+        return this.pageContent
     }
 
     closeTab() {
@@ -69,10 +69,6 @@ export default class LiteratePageComponentDisplay {
     }
 
     componentUpdated(component) {
-
-        // if(component.isMemberFieldUpdated("member","name")) {
-        //     this.tab.setTitle(this.componentView.getName());
-        // }
 
         if(component.isFieldUpdated("editorState")) {
             let editorData = this.componentView.getEditorState();
@@ -209,39 +205,10 @@ export default class LiteratePageComponentDisplay {
 
     /** @private */
     loadTabEntry() {
-        let component = this.componentView.getComponent();
-//        this.tab = new Tab(component.getId());    
-
         //-----------------------
         //set the content
         //-----------------------
         this.createDisplayContent();
-
-        // if(this.tab.getIsShowing()) {
-        //     this.tabShown()
-        // }
-        // else {
-        //     this.tabHidden()
-        // }
-
-        // this.tabShownListener = () => this.tabShown();
-        // this.tabHiddenListener = () => this.tabHidden();
-        // this.tabClosedListener = () => this.tabClosed();
-        // this.beforeTabCloseHandler = () => this.beforeTabClose();
-        // this.tab.addListener(uiutil.SHOWN_EVENT,this.tabShownListener);
-        // this.tab.addListener(uiutil.HIDDEN_EVENT,this.tabHiddenListener);
-        // this.tab.addListener(uiutil.CLOSE_EVENT,this.tabClosedListener);
-        // this.tab.addHandler(uiutil.REQUEST_CLOSE,this.beforeTabCloseHandler);
-
-        //------------------
-        // set icon
-        //------------------
-//        this.tab.setIconUrl(this.componentView.getIconUrl());
-
-        //-----------------
-        //set the tab title
-        //-----------------
-//        this.tab.setTitle(this.componentView.getName());
 
         //-----------------
         // apply the banner state
@@ -261,16 +228,6 @@ export default class LiteratePageComponentDisplay {
             var banner = getBanner(bannerMessage,bannerState);
             this.bannerContainer.appendChild(banner);
         }
-
-        // if(this.tab) {
-        //     var iconOverlay = getIconOverlay(bannerState,bannerMessage);
-        //     if(iconOverlay) {
-        //         this.tab.setIconOverlay(iconOverlay);
-        //     }
-        //     else {
-        //         this.tab.clearIconOverlay();
-        //     }
-        // }
     }
 
      /** @private */

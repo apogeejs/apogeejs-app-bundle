@@ -1,9 +1,8 @@
 import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
-import {uiutil,TreeEntry} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
+import {uiutil} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 import {bannerConstants} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 import {updateComponentProperties} from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js";
 import {deleteComponent} from "/apogeejs-app-bundle/src/commandseq/deletecomponentseq.js";
-import TreeComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/TreeComponentDisplay.js";
 
 //here for legacy support
 import {getErrorViewModeEntry} from "/apogeejs-app-lib/src/datasource/standardDataDisplay.js";
@@ -30,9 +29,6 @@ export default class ComponentView {
         this.childDisplayState = null;
         
         this.tabDisplay = null; //only valid on parents, which open into a tab
-        
-        this.treeDisplay = null; //this is shown in the tree view
-        this.treeState = null;
 
         this.component.setViewStateCallback(() => this.getViewState());
 
@@ -57,49 +53,6 @@ export default class ComponentView {
     }
 
     //getIconUrl() - alredy defined for the class
-
-    /*
-    var menuItemCallback = () => {
-        //open menu item
-        var menuItemList = [];
-        var openMenuItem = this.componentView.getOpenMenuItem();
-        if(openMenuItem) {
-            menuItemList.push(openMenuItem);
-        }
-
-        var component = this.componentView.getComponent();
-
-        //add child folder menu item
-        if(this.componentView.getViewConfig().isParentOfChildEntries) {
-            let app = this.componentView.getApp();
-            var appViewInterface = this.componentView.getAppViewInterface();
-            let initialValues = {parentId: component.getMemberId()};
-            let componentConfigs = componentInfo.getComponentConfigs();
-            componentConfigs.forEach(componentConfig => {
-                if(componentConfig.isParentOfChildEntries) {
-                    let childMenuItem = {};
-                    let pageComponentConfig = componentInfo.getComponentConfig(componentType);
-                    childMenuItem.title = "Add Child " + pageComponentConfig.displayName;
-                    childMenuItem.callback = () => addComponent(appViewInterface,app,componentConfig,initialValues);
-                    menuItemList.push(childMenuItem);
-                }
-            })
-        }
-
-        return this.componentView.getMenuItems(menuItemList);
-    }
-    
-    //double click callback
-    var openCallback = this.componentView.createOpenCallback();
-    
-    var component = this.componentView.getComponent();
-    var modelManager = this.componentView.getApp().getModelManager();
-    var labelText = this.componentView.getName();
-    var iconUrl = this.componentView.getIconUrl();
-    var isRoot = component.getParentComponent(modelManager) ? true : false;
-    return new TreeEntry(labelText, iconUrl, openCallback, menuItemCallback,isRoot);
-
-    */
 
     //tree interface
     hasChildren() {
@@ -380,33 +333,10 @@ export default class ComponentView {
             json.childDisplayState = activeChildDisplayState;
             statePresent = true;
         }
-    
-        //get the tree display state
-        let activeTreeState;
-        if(this.treeDisplay) {
-            activeTreeState = this.treeDisplay.getState();
-        }
-        else {
-            activeTreeState = this.treeState; 
-        }
-
-        if((activeTreeState !== undefined)&&(activeTreeState != TreeEntry.NO_CONTROL)) {
-            json.treeState = activeTreeState;
-            statePresent = true;
-        }
 
         //allow the specific component implementation to write to the json
         if(this.writeToJson) {
             statePresent = this.writeToJson(json);
-        }
-
-        if(this.tabDisplay) {
-            json.tabOpened = true;
-            var tab = this.tabDisplay.getTab();
-            if(tab.getIsShowing()) {
-                json.tabShowing = true;
-            }
-            statePresent = true;
         }
 
         //return the state
@@ -425,17 +355,6 @@ if(true) return;
 
         let json = this.component.getCachedViewState();
         if(!json) return;
-
-        //set the tree state
-        if((json.treeState !== undefined)&&(json.treeState !== null)) {
-            if(this.treeDisplay) {
-                this.treeDisplay.setState(json.treeState);
-                this.treeState = null;
-            }
-            else {
-                this.treeState = json.treeState;
-            }
-        }
         
         //set window options
         if((json.childDisplayState !== undefined)||(json.childDisplayState !== null)) {
@@ -452,12 +371,6 @@ if(true) return;
         if(this.readFromJson) {
             this.readFromJson(json);
         }
-
-        //check the tab display state (where tabs are used)
-        if(json.tabOpened) {
-            let setShowing = json.tabShowing;
-            this.createTabDisplay(setShowing);
-        }
     }
 
     /** This method can be implemented if the component view has additional state to save.
@@ -466,32 +379,6 @@ if(true) return;
 
     /** This method can be implemented if the component view has additional state saved. */
     //readFromJson(json) {}
-
-    //-------------------
-    // tree entry methods - this is the element in the tree view
-    //-------------------
-    // getTreeEntry() {
-    //     if(!this.treeDisplay) {
-    //         this.treeDisplay = this.createTreeDisplay();
-    //     }
-    //     return this.treeDisplay.getTreeEntry();
-    // }
-
-    /** @protected */
-    // createTreeDisplay() {
-    //     var treeDisplay = new TreeComponentDisplay(this);
-
-    //     if((this.treeState !== undefined)&&(this.treeState !== null)) {
-    //         treeDisplay.setState(this.treeState);
-    //     }
-        
-    //     //default sort order within parent
-    //     let treeEntrySortOrder = this.viewConfig.isParentOfChildEntries ? 
-    //         ComponentView.FOLDER_COMPONENT_TYPE_SORT_ORDER : ComponentView.DEFAULT_COMPONENT_TYPE_SORT_ORDER;
-    //     treeDisplay.setComponentTypeSortOrder(treeEntrySortOrder);
-        
-    //     return treeDisplay;
-    // }
 
     //-------------------
     // component display methods - this is the element in the parent tab (main display)
@@ -541,15 +428,7 @@ if(true) return;
 
     createTabDisplay(makeActive) {
         if((this.viewConfig.isParentOfChildEntries)&&(!this.tabDisplay)) {
-//            var tabFrame = this.appViewInterface.getTabFrame();
-//            if(tabFrame) {
-
-                this.tabDisplay = this.instantiateTabDisplay();
-
-                //add the tab display to the tab frame
-//                let tab = this.tabDisplay.getTab();
-//                tabFrame.addTab(tab,makeActive);
-//            }
+            this.tabDisplay = this.instantiateTabDisplay();
         }
     }
 
@@ -564,41 +443,6 @@ if(true) return;
             this.tabDisplay = null;
             tabDisplay.closeTab();
             tabDisplay.destroy();    
-        }
-    }
-
-    //-------------------
-    // Menu methods
-    //-------------------
-/*
-    getMenuItems(optionalMenuItemList) {
-        //menu items
-        var menuItemList = optionalMenuItemList ? optionalMenuItemList : [];
-            
-        //add the standard entries
-        var itemInfo = {};
-        itemInfo.title = "Edit Properties";
-        itemInfo.callback = () => updateComponentProperties(this);
-        menuItemList.push(itemInfo);
-
-        var itemInfo = {};
-        itemInfo.title = "Delete";
-        itemInfo.callback = () => deleteComponent(this);
-        menuItemList.push(itemInfo);
-        
-        return menuItemList;
-    }
-*/
-    getOpenMenuItem () {
-        var openCallback = this.createOpenCallback();
-        if(openCallback) {
-            var itemInfo = {};
-            itemInfo.title = "Open";
-            itemInfo.callback = openCallback;
-            return itemInfo;
-        }
-        else {
-            return null;
         }
     }
 
@@ -656,7 +500,8 @@ if(true) return;
                     }
                     else {
                         //this is placed in the root folder
-                        this.appViewInterface.addChildToRoot(this);
+                        //NOTE - addChildToRoot was used only to add the component to the tree. It does nothing now.
+                        this.appViewInterface.addChildToRoot(this); 
                         this.setLastAssignedParentComponentView(null);
                     }
                 }
@@ -664,70 +509,12 @@ if(true) return;
         }
         
         //update for new data
-        if(this.treeDisplay) {
-            this.treeDisplay.componentUpdated(component);
-        }
         if(this.childComponentDisplay != null) {
             this.childComponentDisplay.componentUpdated(component);
         }
         if(this.tabDisplay != null) {
             this.tabDisplay.componentUpdated(component);
         }
-    }
-
-    //=============================
-    // Action UI Entry Points
-    //=============================
-
-    /** This method creates a callback for opening the component. 
-     *  @private */
-    createOpenCallback() {
-        var openCallback;
-        
-        var makeTabActive = function(tabComponent) {
-            var tabDisplay = tabComponent.getTabDisplay();
-            if(tabDisplay) {
-                var tab = tabDisplay.getTab();
-                tab.makeActive();
-            }
-            else {
-                //create the tab display - this automaticaly puts it in the tab frame
-                tabComponent.createTabDisplay(true);
-            }
-        }
-        
-        if(this.viewConfig.isParentOfChildEntries) {
-            openCallback = () => {
-                makeTabActive(this);
-
-                // //allow time for UI to be created and then select start fo doc
-                // //this will also give the doc focus
-                // setTimeout(() => {
-                //     let tabDisplay = this.getTabDisplay();
-                //     if(tabDisplay.selectStartOfDocument) {
-                //         tabDisplay.selectStartOfDocument();
-                //     }
-                // },0);
-            }
-        }
-        else {
-            //remove the tree from the parent
-            openCallback = () => {
-                var parentComponentView = this.getParentComponentView();
-                if((parentComponentView)&&(parentComponentView.getViewConfig().isParentOfChildEntries)) {
-
-                    //execute command to select child
-                    let command = parentComponentView.getSelectApogeeNodeCommand(this.getName());
-                    this.getApp().executeCommand(command);
-
-                    //open the parent and bring this child to the front
-                    makeTabActive(parentComponentView);
-
-                }
-            }
-        }
-        
-        return openCallback;
     }
 
     //---------------------------

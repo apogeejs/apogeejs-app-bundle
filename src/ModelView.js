@@ -112,20 +112,13 @@ export default class ModelView {
     tabClosed() {
     }
 
+    /** @TODO this is a dummy element for testing the ui */
     getTabElement() {
         return React.createElement("div",{key: this.modelManager.getId()},"This is Tom's tab")
     }
 
     // END REACT STUFF
     ///////////////////////////////////////////////
-
-    // getTreeEntry() {
-    //     return this.treeEntry;
-    // }
-
-    getTabFrame() {
-        return this.workspaceView.getTabFrame();
-    }
 
     getComponentViewByComponentId(componentId) {
         return this.componentViewMap[componentId];
@@ -255,9 +248,10 @@ export default class ModelView {
         try {
             this.modelManager = modelManager;
             let model = this.modelManager.getModel();
-            if(model.isFieldUpdated("name")) {
-                this.workspaceView.setName(model.getName());
-            }
+            //(this was to display the name on the workspace tree entry)
+            // if(model.isFieldUpdated("name")) {
+            //     this.workspaceView.setName(model.getName());
+            // }
             
             this.modelManager.setViewStateCallback(() => this.getViewState());
         }
@@ -269,11 +263,9 @@ export default class ModelView {
     }
 
     addChildToRoot(componentView) {
-        //this.treeEntry.addChild(componentView.getTreeEntry());
     }
 
     removeChildFromRoot(componentView) {
-        //this.treeEntry.removeChild(componentView.getTreeEntry());
     }
 
     //====================================
@@ -281,47 +273,10 @@ export default class ModelView {
     //====================================
 
     getViewState() {
-        // if(this.treeEntry) {
-        //     return {treeState: this.treeEntry.getState()};
-        // }
     }
 
     init() {
-        //this.treeEntry = this.createTreeEntry();
-        //this.treeEntry.setState(TreeEntry.EXPANDED);
-
-        let viewState = this.modelManager.getCachedViewState();
-        if((viewState)&&(viewState.treeState !== undefined)) {
-            //this.treeEntry.setState(viewState.treeState)
-        }
     }
-/*
-    createTreeEntry() {
-
-        //menu item callback
-        var menuItemCallback = () => {
-            //open menu item
-            var menuItemList = [];
-            var app = this.getApp();
-            let initialValues = {parentId: this.getModelManager().getModel().getId()};
-            let componentConfigs = componentInfo.getComponentConfigs();
-            componentConfigs.forEach(componentConfig => {
-                if((componentConfig.isParentOfChildEntries)&&(componentConfig.viewModes === undefined)) {
-                    let childMenuItem = {};
-                    childMenuItem.title = "Add Child " + componentConfig.displayName;
-                    childMenuItem.callback = () => addComponent(this,app,componentConfig,initialValues);
-                    menuItemList.push(childMenuItem);
-                }
-            })
-
-            return menuItemList;
-        }
-
-        var iconUrl = uiutil.getResourcePath(ICON_RES_PATH,"app");
-        var isRoot = true;
-        return new TreeEntry(MODEL_FOLDER_LABEL, iconUrl, null, menuItemCallback, isRoot);
-    }
-*/
 }
 
 let MODEL_FOLDER_LABEL = "Code";

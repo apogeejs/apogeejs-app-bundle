@@ -25,26 +25,6 @@ export default class DocumentParentComponentView extends ComponentView {
     instantiateTabDisplay() {
         return new LiteratePageComponentDisplay(this); 
     }
-
-    createTreeDisplay() {
-        var treeDisplay = super.createTreeDisplay();
-        
-        //add any existing children to the tree entry
-        var treeEntry = treeDisplay.getTreeEntry();
-        var parentFolder = this.component.getParentFolderForChildren();
-        var appViewInterface = this.getAppViewInterface();
-        var childIdMap = parentFolder.getChildIdMap();
-        for(var childKey in childIdMap) {
-            var childMemberId = childIdMap[childKey];
-            var childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId);
-            if(childComponentView) {
-                var childTreeEntry = childComponentView.getTreeEntry();
-                treeEntry.addChild(childTreeEntry);
-            }
-        }
-        
-        return treeDisplay;
-    }
     
     //----------------------
     // Parent Methods
@@ -53,14 +33,6 @@ export default class DocumentParentComponentView extends ComponentView {
     /** This function adds a fhile componeent to the displays for this parent component. */
     removeChild(childComponentView) {
         //remove from tree entry
-        var treeEntry = this.getTreeEntry();
-        if(treeEntry) {
-            var childTreeEntry = childComponentView.getTreeEntry();
-            if(childTreeEntry) {
-                treeEntry.removeChild(childTreeEntry);
-            }
-        }
-
         if(this.tabDisplay) {
             this.tabDisplay.removeChild(childComponentView); 
         }
@@ -71,13 +43,6 @@ export default class DocumentParentComponentView extends ComponentView {
 
     /** This function adds a fhile componeent to the displays for this parent component. */
     addChild(childComponentView) {
-        //add the child to the tree entry
-        var treeEntry = this.getTreeEntry();
-        if(treeEntry) {
-            var childTreeEntry = childComponentView.getTreeEntry();
-            treeEntry.addChild(childTreeEntry);
-        }
-
         //add child entry for tab
         if(this.tabDisplay) {
             this.tabDisplay.addChild(childComponentView); 

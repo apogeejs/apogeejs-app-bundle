@@ -201,9 +201,6 @@ function getUseParentSelection(parentComponentView) {
 
     let tabDisplay = parentComponentView.getTabDisplay();
     if(!tabDisplay) return false;
-
-    let tab = tabDisplay.getTab();
-    if(!tab) return false;
     
     return tabDisplay.getIsShowing();
 }

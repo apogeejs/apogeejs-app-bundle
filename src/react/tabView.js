@@ -11,18 +11,22 @@ function TabView({appObject, tabObjectIds, selectedTabId, closeTab, selectTabId}
     return (
         <div className="tabView">
             <div className="tabView_head">
-                {tabObjects.map(tabObject => TabTab({
-                        tabObject, 
-                        closeTab, 
-                        selectTabId, 
-                        selected: selectedTabId == tabObject.getId()
-                    }))}
+                {tabObjects.map(tabObject => <TabTab 
+                        key={tabObject.getId()} 
+                        tabObject={tabObject} 
+                        closeTab={closeTab} 
+                        selectTabId={selectTabId} 
+                        selected={selectedTabId == tabObject.getId()}
+                    />)
+                }
             </div>
             <div className="tabView_body">
-                {tabObjects.map(tabObject => TabFrame({
-                    tabObject,
-                    selected: selectedTabId == tabObject.getId()
-                }))}
+                {tabObjects.map(tabObject => <TabFrame
+                        key={tabObject.getId()} 
+                        tabObject={tabObject} 
+                        selected={selectedTabId == tabObject.getId()}
+                    />)
+                }
             </div>
         </div>
     )
