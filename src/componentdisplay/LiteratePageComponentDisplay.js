@@ -73,7 +73,7 @@ export default class LiteratePageComponentDisplay {
         if(component.isFieldUpdated("editorState")) {
             let editorData = this.componentView.getEditorState();
             this.editorView.updateState(editorData);
-            this._checkSelectionForNodeHighlights(editorData);
+            //this._checkSelectionForNodeHighlights(editorData);
         }
 
         if(component.isStateUpdated()) {
@@ -81,22 +81,30 @@ export default class LiteratePageComponentDisplay {
         }
     }
 
-    getChildComponentDisplay(name,createIfMissing) {
+    getChildComponentDisplay(name) {
         //get id
         let folderComponent = this.componentView.getComponent();
         let folderMember = folderComponent.getParentFolderForChildren();
-        let memberId = folderMember.lookupChildId(name);
+        let memberId = folderMember.lookupChildId(name)
 
         //lookup component
         if (memberId) {
             var modelManager = this.componentView.getApp().getModelManager();
             var childComponentId = modelManager.getComponentIdByMemberId(memberId);
+
+            // let appViewInterface = componentView.getAppViewInterface();
+            // let childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId);
+            // let childComponentDisplay = childComponentView.getComponentDisplay(/* args */);
+
             let childComponentDisplay = this.childDisplayMap[childComponentId];
-            if((!childComponentDisplay)&&(createIfMissing)) {
+            if(!childComponentDisplay) {
                 //we don't haven't added it yet, but we will pre-create it
                 childComponentDisplay = new PageChildComponentDisplay(this);
                 this.childDisplayMap[childComponentId] = childComponentDisplay;
             }
+
+            childComponentDisplay._setIsPageShowing(this.isShowing);
+
             return childComponentDisplay;
         }
         else {
@@ -382,34 +390,34 @@ this.pageContent.appendChild(this.contentElement);
         }    
     }
 
-    /** This function sets any apogee nodes included in the selection to be highlighted. */
-    _checkSelectionForNodeHighlights(editorData) {
-        let { empty, from, to } = editorData.selection;
-        if(empty) {
-            from = -1;
-            to = -1;
-        }
+    // /** This function sets any apogee nodes included in the selection to be highlighted. */
+    // _checkSelectionForNodeHighlights(editorData) {
+    //     let { empty, from, to } = editorData.selection;
+    //     if(empty) {
+    //         from = -1;
+    //         to = -1;
+    //     }
  
-        let document = editorData.doc;
-        let schema = editorData.schema;
-        //travers doc, finding apogee nodes and setting their selection state
-        document.forEach( (node,offset) => {
-            if(node.type === schema.nodes.apogeeComponent) {
-                let inSelection = ((offset >= from)&&(offset < to));
-                let nodeName = node.attrs["name"];
-                this._setApogeeNodeHighlight(nodeName,inSelection);
-            }
-            //do not recurse into children
-            return false;
-        });
+    //     let document = editorData.doc;
+    //     let schema = editorData.schema;
+    //     //travers doc, finding apogee nodes and setting their selection state
+    //     document.forEach( (node,offset) => {
+    //         if(node.type === schema.nodes.apogeeComponent) {
+    //             let inSelection = ((offset >= from)&&(offset < to));
+    //             let nodeName = node.attrs["name"];
+    //             this._setApogeeNodeHighlight(nodeName,inSelection);
+    //         }
+    //         //do not recurse into children
+    //         return false;
+    //     });
 
-    }
+    // }
 
     /** This function sets the highlight state for the given node. */
-    _setApogeeNodeHighlight(childName,inSelection) {
-        let childComponentDisplay = this.getChildComponentDisplay(childName,false);
-        if(childComponentDisplay) childComponentDisplay.setHighlight(inSelection); 
-    }
+    // _setApogeeNodeHighlight(childName,inSelection) {
+    //     let childComponentDisplay = this.getChildComponentDisplay(childName,false);
+    //     if(childComponentDisplay) childComponentDisplay.setHighlight(inSelection); 
+    // }
     
 
     /** This should be called by the parent component when it is discarding the 
@@ -502,19 +510,6 @@ this.pageContent.appendChild(this.contentElement);
     }
 
     tabClosed() {
-        //delete the page
-        // if(this.tabShownListener) {
-        //     this.tab.removeListener(uiutil.SHOWN_EVENT,this.tabShownListener);
-        //     this.tabShownListener = null;
-        // }
-        // if(this.tabHiddenListener) {
-        //     this.tab.removeListener(uiutil.HIDDEN_EVENT,this.tabHiddenListener);
-        //     this.tabHiddenListener = null;
-        // }
-        // if(this.tabClosedListener) {
-        //     this.tab.removeListener(uiutil.CLOSE_EVENT,this.tabClosedListener);
-        //     this.tabClosedListener = null;
-        // }
         this.componentView.closeTabDisplay();
         this.dispatchEvent(uiutil.CLOSE_EVENT,this);
     }

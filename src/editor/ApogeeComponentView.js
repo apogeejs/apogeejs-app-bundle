@@ -43,10 +43,8 @@ export default class ApogeeComponentView {
     //we will not display data in this time.
     let childComponentDisplay
     if (name) {
-      childComponentDisplay = this.pageDisplay.getChildComponentDisplay(name,true);
-
+     childComponentDisplay = this.pageDisplay.getChildComponentDisplay(name);
     }
-
     if (childComponentDisplay) {
       var displayElement = childComponentDisplay.getElement();
       this.contentDiv.appendChild(displayElement);
@@ -54,6 +52,19 @@ export default class ApogeeComponentView {
     else {
       this.contentDiv.innerHTML = "Component not found: " + name;
     }
+
+    // let cellElement
+    // if (name) {
+    //   //childComponentDisplay = this.pageDisplay.getChildComponentDisplay(name);
+    //   cellElement = getComponentCell(this.pageDisplay,name)
+    // }
+    // if(cellElement) {
+    //   let cellElement = getComponentCell(childComponentDisplay)
+    //   ReactDOM.render(cellElement,this.contentDiv)
+    // }
+    // else {
+    //   this.contentDiv.innerHTML = "Component not found: " + name;
+    // }
 
   }
 

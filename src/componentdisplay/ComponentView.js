@@ -119,9 +119,37 @@ export default class ComponentView {
         this.closeTabDisplay()
     }
 
-    getTabElement() {      
+    getTabElement(showing) {      
         if(this.viewConfig.isParentOfChildEntries) {
-            return getComponentTab(this)
+            //get child component views
+            let childComponentViews =[]
+            const app = this.componentView.getApp()
+            const appViewInterface = this.getAppViewInterface()
+            let childIdMap = parentFolder.getChildIdMap()
+            for(let childKey in childIdMap) {
+                let childMemberId = childIdMap[childKey]
+                let childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId)
+                if(childComponentView) {
+                    childComponentViews.push(childComponentView)
+                }
+            }
+
+            //we might want to ccache one or both of those, and only change it if the components change
+            //get component configs for create buttons
+            let componentConfigs = componentInfo.getComponentConfigs()
+            let childComponentConfigs = []
+            componentConfigs.forEach(componentConfig => {
+                if(componentConfig.viewModes !== undefined) {
+                    childComponentConfigs.push(componentConfig);
+                }
+            })
+            //get the command to create
+            var initialValues = {};
+            var parentMember = this.getComponent().getParentFolderForChildren();
+            initialValues.parentId = parentMember.getId();
+            let createComponent = componentConfig => addComponent(appViewInterface,app,componentConfig,initialValues)
+            
+            return getComponentTab(componentView,childComponentViews,childComponentConfigs,createComponent,showing)
         }
         else {
             console.log("Requesting tab for non-parent component")
@@ -129,8 +157,107 @@ export default class ComponentView {
         }
     }
 
+
+    /////////////////////////////////////////
+    //old code for creating new component
+    // addAdditionalComponent(appViewInterface,app,optionalInitialProperties) {
+    //     var onSelect = function(componentConfig) {
+    //         addComponent(appViewInterface,app,componentConfig,optionalInitialProperties);
+    //     }
+    //     //get the display names
+    //     let componentConfigs = componentInfo.getComponentConfigs();
+    //     let childComponentConfigs = [];
+    //     componentConfigs.forEach( componentConfig => {
+    //         if(componentConfig.viewModes !== undefined) {
+    //             childComponentConfigs.push(componentConfig);
+    //         }
+    //     });
+    //     //open select component dialog
+    //     showSelectComponentDialog(childComponentConfigs,onSelect);
+    // }
+
+    // showSelectComponentDialog(componentConfigs,onSelectFunction) {
+
+    //     var dialog = dialogMgr.createDialog({"movable":true});
+        
+    //     //add a scroll container
+    //     var contentContainer = uiutil.createElement("div",null,
+    //         {
+    //             "display":"block",
+    //             "position":"relative",
+    //             "top":"0px",
+    //             "height":"100%",
+    //             "overflow": "auto"
+    //         });
+    //     dialog.setContent(contentContainer,uiutil.SIZE_WINDOW_TO_CONTENT);
+        
+    //     var line;
+        
+    //     var content = uiutil.createElement("div",null,
+    //             {
+    //                 "display":"table",
+    //                 "overflow":"hidden"
+    //             });
+    //     contentContainer.appendChild(content);
+        
+    //     var line;
+      
+    //     //title
+    //     line = uiutil.createElement("div",{"className":"dialogLine"});
+    //     line.appendChild(uiutil.createElement("div",{"className":"dialogTitle","innerHTML":"Select Component Type"}));
+    //     content.appendChild(line);
+        
+    //     //folder selection
+    //     line = uiutil.createElement("div",{"className":"dialogLine"});
+    //     line.appendChild(document.createTextNode("Component:"));
+    //     var select = uiutil.createElement("select");
+    //     componentConfigs.forEach( componentConfig => {
+    //         select.add(uiutil.createElement("option",{"text":componentConfig.displayName,"value":componentConfig.displayName}));
+    //     });
+    //     content.appendChild(line);
+        
+    //     //buttons
+    //     line = uiutil.createElement("div",{"className":"dialogLine"});
+    //     var onCancel = function() {
+    //         dialogMgr.closeDialog(dialog);
+    //     }
+        
+    //     var onCreate = function() {
+    //         var displayName = select.value;
+    //         componentConfig = componentConfigs.find(componentConfig => componentConfig.displayName == displayName)
+    //         if(componentConfig) {
+    //             onSelectFunction(componentConfig);
+    //             dialogMgr.closeDialog(dialog);
+    //         }
+    //         else {
+    //             // add error handling - this shouldn't happen though
+    //             apogeeUserAlert("Unknown error selecting component type: " + displayName)
+    //         }
+    //     }
+    //     line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Create","onclick":onCreate}));
+    //     line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Cancel","onclick":onCancel}));
+    //     content.appendChild(line);
+        
+    //     dialog.setContent(content,uiutil.SIZE_WINDOW_TO_CONTENT);  
+        
+    //     //show dialog
+    //     dialogMgr.showDialog(dialog);
+    // }
+    //end old codde for creating new component
+    /////////////////////////////////
+
     // END REACT STUFF
     ///////////////////////////////////////////////
+
+    getCellElement(isShowing) {
+        if(!this.childComponentDisplay) {
+            //we don't haven't added it yet, but we will pre-create it
+            this.childComponentDisplay = new PageChildComponentDisplay(this);
+        }
+        childComponentDisplay._setIsPageShowing(isShowing);
+
+        return getComponentCell(this.childComponentDisplay)
+    }
 
     //==============================
     // Public Instance Methods
@@ -426,13 +553,17 @@ if(true) return;
     ///** This creates the tab display for the component. */
     //instantiateTabDisplay();
 
-    createTabDisplay(makeActive) {
+    createTabDisplay() {
         if((this.viewConfig.isParentOfChildEntries)&&(!this.tabDisplay)) {
             this.tabDisplay = this.instantiateTabDisplay();
         }
     }
 
-    getTabDisplay() {
+    getTabDisplay(showing) {
+        //set the shwing state
+        if(this.tabDisplay.getIsShowing() != showing) {
+            showing ? this.tabDisplay.tabShown() : this.tabDisplay.tabHidden()
+        }
         return this.tabDisplay;
     }
 

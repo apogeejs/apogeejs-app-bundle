@@ -1,31 +1,80 @@
 
 
-function getComponentTab(componentView) {
-    return <ComponentTab componentView={componentView}/>
+function getComponentTab(componentView,childComponentViews,childComponentConfigs,createComponent,showing) {
+    return <ComponentTab 
+        componentView={componentView}
+        childComponentViews={childComponentViews}
+        childComponentConfigs={childComponentConfigs}
+        createComponent={createComponent}
+        showing={showing}
+    />
 }
 
-function ComponentTab({componentView}) {
-    let viewRef = React.useRef()
-    let component = componentView.getComponent();
+// let childComponentConfigs = [];
+// componentConfigs.forEach( componentConfig => {
+//     if(componentConfig.viewModes !== undefined) {
+//         childComponentConfigs.push(componentConfig);
+//     }
+// });
+// //VANILLA CODE  - or at least some elements, for reference
+// var select = uiutil.createElement("select");
+// childComponentConfigs.forEach( componentConfig => {
+//     select.add(uiutil.createElement("option",{"text":componentConfig.displayName,"value":componentConfig.displayName}));
+// });
+// var onCreate = function() {
+//     var displayName = select.value;
+//     componentConfig = componentConfigs.find(componentConfig => componentConfig.displayName == displayName)
+//     if(componentConfig) {
+//         onSelectFunction(componentConfig);
+//         dialogMgr.closeDialog(dialog);
+//     }
+//     else {
+//         // add error handling - this shouldn't happen though
+//         apogeeUserAlert("Unknown error selecting component type: " + displayName)
+//     }
+// }
+// var onCancel = function() {
+//     dialogMgr.closeDialog(dialog);
+// }
 
-    React.useEffect(() => {
-        //create tab display
-        console.log("Tab created: component id = " + component.getId())
+// line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Create","onclick":onCreate}));
+// line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Cancel","onclick":onCancel}));
 
-        let tabDisplay = componentView.getTabDisplay()
-        viewRef.current.appendChild(tabDisplay.getElement())
-        if(!tabDisplay.isShowing) {
-            tabDisplay.tabShown()
-        }
 
-        // return () => {
-        //     //destroy tab display
-        //     //componentView.closeTabDisplay()
-        //     console.log("Tab destroyed: component id = " + component.getId())
-        //   }
-    },[])
+function ComponentTab({componentView,childComponentViews,componentConfigs,createComponent,showing}) {
+    //let component = componentView.getComponent();
+    console.log("in render tab name = " + componentView.getName())
 
-    console.log("in render tab")
+    return (
+        <div className="componentTabWrapper">
+            <PageHeaderElement componentConfigs={componentConfigs} createComponent={createComponent} />
+            <div className="componentPageBodyElement">
+                {childComponentViews.map(childComponentView => childComponentView.getCellElement())}
+            </div>
+        </div>
+    )
+}
 
-    return <div ref={viewRef} className="componentWrapper"/>
+function PageHeaderElement({childComponentConfigs, createComponent}) {
+
+    const [selectedChildConfig, setSelectedChildConfig] = React.useState(() => childComponentConfigs[0])
+
+    const selectedTypeChanged = event => {
+        const selectedConfig = componentConfigs[event.target.selectedIndex];
+        setSelectedChildConfig(selectedConfig)
+    }
+
+    const onCreateClicked = () => {
+        createComponent(selectedChildConfig)
+
+        //?: Do we want to keep the current selection or revert to the first. Keep for now.
+    }
+
+    //add the select and the create button!
+    return <div className="componentPageHeaderElement">
+        <select className="componentPageCreateSelect" onChange={selectedTypeChanged}>
+            {childComponentConfigs.map(componentConfig => <option value={componentConfig.displayName}>{componentConfig.displayName}</option>)}
+        </select>
+        <button type="button" onClick={onCreateClicked}/>
+    </div>
 }

@@ -24,7 +24,7 @@ function TabView({appObject, tabObjectIds, selectedTabId, closeTab, selectTabId}
                 {tabObjects.map(tabObject => <TabFrame
                         key={tabObject.getId()} 
                         tabObject={tabObject} 
-                        selected={selectedTabId == tabObject.getId()}
+                        showing={selectedTabId == tabObject.getId()}
                     />)
                 }
             </div>
@@ -57,8 +57,8 @@ function TabTab({tabObject, closeTab, selectTabId, selected}) {
     )
 }
 
-function TabFrame({tabObject, selected}) {
+function TabFrame({tabObject, showing}) {
     return (
-        <div key={tabObject.getId()} style={{display: selected ? '' : "none"}} className="tabView_frame">{tabObject.getTabElement()}</div>
+        <div key={tabObject.getId()} style={{display: showing ? '' : "none"}} className="tabView_frame">{tabObject.getTabElement(showing)}</div>
     )
 }

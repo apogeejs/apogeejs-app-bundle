@@ -5,9 +5,8 @@ import {uiutil,Menu,bannerConstants,getBanner,getIconOverlay} from "/apogeejs-ui
 /** This component represents a cell on a page. */
 export default class PageChildComponentDisplay {
 
-    constructor(parentComponentDisplay) {
-        this.parentComponentDisplay = parentComponentDisplay;
-
+    constructor(componentView) {
+        this.componentView = componentView;
         this.editModeViews = [];
         this.inEditMode = false;
         
@@ -26,27 +25,34 @@ export default class PageChildComponentDisplay {
         //make the container
         this.mainElement = uiutil.createElementWithClass("div","visiui_pageChild_mainClass",null);
         this.isHighlighted = false;
+
+        this._loadComponentDisplay();
+        this._updateChildDisplayStates();
+
+        //set any current child component views
+        this._processChildComponentViews(this.componentView)
         
         //connect to parent
-        this._setIsPageShowing(this.parentComponentDisplay.getIsShowing());
-        this.onShow = () => this._setIsPageShowing(true);
-        this.onHide = () => this._setIsPageShowing(false);
-        this.parentComponentDisplay.addListener(uiutil.SHOWN_EVENT,this.onShow);
-        this.parentComponentDisplay.addListener(uiutil.HIDDEN_EVENT,this.onHide);
+        //REMOVE PAGE SHOWING EVENTS
+        // this._setIsPageShowing(this.parentComponentDisplay.getIsShowing());
+        // this.onShow = () => this._setIsPageShowing(true);
+        // this.onHide = () => this._setIsPageShowing(false);
+        // this.parentComponentDisplay.addListener(uiutil.SHOWN_EVENT,this.onShow);
+        // this.parentComponentDisplay.addListener(uiutil.HIDDEN_EVENT,this.onHide);
     }
 
     getElement() {
         return this.mainElement;
     }
 
-    setComponentView(componentView) {
-        this.componentView = componentView;
-        this._loadComponentDisplay();
-        this._updateChildDisplayStates();
+    // setComponentView(componentView) {
+    //     this.componentView = componentView;
+    //     this._loadComponentDisplay();
+    //     this._updateChildDisplayStates();
 
-        //set any current child component views
-        this._processChildComponentViews(this.componentView)
-    }
+    //     //set any current child component views
+    //     this._processChildComponentViews(this.componentView)
+    // }
 
     addChildComponentView(childComponentView) {
         this._addComponentDisplayChildComponentView(childComponentView);
@@ -163,11 +169,11 @@ export default class PageChildComponentDisplay {
         if(this.isDestroyed) return; 
 
         //remove parent listeners
-        if(this.parentComponentDisplay) {
-            this.parentComponentDisplay.removeListener(uiutil.SHOWN_EVENT,this.onShow);
-            this.parentComponentDisplay.removeListener(uiutil.HIDDEN_EVENT,this.onHide);
-            this.parentComponentDisplay = null;
-        }
+        // if(this.parentComponentDisplay) {
+        //     this.parentComponentDisplay.removeListener(uiutil.SHOWN_EVENT,this.onShow);
+        //     this.parentComponentDisplay.removeListener(uiutil.HIDDEN_EVENT,this.onHide);
+        //     this.parentComponentDisplay = null;
+        // }
         
         //discard the menu
         if(this.menu) {
@@ -379,9 +385,9 @@ export default class PageChildComponentDisplay {
         }
             
         //notify page
-        if(this.componentView) {
-            this.parentComponentDisplay.notifyEditMode(this.inEditMode,this.componentView);
-        }
+        // if(this.componentView) {
+        //     this.parentComponentDisplay.notifyEditMode(this.inEditMode,this.componentView);
+        // }
     }
 
     _updateChildDisplayStates() {
