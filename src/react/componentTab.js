@@ -60,7 +60,7 @@ function PageHeaderElement({childComponentConfigs, createComponent}) {
     const [selectedChildConfig, setSelectedChildConfig] = React.useState(() => childComponentConfigs[0])
 
     const selectedTypeChanged = event => {
-        const selectedConfig = componentConfigs[event.target.selectedIndex];
+        const selectedConfig = childComponentConfigs[event.target.selectedIndex];
         setSelectedChildConfig(selectedConfig)
     }
 
