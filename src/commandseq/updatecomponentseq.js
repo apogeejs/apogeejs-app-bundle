@@ -81,42 +81,42 @@ export function updateComponentProperties(componentView) {
                 }
             }
 
-            let oldName = component.getName();
+            //let oldName = component.getName();
 
-            let renameEditorCommands;
+            //let renameEditorCommands;
 
             //do the first stage of editor commands
-            if(componentView.isChildEntry()) {
-                //load model view, will be used for old parent and new parent
-                let appViewInterface = componentView.getAppViewInterface();
+            // if(componentView.isChildEntry()) {
+            //     //load model view, will be used for old parent and new parent
+            //     let appViewInterface = componentView.getAppViewInterface();
 
-                if(appViewInterface.hasParentDisplays()) {
-                    //look up the old parent component
-                    let oldParentComponent = component.getParentComponent(modelManager);
-                    //remove the component from the parent component document.
-                    //if there is no parent component, we wil assume this was in the root folder
-                    if(oldParentComponent) {
-                        let oldParentComponentView = appViewInterface.getComponentViewByComponentId(oldParentComponent.getId());
+            //     if(appViewInterface.hasParentDisplays()) {
+            //         //look up the old parent component
+            //         let oldParentComponent = component.getParentComponent(modelManager);
+            //         //remove the component from the parent component document.
+            //         //if there is no parent component, we wil assume this was in the root folder
+            //         if(oldParentComponent) {
+            //             let oldParentComponentView = appViewInterface.getComponentViewByComponentId(oldParentComponent.getId());
 
-                        if(newFormValues.parentId) {
-                            //----------------------------
-                            //move case
-                            //delete old node
-                            //----------------------------
-                            let oldParentEditorCommand = oldParentComponentView.getRemoveApogeeNodeFromPageCommand(oldName);
-                            commands.push(oldParentEditorCommand);
-                        }
-                        else if(newFormValues.name) {
-                            //---------------------------
-                            //rename case
-                            //get the rename editr comamnds, then apply the one to clear the component node name
-                            //----------------------------
-                            renameEditorCommands = oldParentComponentView.getRenameApogeeNodeCommands(component.getMemberId(),oldName,newFormValues.name);
-                            commands.push(renameEditorCommands.setupCommand);
-                        }
-                    }
-                }
-            }
+            //             if(newFormValues.parentId) {
+            //                 //----------------------------
+            //                 //move case
+            //                 //delete old node
+            //                 //----------------------------
+            //                 let oldParentEditorCommand = oldParentComponentView.getRemoveApogeeNodeFromPageCommand(oldName);
+            //                 commands.push(oldParentEditorCommand);
+            //             }
+            //             else if(newFormValues.name) {
+            //                 //---------------------------
+            //                 //rename case
+            //                 //get the rename editr comamnds, then apply the one to clear the component node name
+            //                 //----------------------------
+            //                 renameEditorCommands = oldParentComponentView.getRenameApogeeNodeCommands(component.getMemberId(),oldName,newFormValues.name);
+            //                 commands.push(renameEditorCommands.setupCommand);
+            //             }
+            //         }
+            //     }
+            // }
             
             //update the component name
             let moveCommand = {};
@@ -126,63 +126,63 @@ export function updateComponentProperties(componentView) {
             moveCommand.newParentId = newFormValues.parentId;
             commands.push(moveCommand);
 
-            //do the second stage of editor commands
-            if(componentView.isChildEntry()) {
+        //     //do the second stage of editor commands
+        //     if(componentView.isChildEntry()) {
 
-                //-----------------------------------
-                // move case
-                // add the compone nodes to the new page after the component has been moved there
-                //----------------------------------------------
-                if(newFormValues.parentId) {
-                    let newParentComponentId = modelManager.getComponentIdByMemberId(newFormValues.parentId);
-                    //there will be no component id if we are putting this in the root folder
-                    if(newParentComponentId) {
-                        let appViewInterface = componentView.getAppViewInterface();
-                        if(appViewInterface.hasParentDisplays()) {
-                            let newParentComponentView = appViewInterface.getComponentViewByComponentId(newParentComponentId);
+        //         //-----------------------------------
+        //         // move case
+        //         // add the compone nodes to the new page after the component has been moved there
+        //         //----------------------------------------------
+        //         if(newFormValues.parentId) {
+        //             let newParentComponentId = modelManager.getComponentIdByMemberId(newFormValues.parentId);
+        //             //there will be no component id if we are putting this in the root folder
+        //             if(newParentComponentId) {
+        //                 let appViewInterface = componentView.getAppViewInterface();
+        //                 if(appViewInterface.hasParentDisplays()) {
+        //                     let newParentComponentView = appViewInterface.getComponentViewByComponentId(newParentComponentId);
 
-                            if(newParentComponentView) {
-                                let newName = newFormValues.name ? newFormValues.name : oldName;
+        //                     if(newParentComponentView) {
+        //                         let newName = newFormValues.name ? newFormValues.name : oldName;
 
-                                //insert node add at end of new page
-                                let newParentCommands = newParentComponentView.getInsertApogeeNodeOnPageCommands(newName,true);
-                                //added the editor setup command
-                                if(newParentCommands.editorSetupCommand) commands.push(newParentCommands.editorSetupCommand);
-                                //check if we need to add any delete component commands  - we shouldn't have any since we are not overwriting data here
-                                if(newParentCommands.deletedComponentCommands) {
-                                    //flag a delete will be done
-                                    commandsDeleteComponent = true
-                                    deleteMsg = "This action deletes cells on the new page. Are you sure you want to do that? Deleted cells: " + deletedComponentNames;
+        //                         //insert node add at end of new page
+        //                         let newParentCommands = newParentComponentView.getInsertApogeeNodeOnPageCommands(newName,true);
+        //                         //added the editor setup command
+        //                         if(newParentCommands.editorSetupCommand) commands.push(newParentCommands.editorSetupCommand);
+        //                         //check if we need to add any delete component commands  - we shouldn't have any since we are not overwriting data here
+        //                         if(newParentCommands.deletedComponentCommands) {
+        //                             //flag a delete will be done
+        //                             commandsDeleteComponent = true
+        //                             deleteMsg = "This action deletes cells on the new page. Are you sure you want to do that? Deleted cells: " + deletedComponentNames;
                                     
-                                    //return if user rejects
-                                    if(!doDelete) return;
+        //                             //return if user rejects
+        //                             if(!doDelete) return;
                                     
-                                    commands.push(...newParentCommands.deletedComponentCommands);
-                                }
+        //                             commands.push(...newParentCommands.deletedComponentCommands);
+        //                         }
 
-                                //add the editor insert command
-                                if(newParentCommands.editorAddCommand) commands.push(newParentCommands.editorAddCommand);
-                            }
-                        }
-                    }
-                    else {
-                        if(!componentViewConfig.isParentOfChildEntries) {
-                            //TBR if we want to enforce this condition...
-                            throw new Error("This component can not be placed in the root folder.");
-                        }
-                    }
+        //                         //add the editor insert command
+        //                         if(newParentCommands.editorAddCommand) commands.push(newParentCommands.editorAddCommand);
+        //                     }
+        //                 }
+        //             }
+        //             else {
+        //                 if(!componentViewConfig.isParentOfChildEntries) {
+        //                     //TBR if we want to enforce this condition...
+        //                     throw new Error("This component can not be placed in the root folder.");
+        //                 }
+        //             }
 
-                }
+        //         }
 
-                //----------------------------
-                //rename case
-                //set the new node name, after the compnoent rename is done
-                //-------------------------------------------
-                if(renameEditorCommands) {
-                    //update apogee node name
-                    commands.push(renameEditorCommands.setNameCommand);
-                }
-            }
+        //         //----------------------------
+        //         //rename case
+        //         //set the new node name, after the compnoent rename is done
+        //         //-------------------------------------------
+        //         if(renameEditorCommands) {
+        //             //update apogee node name
+        //             commands.push(renameEditorCommands.setNameCommand);
+        //         }
+        //     }
 
         }
         
@@ -208,13 +208,13 @@ export function updateComponentProperties(componentView) {
                 app.executeCommand(command);
             }
 
-            returnToEditor(componentView,submittedFormValues.name);
+            //returnToEditor(componentView,submittedFormValues.name);
         }
 
         if(commandsDeleteComponent) {
             //if there is a delete, verify the user wants to do this
             let cancelAction = () => {
-                returnToEditor(componentView,submittedFormValues.name);
+                //returnToEditor(componentView,submittedFormValues.name);
             };
             apogeeUserConfirm(deleteMsg,"Delete","Cancel",doAction,cancelAction);
         }
@@ -228,21 +228,21 @@ export function updateComponentProperties(componentView) {
     }
 
     //return focus to editor on cancel
-    let onCancelFunction = () => returnToEditor(componentView);
+    let onCancelFunction = () => undefined //returnToEditor(componentView);
 
     //show dialog
     showConfigurableDialog(dialogLayout,onSubmitFunction,onCancelFunction);
 }
 
-function returnToEditor(componentView) {
-    let componentViewConfig = componentView.getViewConfig();
-    if(componentViewConfig.hasChildDisplay) {
-        let parentComponentView = componentView.getParentComponentView();
-        if(parentComponentView) {
-            parentComponentView.giveEditorFocusIfShowing();
-        }
-    }
-}
+// function returnToEditor(componentView) {
+//     let componentViewConfig = componentView.getViewConfig();
+//     if(componentViewConfig.hasChildDisplay) {
+//         let parentComponentView = componentView.getParentComponentView();
+//         if(parentComponentView) {
+//             parentComponentView.giveEditorFocusIfShowing();
+//         }
+//     }
+// }
 
 //========================
 // dialog setup - this is shared with add component since it is the same basic action

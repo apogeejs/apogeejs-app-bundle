@@ -1,7 +1,7 @@
 //maybe pass in parentComponentView and childComponentView instead?
 
 function getComponentCell(childComponentDisplay) {
-    return <ComponentCell childComponentDisplay={childComponentDisplay} />
+    return <ComponentCell key={childComponentDisplay.componentView.getId()} childComponentDisplay={childComponentDisplay} />
 }
 
 function ComponentCell({childComponentDisplay}) {

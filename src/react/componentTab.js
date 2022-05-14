@@ -41,15 +41,15 @@ function getComponentTab(componentView,childComponentViews,childComponentConfigs
 // line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Cancel","onclick":onCancel}));
 
 
-function ComponentTab({componentView,childComponentViews,componentConfigs,createComponent,showing}) {
+function ComponentTab({componentView,childComponentViews,childComponentConfigs,createComponent,showing}) {
     //let component = componentView.getComponent();
     console.log("in render tab name = " + componentView.getName())
 
     return (
         <div className="componentTabWrapper">
-            <PageHeaderElement componentConfigs={componentConfigs} createComponent={createComponent} />
+            <PageHeaderElement childComponentConfigs={childComponentConfigs} createComponent={createComponent} />
             <div className="componentPageBodyElement">
-                {childComponentViews.map(childComponentView => childComponentView.getCellElement())}
+                {childComponentViews.map(childComponentView => childComponentView.getCellElement(showing))}
             </div>
         </div>
     )
@@ -73,8 +73,9 @@ function PageHeaderElement({childComponentConfigs, createComponent}) {
     //add the select and the create button!
     return <div className="componentPageHeaderElement">
         <select className="componentPageCreateSelect" onChange={selectedTypeChanged}>
-            {childComponentConfigs.map(componentConfig => <option value={componentConfig.displayName}>{componentConfig.displayName}</option>)}
+            {childComponentConfigs.map(componentConfig => <option key={componentConfig.displayName} value={componentConfig.displayName}>{componentConfig.displayName}</option>)}
         </select>
-        <button type="button" onClick={onCreateClicked}/>
+        <button type="button" onClick={onCreateClicked}>Create Element</button>
+        <hr/>
     </div>
 }

@@ -1,8 +1,11 @@
 import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 import {uiutil} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 import {bannerConstants} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
+import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js";
 import {updateComponentProperties} from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js";
 import {deleteComponent} from "/apogeejs-app-bundle/src/commandseq/deletecomponentseq.js";
+import PageChildComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/PageChildComponentDisplay.js"
 
 //here for legacy support
 import {getErrorViewModeEntry} from "/apogeejs-app-lib/src/datasource/standardDataDisplay.js";
@@ -61,11 +64,10 @@ export default class ComponentView {
         if(this.getViewConfig().isParentOfChildEntries) {
             let count = 0
             let parentFolder = this.component.getParentFolderForChildren();
-            let appViewInterface = this.getAppViewInterface();
             let childIdMap = parentFolder.getChildIdMap();
             for(let childKey in childIdMap) {
                 let childMemberId = childIdMap[childKey];
-                let childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId);
+                let childComponentView = this.appViewInterface.getComponentViewByMemberId(childMemberId);
                 if(childComponentView) {
                     count++
                 }
@@ -82,11 +84,10 @@ export default class ComponentView {
         let childComponentViews = []
 
         let parentFolder = this.component.getParentFolderForChildren();
-        let appViewInterface = this.getAppViewInterface();
         let childIdMap = parentFolder.getChildIdMap();
         for(let childKey in childIdMap) {
             let childMemberId = childIdMap[childKey];
-            let childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId);
+            let childComponentView = this.appViewInterface.getComponentViewByMemberId(childMemberId);
             if(childComponentView) {
                 childComponentViews.push(childComponentView)
             }
@@ -112,23 +113,22 @@ export default class ComponentView {
     }
 
     tabOpened() {
-        this.createTabDisplay()
+        //this.createTabDisplay()
     }
 
     tabClosed() {
-        this.closeTabDisplay()
+        //this.closeTabDisplay()
     }
 
     getTabElement(showing) {      
         if(this.viewConfig.isParentOfChildEntries) {
             //get child component views
             let childComponentViews =[]
-            const app = this.componentView.getApp()
-            const appViewInterface = this.getAppViewInterface()
+            let parentFolder = this.component.getParentFolderForChildren();
             let childIdMap = parentFolder.getChildIdMap()
             for(let childKey in childIdMap) {
                 let childMemberId = childIdMap[childKey]
-                let childComponentView = appViewInterface.getComponentViewByMemberId(childMemberId)
+                let childComponentView = this.appViewInterface.getComponentViewByMemberId(childMemberId)
                 if(childComponentView) {
                     childComponentViews.push(childComponentView)
                 }
@@ -147,9 +147,9 @@ export default class ComponentView {
             var initialValues = {};
             var parentMember = this.getComponent().getParentFolderForChildren();
             initialValues.parentId = parentMember.getId();
-            let createComponent = componentConfig => addComponent(appViewInterface,app,componentConfig,initialValues)
+            let createComponent = componentConfig => addComponent(this.appViewInterface,this.app,componentConfig,initialValues)
             
-            return getComponentTab(componentView,childComponentViews,childComponentConfigs,createComponent,showing)
+            return getComponentTab(this,childComponentViews,childComponentConfigs,createComponent,showing)
         }
         else {
             console.log("Requesting tab for non-parent component")
@@ -254,7 +254,7 @@ export default class ComponentView {
             //we don't haven't added it yet, but we will pre-create it
             this.childComponentDisplay = new PageChildComponentDisplay(this);
         }
-        childComponentDisplay._setIsPageShowing(isShowing);
+        this.childComponentDisplay._setIsPageShowing(isShowing);
 
         return getComponentCell(this.childComponentDisplay)
     }
@@ -553,29 +553,29 @@ if(true) return;
     ///** This creates the tab display for the component. */
     //instantiateTabDisplay();
 
-    createTabDisplay() {
-        if((this.viewConfig.isParentOfChildEntries)&&(!this.tabDisplay)) {
-            this.tabDisplay = this.instantiateTabDisplay();
-        }
-    }
+    // createTabDisplay() {
+    //     if((this.viewConfig.isParentOfChildEntries)&&(!this.tabDisplay)) {
+    //         this.tabDisplay = this.instantiateTabDisplay();
+    //     }
+    // }
 
-    getTabDisplay(showing) {
-        //set the shwing state
-        if(this.tabDisplay.getIsShowing() != showing) {
-            showing ? this.tabDisplay.tabShown() : this.tabDisplay.tabHidden()
-        }
-        return this.tabDisplay;
-    }
+    // getTabDisplay(showing) {
+    //     //set the shwing state
+    //     if(this.tabDisplay.getIsShowing() != showing) {
+    //         showing ? this.tabDisplay.tabShown() : this.tabDisplay.tabHidden()
+    //     }
+    //     return this.tabDisplay;
+    // }
 
     /** This closes the tab display for the component. */
-    closeTabDisplay() {
-        if(this.tabDisplay) {
-            var tabDisplay = this.tabDisplay;
-            this.tabDisplay = null;
-            tabDisplay.closeTab();
-            tabDisplay.destroy();    
-        }
-    }
+    // closeTabDisplay() {
+    //     if(this.tabDisplay) {
+    //         var tabDisplay = this.tabDisplay;
+    //         this.tabDisplay = null;
+    //         tabDisplay.closeTab();
+    //         tabDisplay.destroy();    
+    //     }
+    // }
 
     //==============================
     // Protected Instance Methods

@@ -318,12 +318,13 @@ export default class PageDisplayContainer {
             this.viewSelectorContainer.classList.remove("visiui_displayContainer_viewSelectorContainerClass_editMode");
             this.componentDisplay.notifyEditMode(false,this.viewTypeName);
         }
-        //select the associated node in the document.
-        let parentComponentView = this.mainComponentView.getParentComponentView();
-        if(parentComponentView) {
-            //give the editor focus
-            parentComponentView.giveEditorFocusIfShowing();
-        }
+        //GOT RID OF DOCUMENT STUFF
+        // //select the associated node in the document.
+        // let parentComponentView = this.mainComponentView.getParentComponentView();
+        // if(parentComponentView) {
+        //     //give the editor focus
+        //     parentComponentView.giveEditorFocusIfShowing();
+        // }
 
     }
 

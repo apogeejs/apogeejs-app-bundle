@@ -22,9 +22,9 @@ export default class DocumentParentComponentView extends ComponentView {
         this.editorManager = createProseMirrorManager(this.getApp(),component.getSchema());
     }
 
-    instantiateTabDisplay() {
-        return new LiteratePageComponentDisplay(this); 
-    }
+    // instantiateTabDisplay() {
+    //     return new LiteratePageComponentDisplay(this); 
+    // }
     
     //----------------------
     // Parent Methods
@@ -301,13 +301,13 @@ export default class DocumentParentComponentView extends ComponentView {
             if(commandsDeleteComponent) {
                 let okAction = () => {
                     doAction();
-                    this.giveEditorFocusIfShowing();
+                    //this.giveEditorFocusIfShowing();
                 }
                 //if there is a delete, verify the user wants to do this
                 let cancelAction = () => {
-                    this.giveEditorFocusIfShowing();
+                    //this.giveEditorFocusIfShowing();
                 };
-                apogeeUserConfirm(deleteMsg,"Delete","Cancel",doAction,cancelAction);
+                apogeeUserConfirm(deleteMsg,"Delete","Cancel",okAction,cancelAction);
             }
             else {
                 //otherwise just take the action
@@ -635,15 +635,15 @@ export default class DocumentParentComponentView extends ComponentView {
     }
 
     /** This method give focus to the editor for this componennt, if the component is showing. */
-    giveEditorFocusIfShowing() {
-        let display = this.getTabDisplay();
-        if((display)&&(display.getIsShowing())) {
-            let editorView = display.getEditorView(); 
-            if(editorView.dom) {
-                editorView.focus();
-            }
-        }
-    }
+    // giveEditorFocusIfShowing() {
+    //     let display = this.getTabDisplay();
+    //     if((display)&&(display.getIsShowing())) {
+    //         let editorView = display.getEditorView(); 
+    //         if(editorView.dom) {
+    //             editorView.focus();
+    //         }
+    //     }
+    // }
       
     /** This method adds an apogee component node of the given name to the folder.
      * It will be placed in the current selection, unless the "insertAtEnd" argument is true. 

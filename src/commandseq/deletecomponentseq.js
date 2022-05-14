@@ -3,22 +3,22 @@ export function deleteComponent(componentView) {
 
     let doDelete = () => {
         deleteComponentImpl(componentView);
-        returnToEditor(componentView);
+        //returnToEditor(componentView);
     }
 
     let doCancel = () => {
-        returnToEditor(componentView);
+        //returnToEditor(componentView);
     };
     let deleteMsg = "Are you sure you want to delete this object:" + componentView.getName() + "?"
     apogeeUserConfirm(deleteMsg,"Delete","Cancel",doDelete,doCancel);
 }
 
-function returnToEditor(componentView) {
-    let parentComponentView = componentView.getParentComponentView();
-    if(parentComponentView) {
-        parentComponentView.giveEditorFocusIfShowing();
-    }
-}
+// function returnToEditor(componentView) {
+//     let parentComponentView = componentView.getParentComponentView();
+//     if(parentComponentView) {
+//         parentComponentView.giveEditorFocusIfShowing();
+//     }
+// }
 
 function deleteComponentImpl(componentView) {
 
@@ -28,13 +28,14 @@ function deleteComponentImpl(componentView) {
     var member = component.getMember();
     var commands = [];
 
-    if(componentView.isChildEntry()) {
-        let parentComponentView = componentView.getParentComponentView();
-        if(parentComponentView) {
-            let editorCommand = parentComponentView.getRemoveApogeeNodeFromPageCommand(component.getName());
-            commands.push(editorCommand);
-        }
-    }
+    //get rid of editor commands
+    // if(componentView.isChildEntry()) {
+    //     let parentComponentView = componentView.getParentComponentView();
+    //     if(parentComponentView) {
+    //         let editorCommand = parentComponentView.getRemoveApogeeNodeFromPageCommand(component.getName());
+    //         commands.push(editorCommand);
+    //     }
+    // }
 
     //model command
     var modelCommand = {};

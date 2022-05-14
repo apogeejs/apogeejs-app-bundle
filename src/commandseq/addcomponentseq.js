@@ -82,29 +82,32 @@ export function addComponent(appViewInterface,app,componentConfig,optionalInitia
 
             //editor related commands
             let additionalCommandInfo;
-            let parentComponentView;
-            if((componentConfig.viewModes !== undefined)&&(!modelIsParent)) {
-                let parentComponentId = modelManager.getComponentIdByMemberId(parentId);
-                if((parentComponentId)&&(appViewInterface.hasParentDisplays())) {
-                    parentComponentView = appViewInterface.getComponentViewByComponentId(parentComponentId);
-                    if(!parentComponentView) throw new Error("Parent component not found!");
+            //////////////////////////////
+            //GOT RID OF EDITOR COMMANDS!
+            //////////////////////////////
+            // let parentComponentView;
+            // if((componentConfig.viewModes !== undefined)&&(!modelIsParent)) {
+            //     let parentComponentId = modelManager.getComponentIdByMemberId(parentId);
+            //     if((parentComponentId)&&(appViewInterface.hasParentDisplays())) {
+            //         parentComponentView = appViewInterface.getComponentViewByComponentId(parentComponentId);
+            //         if(!parentComponentView) throw new Error("Parent component not found!");
 
-                    additionalCommandInfo = getAdditionalCommands(parentComponentView,userInputFormValues.name);
+            //         additionalCommandInfo = getAdditionalCommands(parentComponentView,userInputFormValues.name);
 
-                    //added the editor setup command
-                    if(additionalCommandInfo.editorSetupCommand) commands.push(additionalCommandInfo.editorSetupCommand);
+            //         //added the editor setup command
+            //         if(additionalCommandInfo.editorSetupCommand) commands.push(additionalCommandInfo.editorSetupCommand);
 
-                    //add any delete commands
-                    //NOTE - currently we do not overwiret, so this will not be triggered
-                    if(additionalCommandInfo.deletedComponentCommands){
-                        //flag a delete will be done
-                        commandsDeleteComponent = true
-                        deleteMsg = "This action will delete the selected cells. Are you sure you want to do that? Cells to delete: " + additionalCommandInfo.deletedComponentShortNames;
+            //         //add any delete commands
+            //         //NOTE - currently we do not overwiret, so this will not be triggered
+            //         if(additionalCommandInfo.deletedComponentCommands){
+            //             //flag a delete will be done
+            //             commandsDeleteComponent = true
+            //             deleteMsg = "This action will delete the selected cells. Are you sure you want to do that? Cells to delete: " + additionalCommandInfo.deletedComponentShortNames;
 
-                        commands.push(...additionalCommandInfo.deletedComponentCommands);
-                    } 
-                }
-            }
+            //             commands.push(...additionalCommandInfo.deletedComponentCommands);
+            //         } 
+            //     }
+            // }
 
             //store create command
             commands.push(createCommandData);
@@ -133,18 +136,18 @@ export function addComponent(appViewInterface,app,componentConfig,optionalInitia
                 app.executeCommand(commandData);
 
                 //give focus back to editor
-                if(parentComponentView) {
-                    parentComponentView.giveEditorFocusIfShowing();
-                }
+                // if(parentComponentView) {
+                //     parentComponentView.giveEditorFocusIfShowing();
+                // }
             }
 
             if(commandsDeleteComponent) {
                 //if there is a delete, verify the user wants to do this
                 let cancelAction = () => {
                     //give focus back to editor
-                    if(parentComponentView) {
-                        parentComponentView.giveEditorFocusIfShowing();
-                    }
+                    // if(parentComponentView) {
+                    //     parentComponentView.giveEditorFocusIfShowing();
+                    // }
                 };
                 apogeeUserConfirm(deleteMsg,"OK","Cancel",doAction,cancelAction);
             }
