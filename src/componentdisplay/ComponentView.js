@@ -600,38 +600,38 @@ if(true) return;
         //update data displays - REACT
         this.dataDisplays.forEach( (dataDisplay,index) => {
             if(dataDisplay) {
-                if(this.viewComponentId == component.getId()) {
 
-                    let {reloadData,reloadDataDisplay,removeView} = this.dataDisplay.doUpdate();
-    
-                    //set the remove view flag
-                    //NOT MANAGINE TRANSIENT VIEWS YET!!!
-                    // let removeViewBool = removeView ? true : false; //account for no removeView returned
-                    // if(removeViewBool != this.isViewRemoved) {
-                    //     this.isViewRemoved = removeViewBool;
-                    //     this._updateViewState();
-                    // }
-                    // else if(this.isViewRemoved) {
-                    //     //if we are still removed, skip further procsseing
-                    //     return;
-                    // }
-    
-                    if(reloadDataDisplay) {
-                        //NOTE - we should store the state, such as the display size!!!
-                        //not doing saved state for now
+                let {reloadData,reloadDataDisplay,removeView} = dataDisplay.doUpdate();
 
-                        //close and reopen display
-                        this.closeDataDisplay(index)
-                        this.getDataDisplay(index)
-                    }
-                    else if(reloadData) {
-                        //if not in edit mode, call showData to update data.
-                        if(!dataDisplay.isInEditMode()) {
-                            dataDisplay.showData()
-                        }
-                    }
-    
+                //set the remove view flag
+                //NOT MANAGINE TRANSIENT VIEWS YET!!!
+                // let removeViewBool = removeView ? true : false; //account for no removeView returned
+                // if(removeViewBool != this.isViewRemoved) {
+                //     this.isViewRemoved = removeViewBool;
+                //     this._updateViewState();
+                // }
+                // else if(this.isViewRemoved) {
+                //     //if we are still removed, skip further procsseing
+                //     return;
+                // }
+
+                if(reloadDataDisplay) {
+                    //NOTE - we should store the state, such as the display size!!!
+                    //not doing saved state for now
+                    //we also used to clear the edit state if we are reloading (I haven't added this yet)
+
+                    //close and reopen display
+                    closeDataDisplay(index)
+                    let newDataDisplay = getDataDisplay(index)
+                    newDataDisplay.showData()
                 }
+                else if(reloadData) {
+                    //if not in edit mode, call showData to update data.
+                    if(!dataDisplay.isInEditMode()) {
+                        dataDisplay.showData()
+                    }
+                }
+
             }
         })
 

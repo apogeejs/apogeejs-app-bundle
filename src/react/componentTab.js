@@ -10,41 +10,7 @@ function getComponentTab(componentView,childComponentViews,childComponentConfigs
     />
 }
 
-// let childComponentConfigs = [];
-// componentConfigs.forEach( componentConfig => {
-//     if(componentConfig.viewModes !== undefined) {
-//         childComponentConfigs.push(componentConfig);
-//     }
-// });
-// //VANILLA CODE  - or at least some elements, for reference
-// var select = uiutil.createElement("select");
-// childComponentConfigs.forEach( componentConfig => {
-//     select.add(uiutil.createElement("option",{"text":componentConfig.displayName,"value":componentConfig.displayName}));
-// });
-// var onCreate = function() {
-//     var displayName = select.value;
-//     componentConfig = componentConfigs.find(componentConfig => componentConfig.displayName == displayName)
-//     if(componentConfig) {
-//         onSelectFunction(componentConfig);
-//         dialogMgr.closeDialog(dialog);
-//     }
-//     else {
-//         // add error handling - this shouldn't happen though
-//         apogeeUserAlert("Unknown error selecting component type: " + displayName)
-//     }
-// }
-// var onCancel = function() {
-//     dialogMgr.closeDialog(dialog);
-// }
-
-// line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Create","onclick":onCreate}));
-// line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Cancel","onclick":onCancel}));
-
-
 function ComponentTab({componentView,childComponentViews,childComponentConfigs,createComponent,showing}) {
-    //let component = componentView.getComponent();
-    console.log("in render tab name = " + componentView.getName())
-
     return (
         <div className="componentTabWrapper">
             <PageHeaderElement childComponentConfigs={childComponentConfigs} createComponent={createComponent} />
