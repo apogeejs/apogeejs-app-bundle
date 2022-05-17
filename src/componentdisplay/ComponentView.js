@@ -27,6 +27,16 @@ export default class ComponentView {
         //this is to record the latest parent view to which this was added
         this.lastAssignedParentComponentView = null;
         
+        //initialize view modes to an array of null elements
+        if(this.viewConfig.viewModes) {
+            this.dataDisplays = this.viewConfig.viewModes.map(() => null)
+            this.defaultOpenedViews = this.viewConfig.viewModes.map(viewModeInfo => viewModeInfo.isActive)
+        }
+        else {
+            this.dataDisplays = []
+            this.defaultOpenedViews = []
+        }
+
         //ui elements
         this.childComponentDisplay = null; //this is the main display, inside the parent tab
         this.childDisplayState = null;
@@ -157,106 +167,15 @@ export default class ComponentView {
         }
     }
 
-
-    /////////////////////////////////////////
-    //old code for creating new component
-    // addAdditionalComponent(appViewInterface,app,optionalInitialProperties) {
-    //     var onSelect = function(componentConfig) {
-    //         addComponent(appViewInterface,app,componentConfig,optionalInitialProperties);
-    //     }
-    //     //get the display names
-    //     let componentConfigs = componentInfo.getComponentConfigs();
-    //     let childComponentConfigs = [];
-    //     componentConfigs.forEach( componentConfig => {
-    //         if(componentConfig.viewModes !== undefined) {
-    //             childComponentConfigs.push(componentConfig);
-    //         }
-    //     });
-    //     //open select component dialog
-    //     showSelectComponentDialog(childComponentConfigs,onSelect);
-    // }
-
-    // showSelectComponentDialog(componentConfigs,onSelectFunction) {
-
-    //     var dialog = dialogMgr.createDialog({"movable":true});
-        
-    //     //add a scroll container
-    //     var contentContainer = uiutil.createElement("div",null,
-    //         {
-    //             "display":"block",
-    //             "position":"relative",
-    //             "top":"0px",
-    //             "height":"100%",
-    //             "overflow": "auto"
-    //         });
-    //     dialog.setContent(contentContainer,uiutil.SIZE_WINDOW_TO_CONTENT);
-        
-    //     var line;
-        
-    //     var content = uiutil.createElement("div",null,
-    //             {
-    //                 "display":"table",
-    //                 "overflow":"hidden"
-    //             });
-    //     contentContainer.appendChild(content);
-        
-    //     var line;
-      
-    //     //title
-    //     line = uiutil.createElement("div",{"className":"dialogLine"});
-    //     line.appendChild(uiutil.createElement("div",{"className":"dialogTitle","innerHTML":"Select Component Type"}));
-    //     content.appendChild(line);
-        
-    //     //folder selection
-    //     line = uiutil.createElement("div",{"className":"dialogLine"});
-    //     line.appendChild(document.createTextNode("Component:"));
-    //     var select = uiutil.createElement("select");
-    //     componentConfigs.forEach( componentConfig => {
-    //         select.add(uiutil.createElement("option",{"text":componentConfig.displayName,"value":componentConfig.displayName}));
-    //     });
-    //     content.appendChild(line);
-        
-    //     //buttons
-    //     line = uiutil.createElement("div",{"className":"dialogLine"});
-    //     var onCancel = function() {
-    //         dialogMgr.closeDialog(dialog);
-    //     }
-        
-    //     var onCreate = function() {
-    //         var displayName = select.value;
-    //         componentConfig = componentConfigs.find(componentConfig => componentConfig.displayName == displayName)
-    //         if(componentConfig) {
-    //             onSelectFunction(componentConfig);
-    //             dialogMgr.closeDialog(dialog);
-    //         }
-    //         else {
-    //             // add error handling - this shouldn't happen though
-    //             apogeeUserAlert("Unknown error selecting component type: " + displayName)
-    //         }
-    //     }
-    //     line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Create","onclick":onCreate}));
-    //     line.appendChild(uiutil.createElement("button",{"className":"dialogButton","innerHTML":"Cancel","onclick":onCancel}));
-    //     content.appendChild(line);
-        
-    //     dialog.setContent(content,uiutil.SIZE_WINDOW_TO_CONTENT);  
-        
-    //     //show dialog
-    //     dialogMgr.showDialog(dialog);
-    // }
-    //end old codde for creating new component
-    /////////////////////////////////
-
     // END REACT STUFF
     ///////////////////////////////////////////////
 
     getCellElement(isShowing) {
-        if(!this.childComponentDisplay) {
-            //we don't haven't added it yet, but we will pre-create it
-            this.childComponentDisplay = new PageChildComponentDisplay(this);
-        }
-        this.childComponentDisplay._setIsPageShowing(isShowing);
+        return getComponentCell(this)
+    }
 
-        return getComponentCell(this.childComponentDisplay)
+    getDefaultOpenedViews() {
+        return this.defaultOpenedViews
     }
 
     //==============================
@@ -405,21 +324,56 @@ export default class ComponentView {
         };
     }
 
-    /** This method should be implemented to retrieve a data display for the given view. 
-     * @protected. */
-    getDataDisplay(displayContainer,viewType) {
-        if(!this.viewConfig.viewModes) {
-            console.error("View Modes static field missing for class " + typeof this);
-            return null;
+    //NON_REACT METHOD
+    // /** This method should be implemented to retrieve a data display for the given view. 
+    //  * @protected. */
+    // getDataDisplay(displayContainer,viewType) {
+    //     if(!this.viewConfig.viewModes) {
+    //         console.error("View Modes static field missing for class " + typeof this);
+    //         return null;
+    //     }
+
+    //     let viewModeInfo = this.viewConfig.viewModes.find(viewModeInfo => viewModeInfo.name == viewType);
+    //     if(!viewModeInfo) {
+    //         console.error("unrecognized view element: " + viewType);
+    //         return null;
+    //     }
+
+    //     return viewModeInfo.getDataDisplay(this,displayContainer);
+    // }
+
+    /** TEMP REACT DATA DISPLAY METHOD */
+    getDataDisplay(index) {
+        if(!this.dataDisplays[index]) {
+            if(!this.viewConfig.viewModes) {
+                console.error("View Modes static field missing for class " + typeof this);
+                return null;
+            }
+
+            let viewModeInfo = this.viewConfig.viewModes[index]
+            if(!viewModeInfo) {
+                console.error("unrecognized view element: " + viewType);
+                return null;
+            }
+
+            //DOH! We need to work out the services provide by displayContainer - save bar, etc
+            this.dataDisplays[index] = viewModeInfo.getDataDisplay(this/*,displayContainer*/)
         }
 
-        let viewModeInfo = this.viewConfig.viewModes.find(viewModeInfo => viewModeInfo.name == viewType);
-        if(!viewModeInfo) {
-            console.error("unrecognized view element: " + viewType);
-            return null;
+        return this.dataDisplays[index]
+    }
+
+    /** TEMP REACT DATA DISPLAY METHOD */
+    closeDataDisplay(index) {
+        let dataDisplay = this.dataDisplays[index]
+        if(dataDisplay) {
+            delete this.dataDisplays[index]
+            dataDisplay.onUnload()
+            //for now always destroy when unloaded
+            dataDisplay.destroy()
         }
 
-        return viewModeInfo.getDataDisplay(this,displayContainer);
+        //we might need more cleanup logic, such as for when the component is deleted. Or maybe not.
     }
 
     getViewConfig() {
@@ -639,14 +593,110 @@ if(true) return;
             }  
         }
         
-        //update for new data
-        if(this.childComponentDisplay != null) {
-            this.childComponentDisplay.componentUpdated(component);
-        }
+        //update for new data - PRE_REACT
+        // if(this.childComponentDisplay != null) {
+        //     this.childComponentDisplay.componentUpdated(component);
+        // }
+        //update data displays - REACT
+        this.dataDisplays.forEach( (dataDisplay,index) => {
+            if(dataDisplay) {
+                if(this.viewComponentId == component.getId()) {
+
+                    let {reloadData,reloadDataDisplay,removeView} = this.dataDisplay.doUpdate();
+    
+                    //set the remove view flag
+                    //NOT MANAGINE TRANSIENT VIEWS YET!!!
+                    // let removeViewBool = removeView ? true : false; //account for no removeView returned
+                    // if(removeViewBool != this.isViewRemoved) {
+                    //     this.isViewRemoved = removeViewBool;
+                    //     this._updateViewState();
+                    // }
+                    // else if(this.isViewRemoved) {
+                    //     //if we are still removed, skip further procsseing
+                    //     return;
+                    // }
+    
+                    if(reloadDataDisplay) {
+                        //NOTE - we should store the state, such as the display size!!!
+                        //not doing saved state for now
+
+                        //close and reopen display
+                        this.closeDataDisplay(index)
+                        this.getDataDisplay(index)
+                    }
+                    else if(reloadData) {
+                        //if not in edit mode, call showData to update data.
+                        if(!dataDisplay.isInEditMode()) {
+                            dataDisplay.showData()
+                        }
+                    }
+    
+                }
+            }
+        })
+
         if(this.tabDisplay != null) {
             this.tabDisplay.componentUpdated(component);
         }
     }
+
+    // //COPIED FROM PAGE DISPLAY CONTAINER FOR ABOVE
+    // _updateDataDisplay() {
+    //     //don't reload data if we are in edit mode. It will reload after completion, whether through cancel or save.
+    //     if(this.inEditMode) return;
+
+    //     this.dataDisplay.showData();
+    //     this._updateViewSizeButtons();
+    // }
+
+    // _reloadDataDisplay() {
+
+    //     //update the stored UI state json
+    //     this.savedUiState = this.getStateJson();
+
+    //     //NOTE: This is probably not optimal treatment of edit mode
+    //     //We restrict reloading to data when we are in edit mode. Reloading of the display is not as simple 
+    //     //as currently coded. So we will just kick the display out of edit mode.
+    //     //It would be nive to get a better treatment 
+    //     if(this.inEditMode) {
+    //         this.endEditMode();
+    //     }
+
+    //     //reset any data display specific parts of the ui
+    //     this._cleanupDataDisplayUI();
+
+    //     //this destrpys the data display, not the container - bad name
+    //     this._deleteDataDisplay();
+
+    //     //reload display
+    //     this._updateDataDisplayLoadedState();
+    // }
+
+    // _updateViewState() {
+    //     //show/hide ui elements
+    //     if(this.isViewRemoved) {
+    //         this.mainElement.style.display = "none";
+    //         this.viewSelectorContainer.style.display = "none";
+    //     }
+    //     else if(this.isViewActive) { 
+    //         this.viewSelectorContainer.style.display = "";
+    //         this.expandImage.style.display = "none";
+    //         this.contractImage.style.display = "";
+    //         this.mainElement.style.display = "";
+    //         if(this.isViewHidden) {
+    //             this.viewContainer.style.display = "none";
+    //         }
+    //         else {
+    //             this.viewContainer.style.display = "";
+    //         }
+    //     }
+    //     else {
+    //         this.viewSelectorContainer.style.display = "";
+    //         this.expandImage.style.display = "";
+    //         this.contractImage.style.display = "none";
+    //         this.mainElement.style.display = "none";
+    //     }
+    // }
 
     //---------------------------
     // Member (model) state
