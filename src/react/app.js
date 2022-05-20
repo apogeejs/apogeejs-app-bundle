@@ -8,8 +8,8 @@
  * I have it here because all jsx code, for now, must be in the global files rather than modules
  * The variable is defined in the html file
  */
-function renderApp(appObject) {
-    ReactDOM.render(<App appObject={appObject}/>,document.getElementById(appObject.containerId))
+function renderApp(appObject,moduleHelper) {
+    ReactDOM.render(<App appObject={appObject} moduleHelper={moduleHelper} />,document.getElementById(appObject.containerId))
 }
 
 //constant - should be defined elsewhere
@@ -18,23 +18,20 @@ const INVALID_OBJECT_ID = 0
 ///////////////////////////////////////////////
 //UI
 ///////////////////////////////////////////////
-function App({appObject}) {
+function App({appObject, moduleHelper}) {
     //Tab State
     //tab data = {text,contentElement,closeOkCallback}
     const [tabObjectIds,setTabObjectIds] = React.useState([])
     const [selectedTabId,setSelectedTabId] = React.useState(INVALID_OBJECT_ID)   //0 is invalid tab id
 
-    function openTab(tabObject,isSelected = true) {
+    function openTab(tabObjectId,isSelected = true) {
         //open if not already there
-        if(tabObjectIds.find(existingTabObjectId => tabObject.getId() == existingTabObjectId) === undefined) {
-            
-            //notify open??? (probabl not necessary)
-            tabObject.tabOpened();
-
-            setTabObjectIds(tabObjectIds.concat(tabObject.getId()))
+        if(tabObjectIds.find(existingTabObjectId => tabObjectId == existingTabObjectId) === undefined) {
+            setTabObjectIds(tabObjectIds.concat(tabObjectId))
         }
+
         //select if specified
-        if(isSelected) selectTabId(tabObject.getId())
+        if(isSelected) selectTabId(tabObjectId)
     }
 
     function selectTabId(tabObjectId) {
@@ -47,9 +44,6 @@ function App({appObject}) {
             //we need some action here presumably
             return
         }
-
-        //notify close??? (I am not sure if this is the place for it)
-        tabObject.tabClosed();
         
         let newTabObjectIds = tabObjectIds.filter(existingTabObjectId => existingTabObjectId != tabObject.getId())
         if(tabObject.getId() == selectedTabId) {
@@ -63,12 +57,19 @@ function App({appObject}) {
         setTabObjectIds(newTabObjectIds)
     }
 
+    const workspaceManager = appObject.getApp().getWorkspaceManager();
+
+    const childTreeEntries = workspaceManager ? 
+            [<WorkspaceTreeEntry key={workspaceManager.getId()} workspaceManager={workspaceManager} openTab={openTab} moduleHelper={moduleHelper}/>]
+            : undefined
+
     return (
         <>
             <MenuBar appObject={appObject} />
             <SplitFrame
-                leftContent={<TreeView treeObject={appObject} openTab={openTab}/>}
-                rightContent={<TabView appObject={appObject} tabObjectIds={tabObjectIds} selectedTabId={selectedTabId} closeTab={closeTab} selectTabId={selectTabId}/>} 
+                leftContent={<TreeView childTreeEntries={childTreeEntries}/>}
+                rightContent={<TabView appObject={appObject} tabObjectIds={tabObjectIds} 
+                        selectedTabId={selectedTabId} closeTab={closeTab} selectTabId={selectTabId} moduleHelper={moduleHelper}/>} 
             />
         </>
     )

@@ -5,7 +5,6 @@ import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js";
 import {updateComponentProperties} from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js";
 import {deleteComponent} from "/apogeejs-app-bundle/src/commandseq/deletecomponentseq.js";
-import PageChildComponentDisplay from "/apogeejs-app-bundle/src/componentdisplay/PageChildComponentDisplay.js"
 
 //here for legacy support
 import {getErrorViewModeEntry} from "/apogeejs-app-lib/src/datasource/standardDataDisplay.js";

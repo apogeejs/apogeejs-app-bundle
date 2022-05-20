@@ -2,8 +2,7 @@ import {closeWorkspace} from "/apogeejs-app-bundle/src/commandseq/closeworkspace
 import {createWorkspace} from "/apogeejs-app-bundle/src/commandseq/createworkspaceseq.js";
 import {openWorkspace} from "/apogeejs-app-bundle/src/commandseq/openworkspaceseq.js";
 import {saveWorkspace} from "/apogeejs-app-bundle/src/commandseq/saveworkspaceseq.js";
-
-import WorkspaceView from "/apogeejs-app-bundle/src/WorkspaceView.js";
+import moduleHelper from "/apogeejs-app-bundle/src/react/ModuleHelper.js";
 
 import {showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
@@ -17,17 +16,20 @@ export default class ApogeeView {
      * - appConfigManager - This is the app config managerm which defines some needed functionality. 
      */
     constructor(containerId,appConfigManager) {
-        this.workspaceView = null;
-        this.containerId = containerId;
-        this.app = new Apogee(appConfigManager);
+        this.workspaceManager = null
+        this.containerId = containerId
+        this.app = new Apogee(appConfigManager)
 
-        this._subscribeToAppEvents();
+        this._subscribeToAppEvents()
+
+        //for react UI
+        this.cacheObjects = {}
     }
 
     ////////////////////////////////////
     // React Version additions section
     render() {
-        renderApp(this)
+        renderApp(this,moduleHelper)
     }
 
     /** @TODO I don't think the menu items are efficient. See how much overhead we have from redefining them
@@ -43,29 +45,37 @@ export default class ApogeeView {
     }
 
     getChildren() {
-        if(this.workspaceView) {
-            return [this.workspaceView]
+        if(this.workspaceManager) {
+            return [getWorkspaceViewObject(this, this.workspaceManager)]
         }
         else {
             return []
         }
     }
 
-    /** This is a lookup function for a workspace object that has a tab
+    /** This is a lookup function for a workspace object that has a tab (it just does components now)
      * @TODO this needs to be cleaned up. This was just a temporary implementation
      */
     getTabObject(tabObjectId) {
-        if(this.workspaceView) {
-            if(tabObjectId == this.workspaceView.getModelView().getModelManager().getId()) {
-                return this.workspaceView.getModelView()
-            }
-            else {
-                return this.workspaceView.getModelView().getComponentViewByComponentId(tabObjectId)
-            }
+        if(this.workspaceManager) {
+            return this.workspaceManager.getModelManager().getComponentByComponentId(tabObjectId)
         }
         else {
             alert("No workspace present")
         }
+    }
+
+    //These cache functions are for the react ui
+    getCacheObject(cacheId) {
+        return this.cacheObjects[cacheId]
+    }
+
+    setCacheObject(cacheId, cacheObject) {
+        this.cacheObjects[cacheId] = cacheObject
+    }
+
+    clearCacheObject(cacheId) {
+        delete this.cacheObjects[cacheId]
     }
 
     //-----------------
@@ -82,7 +92,7 @@ export default class ApogeeView {
             items: menuItems
         }
 
-        let fileAccessObject = apogeeplatform.getFileAccessObject();
+        let fileAccessObject = apogeeplatform.getFileAccessObject()
 
         menuItems.push({
             text: "New",
@@ -97,9 +107,8 @@ export default class ApogeeView {
             action: () => openWorkspace(this.app,fileAccessObject)
         })
 
-        let workspaceManager = this.app.getWorkspaceManager()
-        if(workspaceManager) {
-            var fileMetadata = workspaceManager.getFileMetadata()
+        if(this.workspaceManager) {
+            var fileMetadata = this.workspaceManager.getFileMetadata()
 
             if(fileAccessObject.directSaveOk(fileMetadata)) {
                 menuItems.push({
@@ -126,31 +135,31 @@ export default class ApogeeView {
      * items will change depending on the state of the workspace. */
     _getEditMenuData() {
         
-        var menuItems = [];
+        var menuItems = []
         let menuData = {
             text: "Edit",
             items: menuItems
         }
 
-        let commandManager = this.app.getCommandManager();
-        let commandHistory = commandManager.getCommandHistory();
+        let commandManager = this.app.getCommandManager()
+        let commandHistory = commandManager.getCommandHistory()
         
         //populate the undo menu item
-        var undoLabel;
-        var undoCallback;
-        var nextUndoDesc = commandHistory.getNextUndoDesc();
+        var undoLabel
+        var undoCallback
+        var nextUndoDesc = commandHistory.getNextUndoDesc()
         if(nextUndoDesc === null) {
             undoLabel = "-no undo-"
-            undoCallback = null;
+            undoCallback = null
         }
         else {
             if(nextUndoDesc == "") {
                 undoLabel = "Undo"
             }
             else {
-                undoLabel = "Undo: " + nextUndoDesc;
+                undoLabel = "Undo: " + nextUndoDesc
             }
-            undoCallback = () => commandHistory.undo();
+            undoCallback = () => commandHistory.undo()
         }
 
         menuItems.push({
@@ -161,7 +170,7 @@ export default class ApogeeView {
         //populate the redo menu item
         var redoLabel;
         var redoCallback;
-        var nextRedoDesc = commandHistory.getNextRedoDesc();
+        var nextRedoDesc = commandHistory.getNextRedoDesc()
         if(nextRedoDesc === null) {
             redoLabel = "-no redo-"
             redoCallback = null;
@@ -173,7 +182,7 @@ export default class ApogeeView {
             else {
                 redoLabel = "Redo: " + nextRedoDesc;
             }
-            redoCallback = () => commandHistory.redo();
+            redoCallback = () => commandHistory.redo()
         }
         menuItems.push({
             text: redoLabel,
@@ -204,7 +213,7 @@ export default class ApogeeView {
     /////////////////////////////
 
     getApp() {
-        return this.app;
+        return this.app
     }
 
     /** This method should be implemented if custom menus or menu items are desired. 
@@ -227,40 +236,24 @@ export default class ApogeeView {
      * because we must reload it each time the app is created. */
     _subscribeToAppEvents() {
         //subscribe to events
-        this.app.addListener("workspaceManager_created",workspaceManager => this._onWorkspaceCreated(workspaceManager));
-        this.app.addListener("workspaceManager_deleted",workspaceManager => this._onWorkspaceClosed(workspaceManager));
-        this.app.addListener("component_updated",component => this._onComponentUpdated(component));
+        this.app.addListener("workspaceManager_created",workspaceManager => this._onWorkspaceCreated(workspaceManager))
+        this.app.addListener("workspaceManager_deleted",workspaceManager => this._onWorkspaceClosed(workspaceManager))
+        this.app.addListener("workspaceManager_updated",workspaceManager => this._onWorkspaceUpdated(workspaceManager))
     }
 
     _onWorkspaceCreated(workspaceManager) {
-        if(this.workspaceView != null) {
+        if(this.workspaceManager != null) {
             //discard an old view if there is one
-            this._onWorkspaceClosed();
+            this._onWorkspaceClosed()
         }
 
         //create the new workspace view
-        this.workspaceView = new WorkspaceView(workspaceManager,this);
-
-        //load the tree entry, if needed
-        // if(this.containerId) {
-        //     let treeEntry = this.workspaceView.getTreeEntry();
-        //     this.tree.setRootEntry(treeEntry);
-        // }
+        this.workspaceManager = workspaceManager
 
         this.render()
     }
 
     _onWorkspaceClosed(workspaceManager) {
-        //close any old workspace view
-        if(this.workspaceView) {
-            this.workspaceView.close();
-            this.workspaceView = null;
-        }
-
-        //clear the tree
-        // if(this.containerId) {
-        //     this.tree.clearRootEntry();
-        // }
 
         //rather than rely on people to clear their own workspace handlers from the app
         //I clear them all here
@@ -268,27 +261,19 @@ export default class ApogeeView {
         //with all of them.
         //for now I clear all here and then resubscribe to events here and in the app, since those
         //objects live on.
-        this.app.clearListenersAndHandlers();
-        this.app.subscribeToAppEvents();
-        this._subscribeToAppEvents();
+        this.app.clearListenersAndHandlers()
+        this.app.subscribeToAppEvents()
+        this._subscribeToAppEvents()
+
+        //clear the cache objects
+        this.cacheObjects = {}
 
         this.render()
     }
 
-    /** This is called whenever a component in the model, or the model, changes. If the display name
-     * of that component changes, we update the tab display name. This is also not very general. I should
-     * clean it up to allow other things besides components to have tabs. I should probably make a tab event that
-     * its title changes, or just that it was udpated. */
-    _onComponentUpdated(component) {
-        //tab id for components is the component id
-//        if((component.getId() == this.tabFrame.getActiveTab())) {
-//            //this is pretty messy too... 
-//            let model = this.app.getModel();
-//            if((component.isDisplayNameUpdated())||(component.getMember().isFullNameUpdated(model))) {
-//                let tab = this.tabFrame.getTab(component.getId());
-//                this._onTabShown(tab);
-//           }
-//        }
+    _onWorkspaceUpdated(workspaceManager) {
+        this.workspaceManager = workspaceManager
+        this.render()
     }
 
     //---------------------------------
@@ -298,34 +283,34 @@ export default class ApogeeView {
     /** @TODO need to reimplement resize for the tab/cells!!! */
 
     _onSplitPaneResize() {
-        this._triggerResizeWait();
+        this._triggerResizeWait()
     }
 
     _onWindowResize() {
-        this._triggerResizeWait();
+        this._triggerResizeWait()
     }
 
     _triggerResizeWait() {
         //only do the slow resizde timer if we have listeners
-        if(!this.app.hasListeners("frameWidthResize")) return;
+        if(!this.app.hasListeners("frameWidthResize")) return
 
         //create a new timer if we don't already have one
         if(!this.resizeWaitTimer) {
-            this.resizeWaitTimer =  setTimeout(() => this._resizeTimerExpired(),RESIZE_TIMER_PERIOD_MS);
+            this.resizeWaitTimer =  setTimeout(() => this._resizeTimerExpired(),RESIZE_TIMER_PERIOD_MS)
         }
     }
 
     _resizeTimerExpired() {
-        this.resizeWaitTimer = null;
-        this.app.dispatchEvent("frameWidthResize",null);
+        this.resizeWaitTimer = null
+        this.app.dispatchEvent("frameWidthResize",null)
     }
 
 }
 
-const RESIZE_TIMER_PERIOD_MS = 500;
+const RESIZE_TIMER_PERIOD_MS = 500
 
 function helpCallback() {
-    let title = "Apogee Help";
+    let title = "Apogee Help"
     let message;
     //if we are in a browser, allow the user to open the link. Otherwise just print it.
     if(__browser__) {
@@ -334,11 +319,11 @@ function helpCallback() {
     else {
         message = 'For help, please go to the website: <b>https://www.apogeejs.com</b>'
     }
-    showSimpleActionDialog(title,message,["OK"]);
+    showSimpleActionDialog(title,message,["OK"])
 }
 
 function aboutCallback() {
-    let title = "Apogee Programming Environment";
-    let message = "Version: " + __apogee_version__;
-    showSimpleActionDialog(title,message,["OK"]);
+    let title = "Apogee Programming Environment"
+    let message = "Version: " + __apogee_version__
+    showSimpleActionDialog(title,message,["OK"])
 }

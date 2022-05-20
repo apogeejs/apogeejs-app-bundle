@@ -1,21 +1,38 @@
 
+function getComponentTab(apogeeView,component,showing,moduleHelper) {
+    if(component.getComponentConfig().isParentOfChildEntries) {
 
-function getComponentTab(componentView,childComponentViews,childComponentConfigs,createComponent,showing) {
-    return <ComponentTab 
-        componentView={componentView}
-        childComponentViews={childComponentViews}
-        childComponentConfigs={childComponentConfigs}
-        createComponent={createComponent}
-        showing={showing}
-    />
+        //get child components
+        let app = component.getApp()
+        let modelManager = app.getModelManager()
+        let parentFolder = component.getParentFolderForChildren();
+        let childComponents = getChildComponents(modelManager,parentFolder) 
+
+        //we might want to ccache one or both of those, and only change it if the components change
+        //get component configs for create buttons
+        let childComponentConfigs = moduleHelper.getChildComponentConfigs()
+
+        //get the command to create in this folder
+        var initialValues = {};
+        initialValues.parentId = parentFolder.getId();
+        let createComponent = componentConfig => moduleHelper.addComponent(app,componentConfig,initialValues)
+        
+        return <ComponentTab apogeeView={apogeeView} component={component} childComponents={childComponents} 
+            childComponentConfigs = {childComponentConfigs} createComponent={createComponent} 
+            showing={showing} moduleHelper={moduleHelper}/>
+    }
+    else {
+        console.log("Requesting tab for non-parent component")
+        return null
+    }
 }
 
-function ComponentTab({componentView,childComponentViews,childComponentConfigs,createComponent,showing}) {
+function ComponentTab({apogeeView,component,childComponents,childComponentConfigs,createComponent,showing,moduleHelper}) {
     return (
         <div className="componentTabWrapper">
             <PageHeaderElement childComponentConfigs={childComponentConfigs} createComponent={createComponent} />
             <div className="componentPageBodyElement">
-                {childComponentViews.map(childComponentView => childComponentView.getCellElement(showing))}
+                {childComponents.map(component => getComponentCell(apogeeView,component,showing,moduleHelper))}
             </div>
         </div>
     )

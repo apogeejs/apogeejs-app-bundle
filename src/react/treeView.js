@@ -13,48 +13,35 @@
 /** @TODO In this file I reference uiutil, relying on it being defiend globally. I will want to laod this
  * from a module. */
 
-function TreeView({treeObject, openTab}) {
+function TreeView({childTreeEntries}) {
 
     return (
-<>
         <ul className="treeView_list">
-            {treeObject.getChildren().map(childObject => <TreeEntry key={childObject.getId()} treeObject={childObject} openTab={openTab} />)}
+            {childTreeEntries}
         </ul>
-</>
     )
 }
 
-function TreeEntry({treeObject, openTab}) {
+function TreeEntry({iconSrc, text, status, menuItems, childTreeEntries}) {
     const [opened,setOpened] = React.useState(false);
 
-    let controlResource = treeObject.hasChildren() ? (opened ? "/opened_darkgray.png" : "/closed_darkgray.png") : "/circle_darkgray.png"
+    let controlResource = (childTreeEntries)&&(childTreeEntries.length > 0) ? (opened ? "/opened_darkgray.png" : "/closed_darkgray.png") : "/circle_darkgray.png"
     let controlImageUrl = apogeeui.uiutil.getResourcePath(controlResource,"ui-lib")
     let menuImageUrl = apogeeui.uiutil.getResourcePath("/menuDots16_darkgray.png","ui-lib")
 
     function controlClicked() {
-        if(treeObject.hasChildren()) {
+        if((childTreeEntries)&&(childTreeEntries.length > 0)) {
             setOpened(!opened)
-        }
-    }
-
-    function getMenu(treeObject) {
-        if(treeObject.hasMenu() || treeObject.hasTab()) {
-            let objectMenuItems = treeObject.hasMenu() ? treeObject.getMenuItems() : []
-            let appMenuItems = treeObject.hasTab() ? [{text: "Open", action: () => openTab(treeObject)}] : []
-            return <SelectMenu text="Menu" image={menuImageUrl} items={[...appMenuItems, ...objectMenuItems]} />
-        }
-        else {
-            return ''
         }
     }
 
     return (
         <li className="treeView_item">
             <img src={controlImageUrl} onClick={controlClicked} className="workspaceTree_control"/>
-            <IconWithStatus iconObject={treeObject} />
-            <span>{treeObject.getName()}</span>
-            {getMenu(treeObject)}
-            { (opened && treeObject.hasChildren()) ? <TreeView treeObject={treeObject} openTab={openTab}/> : ''}
+            <IconWithStatus iconSrc={iconSrc} status={status} />
+            <span>{text}</span>
+            { menuItems ? <SelectMenu text="Menu" image={menuImageUrl} items={menuItems} /> : '' }
+            { (opened && childTreeEntries) ? <TreeView childTreeEntries={childTreeEntries} /> : ''}
         </li>
     )
 }

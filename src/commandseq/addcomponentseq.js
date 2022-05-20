@@ -12,7 +12,7 @@ import {showSelectComponentDialog} from "/apogeejs-app-bundle/src/dialogs/Select
 
 /** This functions initiates the add component action. It will create a dialog for the user to enter the relevent 
  * properties, with the values optionalInitialProperties preset.  */   
-export function addComponent(appViewInterface,app,componentConfig,optionalInitialProperties) {
+export function addComponent(app,componentConfig,optionalInitialProperties) {
 
         //get the active workspace
         var workspaceManager = app.getWorkspaceManager();
@@ -82,33 +82,7 @@ export function addComponent(appViewInterface,app,componentConfig,optionalInitia
 
             //editor related commands
             let additionalCommandInfo;
-            //////////////////////////////
-            //GOT RID OF EDITOR COMMANDS!
-            //////////////////////////////
-            // let parentComponentView;
-            // if((componentConfig.viewModes !== undefined)&&(!modelIsParent)) {
-            //     let parentComponentId = modelManager.getComponentIdByMemberId(parentId);
-            //     if((parentComponentId)&&(appViewInterface.hasParentDisplays())) {
-            //         parentComponentView = appViewInterface.getComponentViewByComponentId(parentComponentId);
-            //         if(!parentComponentView) throw new Error("Parent component not found!");
-
-            //         additionalCommandInfo = getAdditionalCommands(parentComponentView,userInputFormValues.name);
-
-            //         //added the editor setup command
-            //         if(additionalCommandInfo.editorSetupCommand) commands.push(additionalCommandInfo.editorSetupCommand);
-
-            //         //add any delete commands
-            //         //NOTE - currently we do not overwiret, so this will not be triggered
-            //         if(additionalCommandInfo.deletedComponentCommands){
-            //             //flag a delete will be done
-            //             commandsDeleteComponent = true
-            //             deleteMsg = "This action will delete the selected cells. Are you sure you want to do that? Cells to delete: " + additionalCommandInfo.deletedComponentShortNames;
-
-            //             commands.push(...additionalCommandInfo.deletedComponentCommands);
-            //         } 
-            //     }
-            // }
-
+         
             //store create command
             commands.push(createCommandData);
 
@@ -171,10 +145,10 @@ export function addComponent(appViewInterface,app,componentConfig,optionalInitia
 
 /** This gets a callback to add an "additional" component, menaing one that is not
  * in the main component menu. */
-export function addAdditionalComponent(appViewInterface,app,optionalInitialProperties) {
+export function addAdditionalComponent(app,optionalInitialProperties) {
         
     var onSelect = function(componentConfig) {
-        addComponent(appViewInterface,app,componentConfig,optionalInitialProperties);
+        addComponent(WAS_APP_INTERFACE,app,componentConfig,optionalInitialProperties);
     }
     //get the display names
     let componentConfigs = componentInfo.getComponentConfigs();

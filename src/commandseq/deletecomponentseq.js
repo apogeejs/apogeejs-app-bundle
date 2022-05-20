@@ -1,41 +1,22 @@
 
-export function deleteComponent(componentView) {
+export function deleteComponent(component) {
 
     let doDelete = () => {
-        deleteComponentImpl(componentView);
-        //returnToEditor(componentView);
+        deleteComponentImpl(component);
     }
 
     let doCancel = () => {
-        //returnToEditor(componentView);
     };
-    let deleteMsg = "Are you sure you want to delete this object:" + componentView.getName() + "?"
+    let deleteMsg = "Are you sure you want to delete this object:" + component.getName() + "?"
     apogeeUserConfirm(deleteMsg,"Delete","Cancel",doDelete,doCancel);
 }
 
-// function returnToEditor(componentView) {
-//     let parentComponentView = componentView.getParentComponentView();
-//     if(parentComponentView) {
-//         parentComponentView.giveEditorFocusIfShowing();
-//     }
-// }
+function deleteComponentImpl(component) {
 
-function deleteComponentImpl(componentView) {
-
-    var app = componentView.getApp(); 
-    var component = componentView.getComponent();
+    var app = component.getApp(); 
 
     var member = component.getMember();
-    var commands = [];
-
-    //get rid of editor commands
-    // if(componentView.isChildEntry()) {
-    //     let parentComponentView = componentView.getParentComponentView();
-    //     if(parentComponentView) {
-    //         let editorCommand = parentComponentView.getRemoveApogeeNodeFromPageCommand(component.getName());
-    //         commands.push(editorCommand);
-    //     }
-    // }
+    var commands = []; //lfegtover from when document commands were included - we may put some back
 
     //model command
     var modelCommand = {};

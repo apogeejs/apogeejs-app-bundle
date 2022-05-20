@@ -1,8 +1,5 @@
-function IconWithStatus({iconObject}) {
+function IconWithStatus({iconSrc, status}) {
 
-    const iconImageSrc = iconObject.getIconUrl();
-    
-    const status = iconObject.getStatus();
     let statusImageSrc;
     switch(status) {
         case "normal":
@@ -29,7 +26,7 @@ function IconWithStatus({iconObject}) {
 
     return (
         <div className="iconWithStatus_wrapper">
-            <img src={iconImageSrc} className="iconWithStatus_icon"/>
+            <img src={iconSrc} className="iconWithStatus_icon"/>
             {statusImageSrc ? <img src={statusImageSrc} className="iconWithStatus_status"/> : ''}
         </div>
     )
