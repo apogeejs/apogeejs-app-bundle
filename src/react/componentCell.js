@@ -75,9 +75,9 @@ const VIEW_OPENED_IMAGE_PATH = "/opened_black.png";
 function DataViewControl({viewModeInfo, index, openedViews, setOpenedViews}) {
 
     const viewOpened = openedViews[index]
-    const setViewOpened = () => {
+    const setViewOpened = opened => {
         let newOpenedViews = openedViews.slice()
-        newOpenedViews[index] = !openedViews[index]
+        newOpenedViews[index] = opened
         setOpenedViews(newOpenedViews)
     }
 
@@ -97,22 +97,33 @@ function DataViewControl({viewModeInfo, index, openedViews, setOpenedViews}) {
     )
 }
 
+function getViewCacheKey(component,index) {
+    return component.getId() + "|" + index
+}
+
 //DO WE WANT APOGEEVIEW OR SOME OBJECT THAT HAS NO OBSERVABLE CHANGE INTERNALLY (LIKE A CLOSURE WITH INTERNAL STATE)
 function ViewModeElement({apogeeView,component,index,moduleHelper}) {
 
     let [editMode,setEditMode] = React.useState(false)
 
+    let viewModeInfo = component.getComponentConfig().viewModes[index]
+
+    console.log(`In view mode render for component ${component.getName()} view mode ${viewModeInfo.label}`)
+
     /////////////////////////
     //is this the right thing to do???
-    let dataDisplayWrapper = apogeeView.getCacheObject(component.getId())
+    let dataDisplayWrapper = apogeeView.getCacheObject(getViewCacheKey(component,index))
     if(!dataDisplayWrapper) {
+        console.log(`Creating display wrapper for ${component.getName()} view mode ${viewModeInfo.label}`)
         dataDisplayWrapper = moduleHelper.getDataDisplayWrapper(component,index)
-        apogeeView.setCacheObject(component.getId(),dataDisplayWrapper)
+        apogeeView.setCacheObject(getViewCacheKey(component,index),dataDisplayWrapper)
         dataDisplayWrapper.init()
+        dataDisplayWrapper.showData()
     }
 
     dataDisplayWrapper.setEditModeState(editMode,setEditMode)
     if(dataDisplayWrapper.getComponent() != component) {
+        console.log(`Updating component for component ${component.getName()} view mode ${viewModeInfo.label}`)
         dataDisplayWrapper.updateComponent(component)
     }
 
@@ -127,24 +138,28 @@ function ViewModeElement({apogeeView,component,index,moduleHelper}) {
     //add the element and clean up on destruction
     const viewRef = React.useRef()
     React.useEffect(() => {
+        console.log(`In use effect for component ${component.getName()} view mode ${viewModeInfo.label}`)
+
         viewRef.current.appendChild(dataDisplayWrapper.getElement())
         dataDisplayWrapper.onLoad()
 
         //cleanup function
         return () => {
+            console.log(`In use effect cleanup for component ${component.getName()} view mode ${viewModeInfo.label}`)
+
             //figure out how this should work - load unload
             dataDisplayWrapper.onUnload()
 
             dataDisplayWrapper.destroy()
-            apogeeView.clearCachObject(component.getId())
+            apogeeView.clearCacheObject(component.getId())
         }
 
     },[])
- 
     
     //note - does this manage it correctly, or should we just se display none it if it is not showing???
     return (
         <div className="visiui_displayContainerClass_mainClass">
+            <div>{viewModeInfo.label}</div>
             {showMsgBar ? <div>{msgText}</div> : ''}
             {editMode ?
                 <div>

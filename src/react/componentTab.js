@@ -32,7 +32,11 @@ function ComponentTab({apogeeView,component,childComponents,childComponentConfig
         <div className="componentTabWrapper">
             <PageHeaderElement childComponentConfigs={childComponentConfigs} createComponent={createComponent} />
             <div className="componentPageBodyElement">
-                {childComponents.map(component => getComponentCell(apogeeView,component,showing,moduleHelper))}
+                {
+                    //get cells for child components that have cells (view modes exist)
+                    childComponents.filter(component => component.getComponentConfig().viewModes)
+                        .map(component => getComponentCell(apogeeView,component,showing,moduleHelper))
+                }
             </div>
         </div>
     )

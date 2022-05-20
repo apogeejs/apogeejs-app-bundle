@@ -7,22 +7,29 @@ export default class DataDisplayWrapper {
         this.viewModeInfo = component.getComponentConfig().viewModes[index]
 
         this.dataDisplay = null;
-
     }
 
     getComponent() {
         return this.component
     }
 
+    getDataDisplay() {
+        return this.dataDisplay
+    }
+
     getElement() {
-        return this.dataDisplay.getContent();
+        if(this.dataDisplay) return this.dataDisplay.getContent()
+        else return null
     }
 
     init() {
-        this.dataDisplay = this.viewModeInfo.getDataDisplay(this.component /*,displayContainer*/)
+        this.dataDisplay = this.viewModeInfo.getDataDisplay(this)
     }
 
     updateComponent(component) {
+        if(this.component == component) return
+        
+        this.component = component
         if(this.dataDisplay) {
 
             let {reloadData,reloadDataDisplay,removeView} = this.dataDisplay.doUpdate();
@@ -57,42 +64,44 @@ export default class DataDisplayWrapper {
     }
 
     showData() {
-        this.dataDisplay.showData()
+        if(this.dataDisplay) this.dataDisplay.showData()
     }
 
     getMessage() {
-        this.dataDisplay.getMessage()
+        if(this.dataDisplay) return this.dataDisplay.getMessage()
+        else return ""
     }
 
     getHideDisplay() {
-        return this.hideDisplay()
+        if(this.dataDisplay) return this.dataDisplay.getHideDisplay()
+        else return true
     }
 
 
     /** This is used to pass is and clear the setEditMode function */
     setEditModeState(editMode,setEditMode) {
-        this.dataDisplay.setEditModeState(editMode,setEditMode)
+        if(this.dataDisplay) this.dataDisplay.setEditModeState(editMode,setEditMode)
     }
 
     save() {
-        this.dataDisplay.save()
+        if(this.dataDisplay) this.dataDisplay.save()
     }
 
     cancel() {
-        this.dataDisplay.cancel()
+        if(this.dataDisplay) this.dataDisplay.cancel()
     }
 
     onLoad() {
-        this.dataDisplay.onLoad()
+        if((this.dataDisplay)&&(this.dataDisplay.onLoad)) this.dataDisplay.onLoad()
     }
 
     onUnload() {
-        this.dataDisplay.onUnload()
+        if((this.dataDisplay)&&(this.dataDisplay.onUnload)) this.dataDisplay.onUnload()
     }
 
     destroy() {
-        this.dataDisplay.destroy();
-        this.dataDisplahy = null;
+        if((this.dataDisplay)&&(this.dataDisplay.destroy))  this.dataDisplay.destroy();
+        this.dataDisplay = null;
     }
 
     //=========================
@@ -126,23 +135,20 @@ export default class DataDisplayWrapper {
         //this destrpys the data display, not the container - bad name
         //this._deleteDataDisplay();
         //I DON"T KNOW IF THIS IS RIGHT?? FIX IT
-        this.dataDisplay.onUnload()
         let oldContentElement = this.dataDisplay.getContent()
-        if(this.dataDisplay.destroy) {
-            this.dataDisplay.destroy()
-        }
-        this.dataDisplay = null;
+        this.onUnload()
+        this.destroy()
         this.init()
         let newContentElement = this.dataDisplay.getContent()
 
-        let parent = oldContent.parent
+        let parent = oldContentElement.parent
         parent.removeChild(oldContentElement)
         parent.appendChild(newContentElement)
-        this.dataDisplay.onLoad();
+        this.onLoad();
 
 
         //reload display
         //this._updateDataDisplayLoadedState();
-        this.dataDisplay.showData();
+        this.showData()
     }
 }

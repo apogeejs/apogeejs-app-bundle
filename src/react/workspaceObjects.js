@@ -48,7 +48,8 @@ export function ComponentTreeEntry({component, modelManager, openTab, moduleHelp
         getChildComponents(modelManager,component.getParentFolderForChildren()) : undefined 
 
     const childTreeEntries = ((childComponents)&&(childComponents.length > 0)) ?
-        childComponents.map( component => <ComponentTreeEntry key={component.getId()} component={component} openTab={openTab}/> ) : undefined
+        childComponents.map( component => <ComponentTreeEntry key={component.getId()} component={component} 
+            modelManager={modelManager} openTab={openTab} moduleHelper={moduleHelper} /> ) : undefined
 
     //menu items
     let menuItems = []
