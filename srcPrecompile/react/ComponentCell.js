@@ -1,8 +1,9 @@
-function getComponentCell(apogeeView,component,showing,moduleHelper) {
-    return <ComponentCell key={component.getId()} apogeeView={apogeeView} component={component} moduleHelper={moduleHelper}/>
-}
+import {IconWithStatus} from "./IconwithStatus.js"
+import {SelectMenu} from "./SelectMenu.js"
+import {addComponentMenuItems} from "./componentUtils.js"
+import DataDisplayWrapper from "/apogeejs-app-bundle/src/componentdisplay/DataDisplayWrapper.js"
 
-function ComponentCell({apogeeView,component,moduleHelper}) {
+export function ComponentCell({apogeeView,component,showing}) {
 
     const viewModes = component.getComponentConfig().viewModes
     const [openedViews,setOpenedViews] = React.useState(() => viewModes.map(viewModeInfo => viewModeInfo.isActive))
@@ -15,7 +16,7 @@ function ComponentCell({apogeeView,component,moduleHelper}) {
     return (
         <div className="visiui_pageChild_mainClass">
             <div className="visiui_pageChild_titleBarClass">
-                <CellHeading component={component} moduleHelper={moduleHelper} />
+                <CellHeading component={component} />
                 <DataViewControls component={component} openedViews={openedViews} setOpenedViews={setOpenedViews} />
                 <span className="visiui_pageChild_cellTypeLabelClass">{component.getComponentTypeDisplayName()}</span>
             </div>
@@ -24,7 +25,7 @@ function ComponentCell({apogeeView,component,moduleHelper}) {
                 {viewModes.map((viewModeInfo,index) => 
                     //using index into fixed array of view modes for key and for reference to view mode
                     openedViews[index] ? <ViewModeElement key={index} apogeeView={apogeeView} 
-                        component={component} index={index} moduleHelper={moduleHelper} /> : ''
+                        component={component} index={index} /> : ''
                 )}
             </div>
         </div>
@@ -32,7 +33,7 @@ function ComponentCell({apogeeView,component,moduleHelper}) {
 }
 
 /** This is the icon, name and properties menu */
-function CellHeading({component, moduleHelper}) {
+function CellHeading({component}) {
 
     const text = component.getDisplayName()
     const iconUrl = component.getIconUrl()
@@ -40,7 +41,7 @@ function CellHeading({component, moduleHelper}) {
 
     // @TODO - update this (maybe just the comment) - the function hsed here comes from a global file workspaceObject.js
     let menuItems =  []
-    moduleHelper.addComponentMenuItems(menuItems,component)
+    addComponentMenuItems(menuItems,component)
 
     let menuImageUrl = apogeeui.uiutil.getResourcePath("/menuDots16_darkgray.png","ui-lib")
 
@@ -105,7 +106,7 @@ function _getMsgLabel(component,viewModeInfo) {
 }
 
 //DO WE WANT APOGEEVIEW OR SOME OBJECT THAT HAS NO OBSERVABLE CHANGE INTERNALLY (LIKE A CLOSURE WITH INTERNAL STATE)
-function ViewModeElement({apogeeView,component,index,moduleHelper}) {
+function ViewModeElement({apogeeView,component,index}) {
 
     let [editMode,setEditMode] = React.useState(false)
 
@@ -118,7 +119,7 @@ function ViewModeElement({apogeeView,component,index,moduleHelper}) {
     let dataDisplayWrapper = apogeeView.getCacheObject(getViewCacheKey(component,index))
     if(!dataDisplayWrapper) {
         console.log('Creating display wrapper for ' + _getMsgLabel(component,viewModeInfo))
-        dataDisplayWrapper = moduleHelper.getDataDisplayWrapper(component,index)
+        dataDisplayWrapper = new DataDisplayWrapper(component,index)
         apogeeView.setCacheObject(getViewCacheKey(component,index),dataDisplayWrapper)
         dataDisplayWrapper.init()
         dataDisplayWrapper.showData()

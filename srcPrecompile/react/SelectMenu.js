@@ -5,7 +5,7 @@
  * As is, it wasn't intended for both, but only because spacing is funny. It will work.)
  * Additional options for label (and other) style might be good too.
  */
-function SelectMenu({text, image, items}) {
+export function SelectMenu({text, image, items}) {
 
     //grab a reference to clear the selection initially
     let selectRef = React.useRef();

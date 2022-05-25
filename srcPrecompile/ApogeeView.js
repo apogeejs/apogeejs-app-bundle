@@ -2,11 +2,12 @@ import {closeWorkspace} from "/apogeejs-app-bundle/src/commandseq/closeworkspace
 import {createWorkspace} from "/apogeejs-app-bundle/src/commandseq/createworkspaceseq.js";
 import {openWorkspace} from "/apogeejs-app-bundle/src/commandseq/openworkspaceseq.js";
 import {saveWorkspace} from "/apogeejs-app-bundle/src/commandseq/saveworkspaceseq.js";
-import moduleHelper from "/apogeejs-app-bundle/src/react/ModuleHelper.js";
 
 import {showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
 import {Apogee} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+
+import {App} from "/apogeejs-app-bundle/src/react/app.js";
 
 export default class ApogeeView {
 
@@ -29,7 +30,7 @@ export default class ApogeeView {
     ////////////////////////////////////
     // React Version additions section
     render() {
-        renderApp(this,moduleHelper)
+        ReactDOM.render(<App apogeeView={this} />,document.getElementById(this.containerId))
     }
 
     /** @TODO I don't think the menu items are efficient. See how much overhead we have from redefining them

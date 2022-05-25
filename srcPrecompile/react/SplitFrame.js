@@ -1,5 +1,5 @@
 
-function SplitFrame({leftContent, rightContent}) {
+export function SplitFrame({leftContent, rightContent}) {
     const [leftWidth,setLeftWidth] = React.useState(200)
     const [resizeOn,setResizeOn] = React.useState(false)
     const [resizeX,setResizeX] = React.useState(0)

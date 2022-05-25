@@ -1,24 +1,19 @@
+import {SelectMenu} from "./SelectMenu.js"
+import {SplitFrame} from "./SplitFrame.js"
+import {TreeView} from "./TreeView.js"
+import {TabView} from "./TabView.js"
+import {WorkspaceTreeEntry} from "./WorkspaceObjects.js"
+
 ///////////////////////////////////////////
 //Application
 ///////////////////////////////////////////
 
 
-
-/** This funtion renders the app
- * I have it here because all jsx code, for now, must be in the global files rather than modules
- * The variable is defined in the html file
- */
-function renderApp(appObject,moduleHelper) {
-    ReactDOM.render(<App appObject={appObject} moduleHelper={moduleHelper} />,document.getElementById(appObject.containerId))
-}
-
 //constant - should be defined elsewhere
 const INVALID_OBJECT_ID = 0
 
-///////////////////////////////////////////////
-//UI
-///////////////////////////////////////////////
-function App({appObject, moduleHelper}) {
+/** This is the app element. */
+export function App({apogeeView}) {
     //Tab State
     //tab data = {text,contentElement,closeOkCallback}
     const [tabObjectIds,setTabObjectIds] = React.useState([])
@@ -57,28 +52,28 @@ function App({appObject, moduleHelper}) {
         setTabObjectIds(newTabObjectIds)
     }
 
-    const workspaceManager = appObject.getApp().getWorkspaceManager();
+    const workspaceManager = apogeeView.getApp().getWorkspaceManager();
 
     const childTreeEntries = workspaceManager ? 
-            [<WorkspaceTreeEntry key={workspaceManager.getId()} workspaceManager={workspaceManager} openTab={openTab} moduleHelper={moduleHelper}/>]
+            [<WorkspaceTreeEntry key={workspaceManager.getId()} workspaceManager={workspaceManager} openTab={openTab} />]
             : undefined
 
     return (
         <>
-            <MenuBar appObject={appObject} />
+            <MenuBar apogeeView={apogeeView} />
             <SplitFrame
                 leftContent={<TreeView childTreeEntries={childTreeEntries}/>}
-                rightContent={<TabView appObject={appObject} tabObjectIds={tabObjectIds} 
-                        selectedTabId={selectedTabId} closeTab={closeTab} selectTabId={selectTabId} moduleHelper={moduleHelper}/>} 
+                rightContent={<TabView apogeeView={apogeeView} tabObjectIds={tabObjectIds} 
+                        selectedTabId={selectedTabId} closeTab={closeTab} selectTabId={selectTabId} />} 
             />
         </>
     )
 }
 
-function MenuBar({appObject}) {
+function MenuBar({apogeeView}) {
     return (
         <div className="appMenuBar">
-            {appObject.getMenuItems().map(menuItem => <SelectMenu key={menuItem.text} text={menuItem.text} items={menuItem.items}/>)}
+            {apogeeView.getMenuItems().map(menuItem => <SelectMenu key={menuItem.text} text={menuItem.text} items={menuItem.items}/>)}
         </div>
     )
 }

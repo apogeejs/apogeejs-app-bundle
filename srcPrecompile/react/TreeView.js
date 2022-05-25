@@ -1,3 +1,6 @@
+import {IconWithStatus} from "./IconwithStatus.js"
+import {SelectMenu} from "./SelectMenu.js"
+
 /* Tree View 
 * Creates a tree from a TreeObject. TreeObject interface:
 * - boolean hasChildren() - returns true if there are 0 children
@@ -13,7 +16,7 @@
 /** @TODO In this file I reference uiutil, relying on it being defiend globally. I will want to laod this
  * from a module. */
 
-function TreeView({childTreeEntries}) {
+export function TreeView({childTreeEntries}) {
 
     return (
         <ul className="treeView_list">
@@ -22,7 +25,7 @@ function TreeView({childTreeEntries}) {
     )
 }
 
-function TreeEntry({iconSrc, text, status, menuItems, childTreeEntries}) {
+export function TreeEntry({iconSrc, text, status, menuItems, childTreeEntries}) {
     const [opened,setOpened] = React.useState(false);
 
     let controlResource = (childTreeEntries)&&(childTreeEntries.length > 0) ? (opened ? "/opened_darkgray.png" : "/closed_darkgray.png") : "/circle_darkgray.png"

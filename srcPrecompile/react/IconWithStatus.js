@@ -1,4 +1,4 @@
-function IconWithStatus({iconSrc, status}) {
+export function IconWithStatus({iconSrc, status}) {
 
     let statusImageSrc;
     switch(status) {

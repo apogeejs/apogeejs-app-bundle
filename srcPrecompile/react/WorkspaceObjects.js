@@ -1,14 +1,19 @@
+import {getChildComponents,addComponentMenuItems,addOpenComponentTabMenuItem,addParentMenuItems} from "./componentUtils.js"
+import {TreeEntry} from "./TreeView.js"
+import {updateWorkspaceProperties} from "/apogeejs-app-bundle/src/commandseq/updateworkspaceseq.js"
+import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+
 /** This file contains the functions to generate the tree objects for the workspace. */
 
-export function WorkspaceTreeEntry({workspaceManager, openTab, moduleHelper}) {
-    const updateWorkspaceProperties = moduleHelper.updateWorkspaceProperties
+export function WorkspaceTreeEntry({workspaceManager, openTab}) {
 
     const menuItems = [
         {text: "Edit Properties", action: () => updateWorkspaceProperties(workspaceManager) },
     ]
     const modelManager = workspaceManager.getModelManager()
+    const parentComponentConfigs = componentInfo.getParentComponentConfigs()
     const childTreeEntries = [
-        <ModelTreeEntry key={modelManager.getId()} modelManager={modelManager} openTab={openTab} moduleHelper={moduleHelper} />
+        <ModelTreeEntry key={modelManager.getId()} modelManager={modelManager} openTab={openTab} parentComponentConfigs={parentComponentConfigs}/>
     ]
 
     return <TreeEntry 
@@ -20,17 +25,17 @@ export function WorkspaceTreeEntry({workspaceManager, openTab, moduleHelper}) {
         childTreeEntries={childTreeEntries} />
 }
 
-export function ModelTreeEntry({modelManager, openTab, moduleHelper}) {
+export function ModelTreeEntry({modelManager, openTab, parentComponentConfigs}) {
 
     //child tree entries
     const childComponents = getChildComponents(modelManager,modelManager.getModel()) 
     const childTreeEntries = (childComponents.length > 0) ?
         childComponents.map( component => <ComponentTreeEntry key={component.getId()} component={component} 
-                modelManager={modelManager} openTab={openTab} moduleHelper={moduleHelper} /> ) : undefined
+                modelManager={modelManager} openTab={openTab} parentComponentConfigs={parentComponentConfigs} /> ) : undefined
 
     //menu items
     let menuItems = []
-    moduleHelper.addParentMenuItems(menuItems,modelManager.getApp(),modelManager.getModel())
+    addParentMenuItems(menuItems,modelManager.getApp(),modelManager.getModel(),parentComponentConfigs)
     
     return <TreeEntry 
         key={modelManager.getId()}
@@ -41,7 +46,7 @@ export function ModelTreeEntry({modelManager, openTab, moduleHelper}) {
         childTreeEntries={childTreeEntries} />
 }
 
-export function ComponentTreeEntry({component, modelManager, openTab, moduleHelper}) {
+export function ComponentTreeEntry({component, modelManager, openTab, parentComponentConfigs}) {
 
     //child tree entries
     const childComponents = component.getComponentConfig().isParentOfChildEntries ? 
@@ -49,19 +54,19 @@ export function ComponentTreeEntry({component, modelManager, openTab, moduleHelp
 
     const childTreeEntries = ((childComponents)&&(childComponents.length > 0)) ?
         childComponents.map( component => <ComponentTreeEntry key={component.getId()} component={component} 
-            modelManager={modelManager} openTab={openTab} moduleHelper={moduleHelper} /> ) : undefined
+            modelManager={modelManager} openTab={openTab} /> ) : undefined
 
     //menu items
     let menuItems = []
     //open tab
     if(component.getComponentConfig().isParentOfChildEntries) {
-        moduleHelper.addOpenComponentTabMenuItem(menuItems,openTab,component.getId())
+        addOpenComponentTabMenuItem(menuItems,openTab,component.getId())
     }
     //component properties
-    moduleHelper.addComponentMenuItems(menuItems,component)
+    addComponentMenuItems(menuItems,component)
     //add children
     if(component.getComponentConfig().isParentOfChildEntries) {
-        moduleHelper.addParentMenuItems(menuItems,modelManager.getApp(),component.getParentFolderForChildren())
+        addParentMenuItems(menuItems,modelManager.getApp(),component.getParentFolderForChildren(),parentComponentConfigs)
     }
     
 
