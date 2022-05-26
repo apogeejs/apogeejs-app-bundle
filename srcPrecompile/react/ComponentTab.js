@@ -3,7 +3,7 @@ import {getChildComponents} from "./componentUtils.js"
 import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
-export function ComponentTab({apogeeView,component,showing}) {
+export function ComponentTab({component,showing}) {
     if(component.getComponentConfig().isParentOfChildEntries) {
 
         //get child components
@@ -21,7 +21,7 @@ export function ComponentTab({apogeeView,component,showing}) {
                     {
                         //get cells for child components that have cells (view modes exist)
                         childComponents.filter(component => component.getComponentConfig().viewModes)
-                            .map(component => <ComponentCell key={component.getId()} apogeeView={apogeeView} component={component} showing={showing} />)
+                            .map(component => <ComponentCell key={component.getId()} component={component} showing={showing} />)
                     }
                 </div>
             </div>

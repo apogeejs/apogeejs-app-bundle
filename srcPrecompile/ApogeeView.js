@@ -66,19 +66,6 @@ export default class ApogeeView {
         }
     }
 
-    //These cache functions are for the react ui
-    getCacheObject(cacheId) {
-        return this.cacheObjects[cacheId]
-    }
-
-    setCacheObject(cacheId, cacheObject) {
-        this.cacheObjects[cacheId] = cacheObject
-    }
-
-    clearCacheObject(cacheId) {
-        delete this.cacheObjects[cacheId]
-    }
-
     //-----------------
     // react-support private methods
     //-----------------

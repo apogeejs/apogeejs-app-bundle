@@ -3,7 +3,7 @@ import {SelectMenu} from "./SelectMenu.js"
 import {addComponentMenuItems} from "./componentUtils.js"
 import DataDisplayWrapper from "/apogeejs-app-bundle/src/componentdisplay/DataDisplayWrapper.js"
 
-export function ComponentCell({apogeeView,component,showing}) {
+export function ComponentCell({component,showing}) {
 
     const viewModes = component.getComponentConfig().viewModes
     const [openedViews,setOpenedViews] = React.useState(() => viewModes.map(viewModeInfo => viewModeInfo.isActive))
@@ -24,8 +24,7 @@ export function ComponentCell({apogeeView,component,showing}) {
             <div className="visiui_pageChild_viewContainerClass" >
                 {viewModes.map((viewModeInfo,index) => 
                     //using index into fixed array of view modes for key and for reference to view mode
-                    openedViews[index] ? <ViewModeElement key={index} apogeeView={apogeeView} 
-                        component={component} index={index} /> : ''
+                    openedViews[index] ? <ViewModeElement key={index} component={component} index={index} showing={showing} /> : ''
                 )}
             </div>
         </div>
@@ -97,32 +96,33 @@ function DataViewControl({viewModeInfo, index, openedViews, setOpenedViews}) {
     )
 }
 
-function getViewCacheKey(component,index) {
-    return component.getId() + "|" + index
-}
-
 function _getMsgLabel(component,viewModeInfo) {
     return `component ${component.getName()} view mode ${viewModeInfo.label} at ${Date.now() % 1000000}`
 }
 
-//DO WE WANT APOGEEVIEW OR SOME OBJECT THAT HAS NO OBSERVABLE CHANGE INTERNALLY (LIKE A CLOSURE WITH INTERNAL STATE)
-function ViewModeElement({apogeeView,component,index}) {
+function ViewModeElement({component,index,showing}) {
+
+    //TEST FOR VANILLA
+    let wasShowingRef = React.useRef(false)
+    const madeVisible = (showing != wasShowingRef.current)
+    wasShowingRef.current = showing
+
+
+    let viewModeInfo = component.getComponentConfig().viewModes[index]
+    console.log('In view mode render for ' + _getMsgLabel(component,viewModeInfo))
 
     let [editMode,setEditMode] = React.useState(false)
 
-    let viewModeInfo = component.getComponentConfig().viewModes[index]
-
-    console.log('In view mode render for ' + _getMsgLabel(component,viewModeInfo))
-
-    /////////////////////////
-    //is this the right thing to do???
-    let dataDisplayWrapper = apogeeView.getCacheObject(getViewCacheKey(component,index))
+    //This is the mutable object for the vanilla display
+    let vanillaRef = React.useRef(null)
+    let dataDisplayWrapper = vanillaRef.current
     if(!dataDisplayWrapper) {
         console.log('Creating display wrapper for ' + _getMsgLabel(component,viewModeInfo))
         dataDisplayWrapper = new DataDisplayWrapper(component,index)
-        apogeeView.setCacheObject(getViewCacheKey(component,index),dataDisplayWrapper)
+        vanillaRef.current = dataDisplayWrapper
+
         dataDisplayWrapper.init()
-        dataDisplayWrapper.showData()
+        //dataDisplayWrapper.showData() COMMENTED OUT DURING WAS SHOWING TEST
     }
 
     dataDisplayWrapper.setEditModeState(editMode,setEditMode)
@@ -130,6 +130,11 @@ function ViewModeElement({apogeeView,component,index}) {
         console.log('Updating component for ' + _getMsgLabel(component,viewModeInfo))
         dataDisplayWrapper.updateComponent(component)
     }
+    else if(madeVisible) {
+        console.log('Trigger show data ' + _getMsgLabel(component,viewModeInfo))
+        dataDisplayWrapper.showData()
+    }
+
 
     const msgText = dataDisplayWrapper.getMessage()
     const showMsgBar = msgText != null
@@ -153,9 +158,7 @@ function ViewModeElement({apogeeView,component,index}) {
 
             //figure out how this should work - load unload
             dataDisplayWrapper.onUnload()
-
             dataDisplayWrapper.destroy()
-            apogeeView.clearCacheObject(getViewCacheKey(component,index))
         }
 
     },[])

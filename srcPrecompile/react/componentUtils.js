@@ -1,3 +1,8 @@
+import { addComponent } from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
+import { updateComponentProperties } from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js"
+import { deleteComponent } from "/apogeejs-app-bundle/src/commandseq/deletecomponentseq.js"
+
+
 /** This function gets the child components, usable either for a parent folder or the model object. */
 export function getChildComponents(modelManager,memberParent) {
     let childComponents = []

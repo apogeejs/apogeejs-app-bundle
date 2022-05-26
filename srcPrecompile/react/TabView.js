@@ -26,7 +26,6 @@ export function TabView({apogeeView, tabObjectIds, selectedTabId, closeTab, sele
             <div className="tabView_body">
                 {tabObjects.map(tabObject => <TabFrame
                         key={tabObject.getId()} 
-                        apogeeView={apogeeView}
                         tabObject={tabObject} 
                         showing={selectedTabId == tabObject.getId()}
                     />)
@@ -61,10 +60,10 @@ function TabTab({tabObject, closeTab, selectTabId, selected}) {
 }
 
 //only for components!
-function TabFrame({apogeeView, tabObject, showing}) {
+function TabFrame({tabObject, showing}) {
     return (
         <div key={tabObject.getId()} style={{display: showing ? '' : "none"}} className="tabView_frame">
-            <ComponentTab apogeeView={apogeeView} component={tabObject} showing={showing} />
+            <ComponentTab component={tabObject} showing={showing} />
         </div>
     )
 }
