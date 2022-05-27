@@ -3,6 +3,7 @@ import {TreeEntry} from "./TreeView.js"
 import {updateWorkspaceProperties} from "/apogeejs-app-bundle/src/commandseq/updateworkspaceseq.js"
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 import {getComponentTab} from "./ComponentTab.js"
+import {ReferencesTreeEntry} from "./ReferenceObjects.js"
 
 /** This file contains the functions to generate the tree objects for the workspace. */
 
@@ -12,9 +13,11 @@ export function WorkspaceTreeEntry({workspaceManager, openTab}) {
         {text: "Edit Properties", action: () => updateWorkspaceProperties(workspaceManager) },
     ]
     const modelManager = workspaceManager.getModelManager()
+    const referenceManager = workspaceManager.getReferenceManager()
     const parentComponentConfigs = componentInfo.getParentComponentConfigs()
     const childTreeEntries = [
-        <ModelTreeEntry key={modelManager.getId()} modelManager={modelManager} openTab={openTab} parentComponentConfigs={parentComponentConfigs}/>
+        <ModelTreeEntry key={modelManager.getId()} modelManager={modelManager} openTab={openTab} parentComponentConfigs={parentComponentConfigs} />,
+        <ReferencesTreeEntry key={referenceManager.getId()} referenceManager={referenceManager} openTab={openTab} />
     ]
 
     return <TreeEntry 

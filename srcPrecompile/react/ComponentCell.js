@@ -104,7 +104,7 @@ function ViewModeFrame({component,viewModeIndex,showing}) {
     return (
         <div className="visiui_displayContainerClass_mainClass">
             <div>{viewModeInfo.label}</div>
-            <ViewModeElement component={component} viewModeIndex={viewModeIndex} showing={showing} />
+            {viewModeInfo.getViewModeElement(component,showing)}
         </div>
     )
 }
