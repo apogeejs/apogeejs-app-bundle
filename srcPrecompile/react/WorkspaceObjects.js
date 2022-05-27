@@ -1,7 +1,8 @@
-import {getChildComponents,addComponentMenuItems,addOpenComponentTabMenuItem,addParentMenuItems} from "./componentUtils.js"
+import {getChildComponents,addComponentMenuItems,addParentMenuItems} from "./componentUtils.js"
 import {TreeEntry} from "./TreeView.js"
 import {updateWorkspaceProperties} from "/apogeejs-app-bundle/src/commandseq/updateworkspaceseq.js"
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+import {getComponentTab} from "./ComponentTab.js"
 
 /** This file contains the functions to generate the tree objects for the workspace. */
 
@@ -54,13 +55,13 @@ export function ComponentTreeEntry({component, modelManager, openTab, parentComp
 
     const childTreeEntries = ((childComponents)&&(childComponents.length > 0)) ?
         childComponents.map( component => <ComponentTreeEntry key={component.getId()} component={component} 
-            modelManager={modelManager} openTab={openTab} /> ) : undefined
+            modelManager={modelManager} openTab={openTab} parentComponentConfigs={parentComponentConfigs} /> ) : undefined
 
     //menu items
     let menuItems = []
     //open tab
     if(component.getComponentConfig().isParentOfChildEntries) {
-        addOpenComponentTabMenuItem(menuItems,openTab,component.getId())
+        menuItems.push({text: "Open", action: () => openTab(component.getId(),getComponentTab)})
     }
     //component properties
     addComponentMenuItems(menuItems,component)
@@ -79,5 +80,4 @@ export function ComponentTreeEntry({component, modelManager, openTab, parentComp
         menuItems={menuItems}
         childTreeEntries={childTreeEntries} />
 }
-
 

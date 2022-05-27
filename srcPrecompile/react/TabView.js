@@ -1,35 +1,41 @@
-import {ComponentTab} from "./ComponentTab.js"
 import {IconWithStatus} from "./IconwithStatus.js"
 
 /** TabView 
-* TabObject functions:
-* - int/string getId() - a unique id for the tab object
-* - string getName() - the name for the tab
-* - element getTabElement() - Returns the tab content element
+ * TabObjectInfo: {tabObject, getTabElement(tabObject,showing)}
+ * TabObject functions:
+ * - int/string getId() - a unique id for the tab object
+ * - string getName() - the name for the tab
+ * - element getTabElement() - Returns the tab content element
+ * - status getStatus() - returns the status
+ * - getIconUrl() - gets the url for the icon
 */
-export function TabView({apogeeView, tabObjectIds, selectedTabId, closeTab, selectTabId}) {
-
-    let tabObjects = tabObjectIds.map(tabId => apogeeView.getTabObject(tabId))
+export function TabView({tabObjectInfos, selectedTabId, closeTab, selectTabId}) {
 
     return (
         <div className="tabView">
             <div className="tabView_head">
-                {tabObjects.map(tabObject => <TabTab 
+                {tabObjectInfos.map(tabObjectInfo => {
+                    let tabObject = tabObjectInfo.tabObject
+                    return <TabTab 
                         key={tabObject.getId()} 
-                        tabObject={tabObject} 
+                        tabObject={tabObject}
                         closeTab={closeTab} 
                         selectTabId={selectTabId} 
                         selected={selectedTabId == tabObject.getId()}
-                    />)
-                }
+                    />
+                })}
             </div>
             <div className="tabView_body">
-                {tabObjects.map(tabObject => <TabFrame
+                {tabObjectInfos.map(tabObjectInfo => {
+                    let tabObject = tabObjectInfo.tabObject
+                    let getTabElement = tabObjectInfo.getTabElement
+                    return <TabFrame
                         key={tabObject.getId()} 
-                        tabObject={tabObject} 
+                        tabObject={tabObject}
+                        getTabElement={getTabElement} 
                         showing={selectedTabId == tabObject.getId()}
-                    />)
-                }
+                    />
+                })}
             </div>
         </div>
     )
@@ -38,7 +44,7 @@ export function TabView({apogeeView, tabObjectIds, selectedTabId, closeTab, sele
 /** The argument tabObject is the component or other workspace object that is displayed in the tab. */
 function TabTab({tabObject, closeTab, selectTabId, selected}) {
     function closeClicked(event) {
-        closeTab(tabObject)
+        closeTab(tabObject.getId())
         event.stopPropagation() //prevent click from going to tab
     }
 
@@ -51,7 +57,7 @@ function TabTab({tabObject, closeTab, selectTabId, selected}) {
     let imageUrl = apogeeui.uiutil.getResourcePath("/close_gray.png","ui-lib");
 
     return (
-        <div key={tabObject.getId()} onClick={tabClicked} className={className}>
+        <div onClick={tabClicked} className={className}>
         <IconWithStatus iconSrc={tabObject.getIconUrl()} status={tabObject.getStatus()} />
             <span>{tabObject.getName()}</span>
             <input type="image" onClick={closeClicked} src={imageUrl}/>    
@@ -59,11 +65,10 @@ function TabTab({tabObject, closeTab, selectTabId, selected}) {
     )
 }
 
-//only for components!
-function TabFrame({tabObject, showing}) {
+function TabFrame({tabObject, getTabElement, showing}) {
     return (
-        <div key={tabObject.getId()} style={{display: showing ? '' : "none"}} className="tabView_frame">
-            <ComponentTab component={tabObject} showing={showing} />
+        <div style={{display: showing ? '' : "none"}} className="tabView_frame">
+            {getTabElement(tabObject,showing)}
         </div>
     )
 }

@@ -1,7 +1,8 @@
 import {IconWithStatus} from "./IconwithStatus.js"
 import {SelectMenu} from "./SelectMenu.js"
 import {addComponentMenuItems} from "./componentUtils.js"
-import DataDisplayWrapper from "/apogeejs-app-bundle/src/componentdisplay/DataDisplayWrapper.js"
+//import DataDisplayWrapper from "/apogeejs-app-bundle/src/componentdisplay/DataDisplayWrapper.js"
+import {ViewModeElement} from "/apogeejs-app-bundle/src/componentdisplay/DataDisplayWrapper.js"
 
 export function ComponentCell({component,showing}) {
 
@@ -22,9 +23,8 @@ export function ComponentCell({component,showing}) {
             </div>
             {bannerVisible ? <div className="visiui_pageChild_bannerContainerClass" style={{color: bannerColor, backgroundColor: bannerBackground}}>{bannerContent}</div> : ''}
             <div className="visiui_pageChild_viewContainerClass" >
-                {viewModes.map((viewModeInfo,index) => 
-                    //using index into fixed array of view modes for key and for reference to view mode
-                    openedViews[index] ? <ViewModeElement key={index} component={component} index={index} showing={showing} /> : ''
+                {viewModes.map((viewModeInfo,viewModeIndex) => 
+                    openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} component={component} viewModeIndex={viewModeIndex} showing={showing} /> : ''
                 )}
             </div>
         </div>
@@ -60,8 +60,8 @@ function DataViewControls({component, openedViews, setOpenedViews}) {
 
     return (
         <div className="visiui_pageChild_titleBarViewsClass">
-            {viewModes.map( (viewModeInfo,index) => 
-                <DataViewControl key={viewModeInfo.name} viewModeInfo={viewModeInfo} index={index} openedViews={openedViews} setOpenedViews={setOpenedViews} />
+            {viewModes.map( (viewModeInfo,viewModeIndex) => 
+                <DataViewControl key={viewModeInfo.name} viewModeInfo={viewModeInfo} viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} />
             )}
         </div>
     )
@@ -71,12 +71,12 @@ const VIEW_CLOSED_IMAGE_PATH = "/closed_black.png";
 const VIEW_OPENED_IMAGE_PATH = "/opened_black.png";
 
 /** This is a selector for a visible data view */
-function DataViewControl({viewModeInfo, index, openedViews, setOpenedViews}) {
+function DataViewControl({viewModeInfo, viewModeIndex, openedViews, setOpenedViews}) {
 
-    const viewOpened = openedViews[index]
+    const viewOpened = openedViews[viewModeIndex]
     const setViewOpened = opened => {
         let newOpenedViews = openedViews.slice()
-        newOpenedViews[index] = opened
+        newOpenedViews[viewModeIndex] = opened
         setOpenedViews(newOpenedViews)
     }
 
@@ -96,84 +96,15 @@ function DataViewControl({viewModeInfo, index, openedViews, setOpenedViews}) {
     )
 }
 
-function _getMsgLabel(component,viewModeInfo) {
-    return `component ${component.getName()} view mode ${viewModeInfo.label} at ${Date.now() % 1000000}`
-}
-
-function ViewModeElement({component,index,showing}) {
-
-    //TEST FOR VANILLA
-    let wasShowingRef = React.useRef(false)
-    const madeVisible = (showing != wasShowingRef.current)
-    wasShowingRef.current = showing
 
 
-    let viewModeInfo = component.getComponentConfig().viewModes[index]
-    console.log('In view mode render for ' + _getMsgLabel(component,viewModeInfo))
+function ViewModeFrame({component,viewModeIndex,showing}) {
+    let viewModeInfo = component.getComponentConfig().viewModes[viewModeIndex]
 
-    let [editMode,setEditMode] = React.useState(false)
-
-    //This is the mutable object for the vanilla display
-    let vanillaRef = React.useRef(null)
-    let dataDisplayWrapper = vanillaRef.current
-    if(!dataDisplayWrapper) {
-        console.log('Creating display wrapper for ' + _getMsgLabel(component,viewModeInfo))
-        dataDisplayWrapper = new DataDisplayWrapper(component,index)
-        vanillaRef.current = dataDisplayWrapper
-
-        dataDisplayWrapper.init()
-        //dataDisplayWrapper.showData() COMMENTED OUT DURING WAS SHOWING TEST
-    }
-
-    dataDisplayWrapper.setEditModeState(editMode,setEditMode)
-    if(dataDisplayWrapper.getComponent() != component) {
-        console.log('Updating component for ' + _getMsgLabel(component,viewModeInfo))
-        dataDisplayWrapper.updateComponent(component)
-    }
-    else if(madeVisible) {
-        console.log('Trigger show data ' + _getMsgLabel(component,viewModeInfo))
-        dataDisplayWrapper.showData()
-    }
-
-
-    const msgText = dataDisplayWrapper.getMessage()
-    const showMsgBar = msgText != null
-    const hideDisplay = dataDisplayWrapper.getHideDisplay()
-
-    const onSave = () => dataDisplayWrapper.save()
-    const onCancel = () => dataDisplayWrapper.cancel()
-    /////////////////////////////
-
-    //add the element and clean up on destruction
-    const viewRef = React.useRef()
-    React.useEffect(() => {
-        console.log('In use effect for ' + _getMsgLabel(component,viewModeInfo))
-
-        viewRef.current.appendChild(dataDisplayWrapper.getElement())
-        dataDisplayWrapper.onLoad()
-
-        //cleanup function
-        return () => {
-            console.log('In use effect cleanup for ' + _getMsgLabel(component,viewModeInfo))
-
-            //figure out how this should work - load unload
-            dataDisplayWrapper.onUnload()
-            dataDisplayWrapper.destroy()
-        }
-
-    },[])
-    
-    //note - does this manage it correctly, or should we just se display none it if it is not showing???
     return (
         <div className="visiui_displayContainerClass_mainClass">
             <div>{viewModeInfo.label}</div>
-            {showMsgBar ? <div>{msgText}</div> : ''}
-            {editMode ?
-                <div>
-                    <button type="button" onClick={onSave}>Save</button>
-                    <button type="button" onClick={onCancel}>Cancel</button>
-                </div> : ''}
-            {hideDisplay ? '' : <div ref={viewRef} className="visiui_displayContainer_viewContainerClass"/>}
+            <ViewModeElement component={component} viewModeIndex={viewModeIndex} showing={showing} />
         </div>
     )
 }

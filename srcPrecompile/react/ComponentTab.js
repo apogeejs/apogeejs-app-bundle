@@ -3,6 +3,10 @@ import {getChildComponents} from "./componentUtils.js"
 import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
+export function getComponentTab(component,showing) {
+    return <ComponentTab component={component} showing={showing} />
+}
+
 export function ComponentTab({component,showing}) {
     if(component.getComponentConfig().isParentOfChildEntries) {
 

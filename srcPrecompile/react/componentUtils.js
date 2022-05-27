@@ -32,7 +32,3 @@ export function addParentMenuItems(menuItems,app,memberParent,parentComponentCon
         menuItems.push(childMenuItem);
     })
 }
-
-export function addOpenComponentTabMenuItem(menuItems,openTab,objectId) {
-    menuItems.push({text: "Open", action: () => openTab(objectId)})
-}

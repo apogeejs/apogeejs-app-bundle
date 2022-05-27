@@ -1,154 +1,109 @@
+import DATA_DISPLAY_CONSTANTS from "/apogeejs-app-lib/src/datadisplay/dataDisplayConstants.js"
 
-export default class DataDisplayWrapper {
+export function ViewModeElement({component,viewModeIndex,showing}) {
 
-    constructor(component,index) {
-        this.component = component
-        this.index = index
-        this.viewModeInfo = component.getComponentConfig().viewModes[index]
+    //Store previous "showing" value (maybe in data display too?)
+    let wasShowingRef = React.useRef(false)
+    const madeVisible = (showing != wasShowingRef.current)
+    wasShowingRef.current = showing
 
-        this.dataDisplay = null;
+    //get display info
+    let viewModeInfo = component.getComponentConfig().viewModes[viewModeIndex]
+
+    //Get the mutable object for the vanilla javascript display
+    let vanillaRef = React.useRef(null)
+    let dataDisplay = vanillaRef.current
+    if(!dataDisplay) {
+        dataDisplay = viewModeInfo.getDataDisplay(component)
+        dataDisplay.setComponent(component)
+        vanillaRef.current = dataDisplay     
     }
 
-    getComponent() {
-        return this.component
-    }
+    //set edit mode state
+    let [editMode,setEditMode] = React.useState(false)
+    dataDisplay.setEditModeState(editMode,setEditMode)
 
-    getDataDisplay() {
-        return this.dataDisplay
-    }
+    //update if the component changes
+    if(dataDisplay.getComponent() != component) { 
+        dataDisplay.setComponent(component)
+        let {reloadData,reloadDataDisplay,removeView} = dataDisplay.doUpdate();
 
-    getElement() {
-        if(this.dataDisplay) return this.dataDisplay.getContent()
-        else return null
-    }
+        //NEED TO PUT THIS BACK IN
+        //set the remove view flag
+        // let removeViewBool = removeView ? true : false; //account for no removeView returned
+        // if(removeViewBool != this.isViewRemoved) {
+        //     this.isViewRemoved = removeViewBool;
+        //     this._updateViewState();
+        // }
+        // else if(this.isViewRemoved) {
+        //     //if we are still removed, skip further procsseing
+        //     return;
+        // }
 
-    init() {
-        this.dataDisplay = this.viewModeInfo.getDataDisplay(this)
-    }
+        if(reloadDataDisplay) {
+            //this will also reload data
+            let oldContentElement = dataDisplay.getContent()
+            let parent = oldContentElement.parent
+            parent.removeChild(oldContentElement)
 
-    updateComponent(component) {
-        if(this.component == component) return
-        
-        this.component = component
-        if(this.dataDisplay) {
+            if(dataDisplay.onUnload) dataDisplay.onUnload()
+            if(dataDisplay.destroy) dataDisplay.destroy()
 
-            let {reloadData,reloadDataDisplay,removeView} = this.dataDisplay.doUpdate();
+            dataDisplay = viewModeInfo.getDataDisplay(component)
+            dataDisplay.setEditModeState(editMode,setEditMode)
 
-            //NEED TO PUT THIS BACK IN
-            //set the remove view flag
-            // let removeViewBool = removeView ? true : false; //account for no removeView returned
-            // if(removeViewBool != this.isViewRemoved) {
-            //     this.isViewRemoved = removeViewBool;
-            //     this._updateViewState();
-            // }
-            // else if(this.isViewRemoved) {
-            //     //if we are still removed, skip further procsseing
-            //     return;
-            // }
+            let newContentElement = dataDisplay.getContent()
+            parent.appendChild(newContentElement)
 
-            if(reloadDataDisplay) {
-                //this will also reload data
-                this._reloadDataDisplay();
+            dataDisplay.onLoad()
+            dataDisplay.showData()
+        }
+        else if(reloadData) {
+            //only update data in display if we are not in edit mode
+            if(!dataDisplay.isInEditMode()) {
+                dataDisplay.showData()
             }
-            else if(reloadData) {
-                this._updateDataDisplay();
-            }
+        }
+    }
+    else if(madeVisible) {
+        //I think we need to do this because of react internal logic - refresh display if we are made visible 
+        //(other wise it seems changes made while not visible are not kept)
+        dataDisplay.showData()
+    }
 
+    //manage adding and removing the vanilla display element
+    const viewRef = React.useRef()
+    React.useEffect(() => {
+        viewRef.current.appendChild(dataDisplay.getContent())
+        dataDisplay.onLoad()
+
+        //cleanup function
+        return () => {
+            //figure out how this should work - load unload
+            if(dataDisplay.onUnload) dataDisplay.onUnload()
+            if(dataDisplay.destroy) dataDisplay.destroy()
         }
 
-        //COPIED FROM PAGE DISPLAY CONTAINER
-        //update name label on view heading if needed
-        // if( (this.hasViewSourceText) && (this.mainComponentId == component.getId()) && (component.isMemberFieldUpdated("member","name"))) {
-        //     this.viewSource.innerHTML = this._getViewSourceText();
-        // }
-    }
+    },[])
+    
+    //render the display
+    const msgText = dataDisplay.getMessage()
+    const showMsgBar = dataDisplay.getMessageType() != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE
+    const hideDisplay = dataDisplay.getHideDisplay()
 
-    showData() {
-        if(this.dataDisplay) this.dataDisplay.showData()
-    }
+    const onSave = () => dataDisplay.save()
+    const onCancel = () => dataDisplay.cancel()
 
-    getMessage() {
-        if(this.dataDisplay) return this.dataDisplay.getMessage()
-        else return ""
-    }
-
-    getHideDisplay() {
-        if(this.dataDisplay) return this.dataDisplay.getHideDisplay()
-        else return true
-    }
-
-
-    /** This is used to pass is and clear the setEditMode function */
-    setEditModeState(editMode,setEditMode) {
-        if(this.dataDisplay) this.dataDisplay.setEditModeState(editMode,setEditMode)
-    }
-
-    save() {
-        if(this.dataDisplay) this.dataDisplay.save()
-    }
-
-    cancel() {
-        if(this.dataDisplay) this.dataDisplay.cancel()
-    }
-
-    onLoad() {
-        if((this.dataDisplay)&&(this.dataDisplay.onLoad)) this.dataDisplay.onLoad()
-    }
-
-    onUnload() {
-        if((this.dataDisplay)&&(this.dataDisplay.onUnload)) this.dataDisplay.onUnload()
-    }
-
-    destroy() {
-        if((this.dataDisplay)&&(this.dataDisplay.destroy))  this.dataDisplay.destroy();
-        this.dataDisplay = null;
-    }
-
-    //=========================
-    // Private Methods
-    //=========================
-
-    _updateDataDisplay() {
-        //don't reload data if we are in edit mode. It will reload after completion, whether through cancel or save.
-        if(this.inEditMode) return;
-        this.dataDisplay.showData();
-    }
-
-    _reloadDataDisplay() {
-
-        //put this back in?
-        //update the stored UI state json
-        //this.savedUiState = this.getStateJson();
-
-        //NOTE: This is probably not optimal treatment of edit mode
-        //We restrict reloading to data when we are in edit mode. Reloading of the display is not as simple 
-        //as currently coded. So we will just kick the display out of edit mode.
-        //It would be nive to get a better treatment 
-        // if(this.inEditMode) {
-        //     this.endEditMode();
-        // }
-
-        //was in page display container
-        //reset any data display specific parts of the ui
-        //this._cleanupDataDisplayUI();
-
-        //this destrpys the data display, not the container - bad name
-        //this._deleteDataDisplay();
-        //I DON"T KNOW IF THIS IS RIGHT?? FIX IT
-        let oldContentElement = this.dataDisplay.getContent()
-        this.onUnload()
-        this.destroy()
-        this.init()
-        let newContentElement = this.dataDisplay.getContent()
-
-        let parent = oldContentElement.parent
-        parent.removeChild(oldContentElement)
-        parent.appendChild(newContentElement)
-        this.onLoad();
-
-
-        //reload display
-        //this._updateDataDisplayLoadedState();
-        this.showData()
-    }
+    return (
+        <div >
+            {showMsgBar ? <div>{msgText}</div> : ''}
+            {editMode ?
+                <div>
+                    <button type="button" onClick={onSave}>Save</button>
+                    <button type="button" onClick={onCancel}>Cancel</button>
+                </div> : ''}
+            {hideDisplay ? '' : <div ref={viewRef} className="visiui_displayContainer_viewContainerClass"/>}
+        </div>
+    )
 }
+

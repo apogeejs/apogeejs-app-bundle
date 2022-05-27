@@ -1,7 +1,7 @@
-import {SelectMenu} from "./SelectMenu.js"
 import {SplitFrame} from "./SplitFrame.js"
 import {TreeView} from "./TreeView.js"
 import {TabView} from "./TabView.js"
+import {MenuBar} from "./MenuBar.js"
 import {WorkspaceTreeEntry} from "./WorkspaceObjects.js"
 
 ///////////////////////////////////////////
@@ -13,67 +13,75 @@ import {WorkspaceTreeEntry} from "./WorkspaceObjects.js"
 const INVALID_OBJECT_ID = 0
 
 /** This is the app element. */
-export function App({apogeeView}) {
-    //Tab State
-    //tab data = {text,contentElement,closeOkCallback}
-    const [tabObjectIds,setTabObjectIds] = React.useState([])
+export function App({app, workspaceManager}) {
+
+    //tabDataList = [{tabObjectId, getTabElement(tabObject,showing)}]
+    const [tabDataList,setTabDataList] = React.useState([])
     const [selectedTabId,setSelectedTabId] = React.useState(INVALID_OBJECT_ID)   //0 is invalid tab id
 
-    function openTab(tabObjectId,isSelected = true) {
-        //open if not already there
-        if(tabObjectIds.find(existingTabObjectId => tabObjectId == existingTabObjectId) === undefined) {
-            setTabObjectIds(tabObjectIds.concat(tabObjectId))
+    function openTab(objectId,getTabElement,isSelected = true) {
+        //insert only if not already there
+        if(tabDataList.find(tabData => (objectId == tabData.objectId)) === undefined) {
+            setTabDataList(tabDataList.concat({objectId, getTabElement}))
         }
 
         //select if specified
-        if(isSelected) selectTabId(tabObjectId)
+        if(isSelected) selectTabId(objectId)
     }
 
     function selectTabId(tabObjectId) {
-        //need notify show and hide!!!
         setSelectedTabId(tabObjectId)
     }
 
-    function closeTab(tabObject) {
-        if( tabObject.closeTabOk && !tabObject.closeTabOk() ) {
-            //we need some action here presumably
-            return
-        }
+    function closeTab(objectId) {
+        //add edit state to the tab view
+        // if( tabObject.closeTabOk && !tabObject.closeTabOk() ) {
+        //     //we need some action here presumably
+        //     return
+        // }
         
-        let newTabObjectIds = tabObjectIds.filter(existingTabObjectId => existingTabObjectId != tabObject.getId())
-        if(tabObject.getId() == selectedTabId) {
-            if(newTabObjectIds.length > 0) { //if we close the active tab, make the first tab active
-                selectTabId(newTabObjectIds[0])
+        let newTabDataList = tabDataList.filter(tabData => (objectId != tabData.objectId) )
+        if(objectId == selectedTabId) {
+            if(newTabDataList.length > 0) { //if we close the active tab, make the first remaining tab active
+                selectTabId(newTabDataList[0].objectId)
             }
             else {
                 selectTabId(INVALID_OBJECT_ID)
             }
         }
-        setTabObjectIds(newTabObjectIds)
+        setTabDataList(newTabDataList)
     }
-
-    const workspaceManager = apogeeView.getApp().getWorkspaceManager();
 
     const childTreeEntries = workspaceManager ? 
             [<WorkspaceTreeEntry key={workspaceManager.getId()} workspaceManager={workspaceManager} openTab={openTab} />]
             : undefined
 
+
+    //Here we might find components that no longer exist - remove them if so
+    let tabObjectInfos = [];
+    tabDataList.forEach(tabData => {
+        const tabObject = workspaceManager.getObject(tabData.objectId)
+        if(tabObject) {
+            tabObjectInfos.push({
+                tabObject: tabObject,
+                getTabElement: tabData.getTabElement
+            })
+        }
+        else {
+            //tabObject not found
+            closeTab(tabData.objectId)
+        }
+    })
+
     return (
         <>
-            <MenuBar apogeeView={apogeeView} />
+            <MenuBar app={app} workspaceManager={workspaceManager} />
             <SplitFrame
                 leftContent={<TreeView childTreeEntries={childTreeEntries}/>}
-                rightContent={<TabView apogeeView={apogeeView} tabObjectIds={tabObjectIds} 
-                        selectedTabId={selectedTabId} closeTab={closeTab} selectTabId={selectTabId} />} 
+                rightContent={<TabView tabObjectInfos={tabObjectInfos} selectedTabId={selectedTabId} 
+                    closeTab={closeTab} selectTabId={selectTabId} />} 
             />
         </>
     )
 }
 
-function MenuBar({apogeeView}) {
-    return (
-        <div className="appMenuBar">
-            {apogeeView.getMenuItems().map(menuItem => <SelectMenu key={menuItem.text} text={menuItem.text} items={menuItem.items}/>)}
-        </div>
-    )
-}
