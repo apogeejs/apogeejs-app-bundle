@@ -100,11 +100,47 @@ function DataViewControl({viewModeInfo, viewModeIndex, openedViews, setOpenedVie
 
 function ViewModeFrame({component,viewModeIndex,showing}) {
     let viewModeInfo = component.getComponentConfig().viewModes[viewModeIndex]
+    let sizeCommandInfo = viewModeInfo.sizeCommandInfo
+
+    let [verticalSize,setVerticalSize] = React.useState(sizeCommandInfo ? sizeCommandInfo.default : null)
 
     return (
         <div className="visiui_displayContainerClass_mainClass">
-            <div>{viewModeInfo.label}</div>
+            <div>
+                <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeInfo.label}</div>
+                {sizeCommandInfo ? <div className="visiui_displayContainer_viewSizingElementClass">
+                    <ViewSizeElement settings={sizeCommandInfo} size={verticalSize} setSize={setVerticalSize} />
+                </div> : ''}
+                {viewModeInfo.getViewStatusElement ? 
+                    <div className="visiui_displayContainer_viewDisplayBarClass">
+                        {viewModeInfo.getViewStatusElement(component,verticalSize)}
+                    </div> : ''
+                }
+            </div>
             {viewModeInfo.getViewModeElement(component,showing)}
         </div>
     )
+}
+
+
+function ViewSizeElement({settings,size,setSize}) {
+
+    const onSmaller = () => {
+        let newSize = size - settings.increment
+        if(newSize < settings.min) newSize = settings.min
+        setSize(newSize)
+        console.log("new size = " + newSize)
+    }
+
+    const onBigger = () => {
+        let newSize = size + settings.increment
+        if(newSize > settings.max) newSize = settings.max
+        setSize(newSize)
+        console.log("new size = " + newSize)
+    }
+
+    return <div>
+        <button type="button" disabled={size <= settings.min} onClick={onSmaller}>less</button>
+        <button type="button" disabled={size >= settings.max} onClick={onBigger}>more</button>
+    </div>
 }
