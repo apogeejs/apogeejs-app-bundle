@@ -113,11 +113,11 @@ function ViewModeFrame({component,viewModeIndex,showing}) {
                 </div> : ''}
                 {viewModeInfo.getViewStatusElement ? 
                     <div className="visiui_displayContainer_viewDisplayBarClass">
-                        {viewModeInfo.getViewStatusElement(component,verticalSize)}
+                        {viewModeInfo.getViewStatusElement(component)}
                     </div> : ''
                 }
             </div>
-            {viewModeInfo.getViewModeElement(component,showing)}
+            {viewModeInfo.getViewModeElement(component,showing,verticalSize)}
         </div>
     )
 }

@@ -1,4 +1,5 @@
 import {SelectMenu} from "./SelectMenu.js"
+import {IconWithStatus} from "./IconwithStatus.js"
 
 import {closeWorkspace} from "/apogeejs-app-bundle/src/commandseq/closeworkspaceseq.js";
 import {createWorkspace} from "/apogeejs-app-bundle/src/commandseq/createworkspaceseq.js";
@@ -9,11 +10,22 @@ import {showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
 /** This file contains the MenuBar element for the apogee app. Embedded in it are the menu commands that run the application. */
 
-export function MenuBar({app, workspaceManager}) {
+export function MenuBar({app, workspaceManager,activeTabObject}) {
+
+    let logoUrl = apogeeui.uiutil.getResourcePath("/shortlogo16.png","app")
+
     return (
-        <div className="appMenuBar">
-            {getMenuItems(app,workspaceManager).map(menuItem => <SelectMenu key={menuItem.text} text={menuItem.text} items={menuItem.items}/>)}
+        <div className="menu_bar">
+            <div className="menu_bar_left">
+                <img src={logoUrl} className="menu_bar_icon" />
+                {getMenuItems(app,workspaceManager).map(menuItem => <SelectMenu key={menuItem.text} text={menuItem.text} items={menuItem.items}/>)}
+            </div>
+            {activeTabObject ? <div className="menu_bar_right">
+                <IconWithStatus iconSrc={activeTabObject.getIconUrl()} status={activeTabObject.getStatus()} />
+                <span>{activeTabObject.getFullName(workspaceManager.getModelManager())}</span>
+            </div> : ''}
         </div>
+        
     )
 }
 

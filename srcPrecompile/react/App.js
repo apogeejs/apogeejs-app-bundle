@@ -58,7 +58,8 @@ export function App({app, workspaceManager}) {
 
 
     //Here we might find components that no longer exist - remove them if so
-    let tabObjectInfos = [];
+    let tabObjectInfos = []
+    let activeTabObject
     tabDataList.forEach(tabData => {
         const tabObject = workspaceManager.getObject(tabData.objectId)
         if(tabObject) {
@@ -66,6 +67,9 @@ export function App({app, workspaceManager}) {
                 tabObject: tabObject,
                 getTabElement: tabData.getTabElement
             })
+            if(tabObject.getId() == selectedTabId) {
+                activeTabObject = tabObject
+            }
         }
         else {
             //tabObject not found
@@ -75,7 +79,7 @@ export function App({app, workspaceManager}) {
 
     return (
         <>
-            <MenuBar app={app} workspaceManager={workspaceManager} />
+            <MenuBar app={app} workspaceManager={workspaceManager} activeTabObject={activeTabObject} />
             <SplitFrame
                 leftContent={<TreeView childTreeEntries={childTreeEntries}/>}
                 rightContent={<TabView tabObjectInfos={tabObjectInfos} selectedTabId={selectedTabId} 
