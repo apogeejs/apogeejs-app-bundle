@@ -242,8 +242,11 @@
     vertical-align: middle;
     user-select: none;
 }
-.visiui_displayContainer_headerContainerClass {
-    position: relative;
+.visiui_displayContainer_saveBarContainerClass {
+    background-color: white;
+    border: 1px solid gray;
+    padding: 3px;
+
 }
 .visiui_displayContainer_viewSizingElementClass {
     display: inline-block;
@@ -262,11 +265,20 @@
     margin-bottom: 0px;
 }
 .visiui_displayContainer_viewDisplaySizeButtonClass {
-    display: inline;
+    border: none;
+    padding: 0;
     margin-right: 5px;
     font-size: smaller;
     color:rgb(128,128,128);
     cursor: pointer;
+    user-select: none;
+}
+.visiui_displayContainer_disabledViewDisplaySizeButtonClass {
+    border: none;
+    padding: 0;
+    margin-right: 5px;
+    font-size: smaller;
+    color:rgb(192,192,192);
     user-select: none;
 }
 .visiui_displayContainer_viewDisplaySizeButtonClass:hover {

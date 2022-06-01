@@ -2,9 +2,7 @@ import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 import {validateMemberName} from "/apogeejs-model-lib/src/apogeeModelLib.js"; 
 
 import {getPropertiesDialogLayout,getPropertyJsons} from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js";
-import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 import {showConfigurableDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
-import {showSelectComponentDialog} from "/apogeejs-app-bundle/src/dialogs/SelectControlDialog.js";
 
 //=====================================
 // UI Entry Point
@@ -141,44 +139,3 @@ export function addComponent(app,componentConfig,optionalInitialProperties) {
         //show dialog
         showConfigurableDialog(dialogLayout,onSubmitFunction,onCancelFunction);
 }
-
-
-/** This gets a callback to add an "additional" component, menaing one that is not
- * in the main component menu. */
-export function addAdditionalComponent(app,optionalInitialProperties) {
-        
-    var onSelect = function(componentConfig) {
-        addComponent(WAS_APP_INTERFACE,app,componentConfig,optionalInitialProperties);
-    }
-    //get the display names
-    let componentConfigs = componentInfo.getComponentConfigs();
-    let childComponentConfigs = [];
-    componentConfigs.forEach( componentConfig => {
-        if(componentConfig.viewModes !== undefined) {
-            childComponentConfigs.push(componentConfig);
-        }
-    });
-    //open select component dialog
-    showSelectComponentDialog(childComponentConfigs,onSelect);
-}
-
-/** This is to get an commands needed to add the a child node onto a parent page. */
-function getAdditionalCommands(parentComponentView,childName) {
-    //check selection
-    let useParentSelection = getUseParentSelection(parentComponentView);
-    
-    let insertAtEnd = !useParentSelection;
-
-    return parentComponentView.getInsertApogeeNodeOnPageCommands(childName,insertAtEnd);
-}
-
-function getUseParentSelection(parentComponentView) {
-    //use the parent selection only if the tab is the active tab
-    //otherwise the component should be placed at the end
-
-    let tabDisplay = parentComponentView.getTabDisplay();
-    if(!tabDisplay) return false;
-    
-    return tabDisplay.getIsShowing();
-}
-

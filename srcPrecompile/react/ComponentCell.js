@@ -1,8 +1,6 @@
 import {IconWithStatus} from "./IconwithStatus.js"
 import {SelectMenu} from "./SelectMenu.js"
 import {addComponentMenuItems} from "./componentUtils.js"
-//import DataDisplayWrapper from "/apogeejs-app-bundle/src/componentdisplay/DataDisplayWrapper.js"
-import {ViewModeElement} from "/apogeejs-app-bundle/src/componentdisplay/DataDisplayWrapper.js"
 
 export function ComponentCell({component,showing}) {
 
@@ -139,8 +137,13 @@ function ViewSizeElement({settings,size,setSize}) {
         console.log("new size = " + newSize)
     }
 
+    const lessDisabled = size <= settings.min
+    const moreDisabled = size >= settings.max
+    const lessClassName = lessDisabled ? "visiui_displayContainer_disabledViewDisplaySizeButtonClass" : "visiui_displayContainer_viewDisplaySizeButtonClass"
+    const moreClassName = moreDisabled ? "visiui_displayContainer_disabledViewDisplaySizeButtonClass" : "visiui_displayContainer_viewDisplaySizeButtonClass"
+
     return <div>
-        <button type="button" disabled={size <= settings.min} onClick={onSmaller}>less</button>
-        <button type="button" disabled={size >= settings.max} onClick={onBigger}>more</button>
+        <button className={lessClassName} type="button" disabled={lessDisabled} onClick={onSmaller}>less</button>
+        <button className={moreClassName} type="button" disabled={moreDisabled} onClick={onBigger}>more</button>
     </div>
 }
