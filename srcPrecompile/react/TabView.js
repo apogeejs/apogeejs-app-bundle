@@ -6,7 +6,7 @@ import {IconWithStatus} from "./IconwithStatus.js"
  * - int/string getId() - a unique id for the tab object
  * - string getName() - the name for the tab
  * - element getTabElement() - Returns the tab content element
- * - status getStatus() - returns the status
+ * - status getState() - returns the status
  * - getIconUrl() - gets the url for the icon
 */
 export function TabView({tabObjectInfos, selectedTabId, closeTab, selectTabId}) {
@@ -58,7 +58,7 @@ function TabTab({tabObject, closeTab, selectTabId, selected}) {
 
     return (
         <div onClick={tabClicked} className={className}>
-        <IconWithStatus iconSrc={tabObject.getIconUrl()} status={tabObject.getStatus()} />
+        <IconWithStatus iconSrc={tabObject.getIconUrl()} status={tabObject.getState()} />
             <span>{tabObject.getName()}</span>
             <input type="image" onClick={closeClicked} src={imageUrl}/>    
         </div>

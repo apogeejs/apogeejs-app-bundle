@@ -21,7 +21,7 @@ export function MenuBar({app, workspaceManager,activeTabObject}) {
                 {getMenuItems(app,workspaceManager).map(menuItem => <SelectMenu key={menuItem.text} text={menuItem.text} items={menuItem.items}/>)}
             </div>
             {activeTabObject ? <div className="menu_bar_right">
-                <IconWithStatus iconSrc={activeTabObject.getIconUrl()} status={activeTabObject.getStatus()} />
+                <IconWithStatus iconSrc={activeTabObject.getIconUrl()} status={activeTabObject.getState()} />
                 <span>{activeTabObject.getFullName(workspaceManager.getModelManager())}</span>
             </div> : ''}
         </div>

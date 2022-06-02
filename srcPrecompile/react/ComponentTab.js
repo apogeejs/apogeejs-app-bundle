@@ -1,5 +1,6 @@
 import {ComponentCell} from "./ComponentCell.js"
 import {getChildComponents} from "./componentUtils.js"
+import {bannerVisible,StateBanner} from "./StateBanner.js"
 import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
@@ -21,6 +22,7 @@ export function ComponentTab({component,showing}) {
         return (
             <div className="componentTabWrapper">
                 <PageHeaderElement app={app} parentFolder={parentFolder} childComponentConfigs={childComponentConfigs} />
+                {bannerVisible(component) ? <StateBanner component={component} /> : ''}
                 <div className="componentPageBodyElement">
                     {
                         //get cells for child components that have cells (view modes exist)

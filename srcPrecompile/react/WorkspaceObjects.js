@@ -24,7 +24,7 @@ export function WorkspaceTreeEntry({workspaceManager, openTab}) {
         key={workspaceManager.getId()}
         iconSrc={workspaceManager.getIconUrl()} 
         text={workspaceManager.getName()} 
-        status={workspaceManager.getStatus()} 
+        status={workspaceManager.getState()} 
         menuItems={menuItems} 
         childTreeEntries={childTreeEntries} />
 }
@@ -45,7 +45,7 @@ export function ModelTreeEntry({modelManager, openTab, parentComponentConfigs}) 
         key={modelManager.getId()}
         iconSrc={modelManager.getIconUrl()} 
         text={modelManager.getName()} 
-        status={modelManager.getStatus()} 
+        status={modelManager.getState()} 
         menuItems={menuItems}
         childTreeEntries={childTreeEntries} />
 }
@@ -79,7 +79,7 @@ export function ComponentTreeEntry({component, modelManager, openTab, parentComp
         key={component.getId()}
         iconSrc={component.getIconUrl()} 
         text={component.getName()} 
-        status={component.getStatus()} 
+        status={component.getState()} 
         menuItems={menuItems}
         childTreeEntries={childTreeEntries} />
 }

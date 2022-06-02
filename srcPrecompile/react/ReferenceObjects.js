@@ -16,7 +16,7 @@ export function ReferencesTreeEntry({referenceManager}) {
     return <TreeEntry 
         iconSrc={iconUrl} 
         text={REFERENCES_TREE_LABEL} 
-        status={referenceManager.getStatus()} 
+        status={referenceManager.getState()} 
         childTreeEntries={childTreeEntries} />
 }
 

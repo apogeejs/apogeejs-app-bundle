@@ -1,6 +1,7 @@
 import {IconWithStatus} from "./IconwithStatus.js"
 import {SelectMenu} from "./SelectMenu.js"
 import {addComponentMenuItems} from "./componentUtils.js"
+import {bannerVisible,StateBanner} from "./StateBanner.js"
 
 export function ComponentCell({component,showing}) {
 
@@ -8,9 +9,6 @@ export function ComponentCell({component,showing}) {
     const [openedViews,setOpenedViews] = React.useState(() => viewModes.map(viewModeInfo => viewModeInfo.isActive))
 
     //need to work out how I want to do the styling
-    const bannerVisible = false
-    const bannerColor = ""
-    const bannerBackground = ""
 
     return (
         <div className="visiui_pageChild_mainClass">
@@ -19,7 +17,7 @@ export function ComponentCell({component,showing}) {
                 <DataViewControls component={component} openedViews={openedViews} setOpenedViews={setOpenedViews} />
                 <span className="visiui_pageChild_cellTypeLabelClass">{component.getComponentTypeDisplayName()}</span>
             </div>
-            {bannerVisible ? <div className="visiui_pageChild_bannerContainerClass" style={{color: bannerColor, backgroundColor: bannerBackground}}>{bannerContent}</div> : ''}
+            {bannerVisible(component) ? <StateBanner component={component} /> : ''}
             <div className="visiui_pageChild_viewContainerClass" >
                 {viewModes.map((viewModeInfo,viewModeIndex) => 
                     openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} component={component} viewModeIndex={viewModeIndex} showing={showing} /> : ''
@@ -28,6 +26,7 @@ export function ComponentCell({component,showing}) {
         </div>
     )
 }
+
 
 /** This is the icon, name and properties menu */
 function CellHeading({component}) {
