@@ -18,13 +18,13 @@ export function StateBanner({component}) {
             text = component.getStateMessage()
             break
 
-        case apogeeutil.STATE_ERROR:
+        case apogeeutil.STATE_PENDING:
             bannerColor = 'black'
             bannerBackground = 'yellow'
             text = 'Pending'
             break
 
-        case apogeeutil.STATE_ERROR:
+        case apogeeutil.STATE_INVALID:
             bannerColor = 'white'
             bannerBackground = 'gray'
             text = 'Invalid Value'

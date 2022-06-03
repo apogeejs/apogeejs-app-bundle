@@ -55,10 +55,14 @@ function DataViewControls({component, openedViews, setOpenedViews}) {
 
     const viewModes = component.getComponentConfig().viewModes
 
+    //function to check if view mode should be removed
+    const showViewTab = (viewModeInfo) => viewModeInfo.isViewRemoved ? !viewModeInfo.isViewRemoved(component) : true
+
     return (
         <div className="visiui_pageChild_titleBarViewsClass">
             {viewModes.map( (viewModeInfo,viewModeIndex) => 
-                <DataViewControl key={viewModeInfo.name} viewModeInfo={viewModeInfo} viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} />
+                showViewTab(viewModeInfo) ? <DataViewControl key={viewModeInfo.name} viewModeInfo={viewModeInfo} 
+                    viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} /> : ''
             )}
         </div>
     )
