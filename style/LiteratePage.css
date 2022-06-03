@@ -296,7 +296,10 @@
 }
 .visiui_displayContainer_messageContainerClass {
     position: relative;
+    margin: 3px;
     padding: 5px;
+    background-color: rgb(245,245,245);
+    outline: 1px solid rgba(170,170,178,.5);
     z-index: 0;
 }
 .visiui_displayContainer_messageNone {
