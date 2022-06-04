@@ -12,10 +12,13 @@
 .splitFrame_leftPanel {
     background-color: white;
     width: 200px; 
+    height: 100%;
+    overflow: hidden;
 }
 .splitFrame_rightPanel {
     background-color: white; 
     flex-grow: 1;
+    overflow: hidden;
 }
 .splitFrame_divider {
     width: 10px;

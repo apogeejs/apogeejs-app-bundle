@@ -1,2 +1,29 @@
+.componentTabWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+}
 
+.componentPageHeaderElement {
+    flex-grow: 0;
+}
 
+.componentPageToolbarElement {
+    padding: 5px;
+    background-color: rgb(235,235,240);
+    border: 1px solid rgba(196,196,205,.5);
+    border-bottom: 1px solid darkgray;
+}
+
+.componentPageCreateSelect {
+
+}
+
+.componentPageBodyElement {
+    position: relative;
+    flex-grow: 1;
+    overflow: auto;
+    padding: 5px;
+    padding-bottom: 200px;
+}

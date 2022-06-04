@@ -4,6 +4,7 @@
     flex-direction: column;
     height: 100%;
     background-color: rgb(234,234,246);
+    overflow: hidden;
 }
 .tabView_head {
     flex-grow: 0;
@@ -11,6 +12,7 @@
 .tabView_body {
     position: relative;
     flex-grow: 1;
+    overflow: hidden;
 }
 .tabView_tab {
     display: inline-block;
@@ -29,6 +31,7 @@
 .tabView_frame {
     position: relative;
     height: 100%;
+    overflow: hidden;
     background-color: white;
 
 }

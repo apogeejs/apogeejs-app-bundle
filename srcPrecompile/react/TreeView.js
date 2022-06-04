@@ -19,9 +19,11 @@ import {SelectMenu} from "./SelectMenu.js"
 export function TreeView({childTreeEntries}) {
 
     return (
-        <ul className="treeView_list">
-            {childTreeEntries}
-        </ul>
+        <div className="treeView_wrapper">
+            <ul className="treeView_list">
+                {childTreeEntries}
+            </ul>
+        </div>
     )
 }
 

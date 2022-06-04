@@ -30,7 +30,6 @@ body {
     background-color:yellow;
     display:flex;
     flex-direction:column;
-    height: 100%;
 }
 .appMenuBar {
     flex-grow:0;

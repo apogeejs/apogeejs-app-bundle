@@ -21,8 +21,10 @@ export function ComponentTab({component,showing}) {
         
         return (
             <div className="componentTabWrapper">
-                <PageHeaderElement app={app} parentFolder={parentFolder} childComponentConfigs={childComponentConfigs} />
-                {bannerVisible(component) ? <StateBanner component={component} /> : ''}
+                <div className="componentPageHeaderElement">
+                    <PageToolbarElement app={app} parentFolder={parentFolder} childComponentConfigs={childComponentConfigs} />
+                    {bannerVisible(component) ? <StateBanner component={component} /> : ''}
+                </div>
                 <div className="componentPageBodyElement">
                     {
                         //get cells for child components that have cells (view modes exist)
@@ -39,7 +41,7 @@ export function ComponentTab({component,showing}) {
     }
 }
 
-function PageHeaderElement({app, parentFolder, childComponentConfigs}) {
+function PageToolbarElement({app, parentFolder, childComponentConfigs}) {
 
     //get the command to create in this folder
     var initialValues = {};
@@ -60,11 +62,10 @@ function PageHeaderElement({app, parentFolder, childComponentConfigs}) {
     }
 
     //add the select and the create button!
-    return <div className="componentPageHeaderElement">
+    return <div className="componentPageToolbarElement">
         <select className="componentPageCreateSelect" onChange={selectedTypeChanged}>
             {childComponentConfigs.map(componentConfig => <option key={componentConfig.displayName} value={componentConfig.displayName}>{componentConfig.displayName}</option>)}
         </select>
         <button type="button" onClick={onCreateClicked}>Create Element</button>
-        <hr/>
     </div>
 }
