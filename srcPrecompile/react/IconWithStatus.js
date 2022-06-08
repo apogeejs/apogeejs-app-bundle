@@ -21,7 +21,7 @@ export function IconWithStatus({iconSrc, status}) {
         default:
             //we should make something noticable here I think, rather than nothing
             statusImageSrc = undefined;
-            brea
+            break
     }
 
     return (
