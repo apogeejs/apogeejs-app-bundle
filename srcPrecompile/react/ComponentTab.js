@@ -2,7 +2,7 @@ import {ComponentCell} from "./ComponentCell.js"
 import {getChildComponents} from "./componentUtils.js"
 import {bannerVisible,StateBanner} from "./StateBanner.js"
 import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
-import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
 export function getComponentTab(component,showing) {
     return <ComponentTab component={component} showing={showing} />
