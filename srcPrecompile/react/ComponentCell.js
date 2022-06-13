@@ -11,7 +11,7 @@ export function ComponentCell({component,showing}) {
     //need to work out how I want to do the styling
 
     return (
-        <div className="visiui_pageChild_mainClass">
+        <div key={component.getInstanceNumber()} className="visiui_pageChild_mainClass">
             <div className="visiui_pageChild_titleBarClass">
                 <CellHeading component={component} />
                 <DataViewControls component={component} openedViews={openedViews} setOpenedViews={setOpenedViews} />
