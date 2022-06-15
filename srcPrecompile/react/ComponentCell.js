@@ -2,6 +2,8 @@ import {IconWithStatus} from "./IconwithStatus.js"
 import {SelectMenu} from "./SelectMenu.js"
 import {addComponentMenuItems} from "./componentUtils.js"
 import {bannerVisible,StateBanner} from "./StateBanner.js"
+//oops - move this
+import DATA_DISPLAY_CONSTANTS from "/apogeejs-app-lib/src/datadisplay/dataDisplayConstants.js"
 
 export function ComponentCell({component,showing}) {
 
@@ -11,7 +13,8 @@ export function ComponentCell({component,showing}) {
     //need to work out how I want to do the styling
 
     return (
-        <div key={component.getInstanceNumber()} className="visiui_pageChild_mainClass">
+        //<div key={component.getInstanceNumber()} className="visiui_pageChild_mainClass">
+        <div className="visiui_pageChild_mainClass">
             <div className="visiui_pageChild_titleBarClass">
                 <CellHeading component={component} />
                 <DataViewControls component={component} openedViews={openedViews} setOpenedViews={setOpenedViews} />
@@ -101,16 +104,24 @@ function DataViewControl({viewModeInfo, viewModeIndex, openedViews, setOpenedVie
 
 function ViewModeFrame({component,viewModeIndex,showing}) {
     let viewModeInfo = component.getComponentConfig().viewModes[viewModeIndex]
-    let sizeCommandInfo = viewModeInfo.sizeCommandInfo
 
-    let [verticalSize,setVerticalSize] = React.useState(sizeCommandInfo ? sizeCommandInfo.default : null)
+    const [editModeData,setEditModeData] = React.useState(null)
+    const [msgData,setMsgData] = React.useState(null)
+    const [verticalSize,setVerticalSize] = React.useState(null)
+    const [sizeCommandData,setSizeCommandData] = React.useState(null)
+
+    const showMsg = (msgData)&&(msgData.type != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
+    const msgBarStyle = showMsg ? getMessageBarStyle(msgData.type) : null
+
+    const onSave = () => editModeData.save ? editModeData.save() : null
+    const onCancel = () => editModeData.cancel ? editModeData.cancel() : null
 
     return (
         <div className="visiui_displayContainerClass_mainClass">
             <div>
                 <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeInfo.label}</div>
-                {sizeCommandInfo ? <div className="visiui_displayContainer_viewSizingElementClass">
-                    <ViewSizeElement settings={sizeCommandInfo} size={verticalSize} setSize={setVerticalSize} />
+                {sizeCommandData ? <div className="visiui_displayContainer_viewSizingElementClass">
+                    <ViewSizeElement sizeCommandData={sizeCommandData} size={verticalSize} setSize={setVerticalSize} />
                 </div> : ''}
                 {viewModeInfo.getViewStatusElement ? 
                     <div className="visiui_displayContainer_viewDisplayBarClass">
@@ -118,30 +129,39 @@ function ViewModeFrame({component,viewModeIndex,showing}) {
                     </div> : ''
                 }
             </div>
-            {viewModeInfo.getViewModeElement(component,showing,verticalSize)}
+            { showMsg ? <div className={msgBarStyle} >{msgData.msg}</div> : ''}
+            { editModeData ?
+                <div className="visiui_displayContainer_saveBarContainerClass">
+                    Edit: 
+                    <button type="button" onClick={onSave}>Save</button>
+                    <button  type="button" onClick={onCancel}>Cancel</button>
+                </div> : ''}
+            {viewModeInfo.getViewModeElement(component,showing,setEditModeData,setMsgData,verticalSize,setSizeCommandData)}
         </div>
     )
 }
 
 
-function ViewSizeElement({settings,size,setSize}) {
+function ViewSizeElement({sizeCommandData,size,setSize}) {
+    
+    let baseSize = (size === null) ? sizeCommandData.previous : size 
 
     const onSmaller = () => {
-        let newSize = size - settings.increment
-        if(newSize < settings.min) newSize = settings.min
+        let newSize = baseSize - sizeCommandData.increment
+        if(newSize < sizeCommandData.min) newSize = settings.min
         setSize(newSize)
         console.log("new size = " + newSize)
     }
 
     const onBigger = () => {
-        let newSize = size + settings.increment
-        if(newSize > settings.max) newSize = settings.max
+        let newSize = baseSize + sizeCommandData.increment
+        if(newSize > sizeCommandData.max) newSize = sizeCommandData.max
         setSize(newSize)
         console.log("new size = " + newSize)
     }
 
-    const lessDisabled = size <= settings.min
-    const moreDisabled = size >= settings.max
+    const lessDisabled = baseSize <= sizeCommandData.min
+    const moreDisabled = baseSize >= sizeCommandData.max
     const lessClassName = lessDisabled ? "visiui_displayContainer_disabledViewDisplaySizeButtonClass" : "visiui_displayContainer_viewDisplaySizeButtonClass"
     const moreClassName = moreDisabled ? "visiui_displayContainer_disabledViewDisplaySizeButtonClass" : "visiui_displayContainer_viewDisplaySizeButtonClass"
 
@@ -149,4 +169,23 @@ function ViewSizeElement({settings,size,setSize}) {
         <button className={lessClassName} type="button" disabled={lessDisabled} onClick={onSmaller}>less</button>
         <button className={moreClassName} type="button" disabled={moreDisabled} onClick={onBigger}>more</button>
     </div>
+}
+
+
+function getMessageBarStyle(messageType) {
+
+    switch(messageType) {
+        case DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_ERROR:
+            return "visiui_displayContainer_messageContainerClass visiui_displayContainer_messageError"
+
+        case DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_WARNING:
+            return "visiui_displayContainer_messageContainerClass visiui_displayContainer_messageWarning"
+
+        case DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_INFO:
+            return "visiui_displayContainer_messageContainerClass visiui_displayContainer_messageInfo"
+
+        case DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE:
+        default:
+            return "visiui_displayContainer_messageContainerClass"
+    }
 }
