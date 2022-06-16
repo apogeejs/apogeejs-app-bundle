@@ -13,7 +13,7 @@ import {WorkspaceTreeEntry} from "./WorkspaceObjects.js"
 const INVALID_OBJECT_ID = 0
 
 /** This is the app element. */
-export function App({app, workspaceManager}) {
+export function AppElement({workspaceManager, menuData}) {
 
     //tabDataList = [{tabObjectId, getTabElement(tabObject,showing)}]
     const [tabDataList,setTabDataList] = React.useState([])
@@ -77,9 +77,16 @@ export function App({app, workspaceManager}) {
         }
     })
 
+    let activeTabName, activeTabIcon, activeTabStatus
+    if(activeTabObject) {
+        activeTabName = activeTabObject.getFullName(workspaceManager.getModelManager())
+        activeTabIcon = activeTabObject.getIconUrl()
+        activeTabObject.getState()
+    }
+
     return (
         <>
-            <MenuBar app={app} workspaceManager={workspaceManager} activeTabObject={activeTabObject} />
+            <MenuBar menuData={menuData} activeTabName={activeTabName} activeTabIcon={activeTabIcon} activeTabStatus={activeTabStatus} />
             <SplitFrame
                 leftContent={<TreeView childTreeEntries={childTreeEntries}/>}
                 rightContent={<TabView tabObjectInfos={tabObjectInfos} selectedTabId={selectedTabId} 

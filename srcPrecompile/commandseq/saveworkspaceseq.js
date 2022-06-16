@@ -28,11 +28,15 @@ export function saveWorkspace(app,fileAccessObject,requestDirectSave) {
             apogeeUserAlert("There was an error saving the file: " + err.toString());
         }
         else if(fileSaved) {
-            var workspaceManager = app.getWorkspaceManager();
-            workspaceManager.clearIsDirty();
-            if(updatedFileMetadata) {
-                workspaceManager.setFileMetadata(updatedFileMetadata);
+
+            //update the file info for the workspaceManager
+            const commandData = {
+                type:"updateWorkspaceFileData",
+                isDirty: false,
+                fileMetadata: updatedFileMetadata ? updatedFileMetadata : undefined
             }
+
+            app.executeCommand(commandData)
         }
     }
 
