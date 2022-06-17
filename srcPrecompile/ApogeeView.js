@@ -87,18 +87,56 @@ export default class ApogeeView {
     //start view state interface
 
     getViewStateJson() {
-        return null
-        //throw new Error("implement view state accessors")
-        // return {
-        //     tabDataList: this.tabDataList,
-        //     selectedTabId: selectedTabId
-        // }
+        //Do I want to do this, or expolicitly not do this?
+        if(this.viewStateDirty) {
+            this._updateViewState()
+        }
+
+        let json = {
+            openTabs: []
+        }
+
+        let modelManager = this.workspaceManager.getModelManager()
+
+        this.tabDataList.forEach(tabDataObject => {
+            let fullName = tabDataObject.tabObject.getFullName(modelManager)
+            json.openTabs.push(fullName)
+            if(this.selectedTabId == tabDataObject.tabObject.getId()) {
+                json.selectedTab = fullName
+            }
+        })
+
+        return json.openTabs.length > 0 ? json : undefined
     }
 
     setViewStateJson(viewStateJson) {
-        //throw new Error("implement view state accessors")
-        // this.viewState = viewState
-        // this.render()
+        if((viewStateJson)&&(viewStateJson.openTabs)) {
+            let modelManager = this.workspaceManager.getModelManager()
+            let model = modelManager.getModel()
+
+            let tabDataList = []
+            let selectedTabId
+
+            viewStateJson.openTabs.forEach(fullName => {
+                let member = model.getMemberByFullName(model,fullName)
+                let componentId = modelManager.getComponentIdByMemberId(member.getId())
+                if(componentId) {
+                    let component = modelManager.getComponentByComponentId(componentId)
+                    let tabDataObject = this._getComponentTabDataObject(component)
+                    tabDataList.push(tabDataObject)
+
+                    if(viewStateJson.selectedTab == fullName) {
+                        selectedTabId = component.getId()
+                    }
+                }
+            })
+
+            this.tabDataList = tabDataList
+            this.selectedTabId = selectedTabId
+            this.viewStateDirty = true
+
+            this.render()
+        }
     }
 
     //end view state interface
