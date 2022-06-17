@@ -9,6 +9,8 @@ import {saveWorkspace} from "/apogeejs-app-bundle/src/commandseq/saveworkspacese
 
 import {showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
+import {getComponentTab} from "/apogeejs-app-bundle/src/react/ComponentTab.js"
+
 
 export default class ApogeeView {
 
@@ -17,10 +19,10 @@ export default class ApogeeView {
      * to null (or other false value) the UI will not be created.
      * - appConfigManager - This is the app config managerm which defines some needed functionality. 
      */
-    constructor(containerId,appConfigManager) {
+    constructor(containerId) {
         this.workspaceManager = null
         this.containerId = containerId
-        this.app = new Apogee(appConfigManager)
+        this.app = new Apogee(this)
 
         //app menu
         this.menuData = null;
@@ -28,6 +30,20 @@ export default class ApogeeView {
         this.editMenuData = this._getEditMenuData(this.app)
         this.aboutMenuData = this._getAboutMenuData()
         this.packageMenuData()
+
+        /////////////////////////////
+        //view state
+        this.tabDataList = []
+        this.selectedTabId = null
+        this.viewState = null
+        this.viewStateDirty = true
+
+        this.tabFunctions = {
+            openTab: (tabId,isSelected = true) => this._openTab(tabId,isSelected),
+            closeTab: (tabId) => this._closeTab(tabId),
+            selectTab: (tabId) => this._selectTab(tabId)
+        }
+        /////////////////////////////////
 
         this._subscribeToAppEvents()
 
@@ -38,7 +54,16 @@ export default class ApogeeView {
     ////////////////////////////////////
     // React Version additions section
     render() {
-        const appElement = <AppElement workspaceManager={this.workspaceManager} menuData={this.menuData} />
+
+        if(this.viewStateDirty) {
+            this._updateViewState()
+        }
+
+        const appElement = <AppElement 
+            workspaceManager={this.workspaceManager}
+            menuData={this.menuData}
+            viewState={this.viewState} 
+        />
         ReactDOM.render(appElement,document.getElementById(this.containerId))
     }
 
@@ -57,6 +82,27 @@ export default class ApogeeView {
 
     //end react version additions section
     /////////////////////////////
+
+    ////////////////////////////////
+    //start view state interface
+
+    getViewStateJson() {
+        return null
+        //throw new Error("implement view state accessors")
+        // return {
+        //     tabDataList: this.tabDataList,
+        //     selectedTabId: selectedTabId
+        // }
+    }
+
+    setViewStateJson(viewStateJson) {
+        //throw new Error("implement view state accessors")
+        // this.viewState = viewState
+        // this.render()
+    }
+
+    //end view state interface
+    //////////////////////////////////
 
     getApp() {
         return this.app
@@ -89,10 +135,14 @@ export default class ApogeeView {
     /** This method subscribes to workspace events to update the UI. It is called out as a separate method
      * because we must reload it each time the app is created. */
     _subscribeToAppEvents() {
-        //subscribe to events
+        //workspace change events
         this.app.addListener("workspaceManager_created",workspaceManager => this._onWorkspaceCreated(workspaceManager))
         this.app.addListener("workspaceManager_deleted",workspaceManager => this._onWorkspaceClosed(workspaceManager))
         this.app.addListener("workspaceManager_updated",workspaceManager => this._onWorkspaceUpdated(workspaceManager))
+
+        //componet update and delete - for the tab state (since only components have tabs now)
+        this.app.addListener("component_deleted",component => this._onComponentDeleted(component))
+        this.app.addListener("component_updated",component => this._onComponentUpdated(component))
     }
 
     _onWorkspaceCreated(workspaceManager) {
@@ -138,6 +188,29 @@ export default class ApogeeView {
         }
 
         this.render()
+    }
+
+    _onComponentUpdated(component) {
+        let index = this.tabDataList.findIndex(tabDataObject => tabDataObject.tabObject.getId() == component.getId())
+        if(index >= 0) {
+            //replace the component of the old entry with the new component
+            const newTabDataList = this.tabDataList.map( (listTabDataObject,listIndex) => {
+                if(listIndex == index) return this._getComponentTabDataObject(component,listTabDataObject)
+                else return listTabDataObject
+            })
+            
+            this.tabDataList = newTabDataList
+            this.viewStateDirty = true
+        }
+
+        this.render()
+        
+    }
+
+    _onComponentDeleted(component) {
+        if(this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == component.getId())) {
+            this._closeTab(component.getId())
+        }
     }
 
     
@@ -305,7 +378,102 @@ export default class ApogeeView {
         this.app.dispatchEvent("frameWidthResize",null)
     }
 
+    //====================================
+    // UI state managements
+    //====================================
+
+    _openTab(tabId,selectTab,supressRerender) {
+        let changeMade = false
+
+        if(!this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == tabId)) {
+            let tabObject = this.getTabObject(tabId)
+            if(tabObject) {
+                //update the tab data list
+                const newTabDataList = this.tabDataList.concat(this._getComponentTabDataObject(tabObject))
+                this.tabDataList = newTabDataList
+
+                changeMade = true
+            }
+        }
+
+        if((selectTab)&&(this.selectedTabId != tabId)) {
+            this.selectedTabId = tabId
+            
+            changeMade = true
+        }
+
+        if((changeMade)&&(!supressRerender)) {
+            this.viewStateDirty = true
+            this.render()
+        } 
+    }
+
+    _closeTab(tabId,supressRerender) {
+        let changeMade = false
+
+        const newTabDataList = this.tabDataList.filter(tabDataObject => tabDataObject.tabObject.getId() != tabId)
+        if(newTabDataList.length != this.tabDataList.length) {
+            //update the tab data list
+            this.tabDataList = newTabDataList
+            
+            changeMade = true
+        }
+
+        if(tabId == this.selectedTabId) {
+            if(this.tabDataList.length > 0) this.selectedTabId = this.tabDataList[0].tabObject.getId()
+            
+            changeMade = true
+        }
+        else {
+            this.selectedTabId = INVALID_OBJECT_ID
+
+            changeMade = true
+        }
+
+        if((changeMade)&&(!supressRerender)) {
+            this.viewStateDirty = true
+            this.render()
+        } 
+    }
+
+    _selectTab(tabId,supressRerender) {
+        let changeMade = false
+
+        if((tabId != this.selectedTabId)&&(this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == tabId))) {
+            this.selectedTabId = tabId
+
+            changeMade = true
+        }
+
+        if((changeMade)&&(!supressRerender)) {
+            this.viewStateDirty = true
+            this.render()
+        }    
+    }
+
+    _updateViewState() {
+        this.viewState = {
+            tabDataList: this.tabDataList,
+            selectedTabId: this.selectedTabId,
+            tabFunctions: this.tabFunctions
+        }
+
+        this.viewStateDirty = false
+    }
+
+    _getComponentTabDataObject(component,oldTabDataObject) {
+        //if we have ui state we need to include it in the new object)
+        const tabDataObject = {
+            tabObject: component,
+            getTabElement: getComponentTab
+        }
+        return tabDataObject
+    }
+
 }
+
+
+const INVALID_OBJECT_ID = 0
 
 const RESIZE_TIMER_PERIOD_MS = 500
 
