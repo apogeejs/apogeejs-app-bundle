@@ -21,13 +21,18 @@ export function TreeView({childTreeEntries}) {
     return (
         <div className="treeView_wrapper">
             <ul className="treeView_list">
-                {childTreeEntries}
+                {childTreeEntries ? childTreeEntries.map(childTreeState => <TreeEntry 
+                        key={childTreeState.data.id}
+                        data={childTreeState.data}
+                        uiState={childTreeState.uiState}
+                        childTreeEntries={childTreeState.childTreeEntries} 
+                    /> ) : ''}
             </ul>
         </div>
     )
 }
 
-export function TreeEntry({iconSrc, text, status, menuItems, childTreeEntries}) {
+export function TreeEntry({data,  uiState, childTreeEntries}) {
     const [opened,setOpened] = React.useState(false);
 
     let controlResource = (childTreeEntries)&&(childTreeEntries.length > 0) ? (opened ? "/opened_darkgray.png" : "/closed_darkgray.png") : "/circle_darkgray.png"
@@ -43,9 +48,9 @@ export function TreeEntry({iconSrc, text, status, menuItems, childTreeEntries}) 
     return (
         <li className="treeView_item">
             <img src={controlImageUrl} onClick={controlClicked} className="workspaceTree_control"/>
-            <IconWithStatus iconSrc={iconSrc} status={status} />
-            <span>{text}</span>
-            { menuItems ? <SelectMenu text="Menu" image={menuImageUrl} items={menuItems} /> : '' }
+            <IconWithStatus iconSrc={data.iconSrc} status={data.status} />
+            <span>{data.name}</span>
+            { data.menuItems ? <SelectMenu text="Menu" image={menuImageUrl} items={data.menuItems} /> : '' }
             { (opened && childTreeEntries) ? <TreeView childTreeEntries={childTreeEntries} /> : ''}
         </li>
     )

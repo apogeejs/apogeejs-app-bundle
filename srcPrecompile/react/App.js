@@ -9,7 +9,7 @@ import {WorkspaceTreeEntry} from "./WorkspaceObjects.js"
 ///////////////////////////////////////////
 
 /** This is the app element. */
-export function AppElement({workspaceManager,menuData,viewState}) {
+export function AppElement({workspaceTreeState,menuData,viewState}) {
 
     /////////////////////////////////////////
     //TEMP
@@ -24,14 +24,7 @@ export function AppElement({workspaceManager,menuData,viewState}) {
             activeTabObject = activeObjectInfo.tabObject
         }
     }
-    /////////////////////////////////////////
-
-
-    const childTreeEntries = workspaceManager ? 
-            [<WorkspaceTreeEntry key={workspaceManager.getId()} workspaceManager={workspaceManager} openTab={tabFunctions.openTab} />]
-            : undefined
-
-    
+    /////////////////////////////////////////    
 
     let activeTabName, activeTabIcon, activeTabStatus
     if(activeTabObject) {
@@ -44,7 +37,7 @@ export function AppElement({workspaceManager,menuData,viewState}) {
         <>
             <MenuBar menuData={menuData} activeTabName={activeTabName} activeTabIcon={activeTabIcon} activeTabStatus={activeTabStatus} />
             <SplitFrame
-                leftContent={<TreeView childTreeEntries={childTreeEntries}/>}
+                leftContent={<TreeView childTreeEntries={workspaceTreeState ? [workspaceTreeState] : []}/>}
                 rightContent={<TabView tabObjectInfos={tabObjectInfos} selectedTabId={selectedTabId} 
                     closeTab={tabFunctions.closeTab} selectTabId={tabFunctions.selectTab} />} 
             />

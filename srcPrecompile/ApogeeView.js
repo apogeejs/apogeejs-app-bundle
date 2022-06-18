@@ -6,6 +6,11 @@ import {closeWorkspace} from "/apogeejs-app-bundle/src/commandseq/closeworkspace
 import {createWorkspace} from "/apogeejs-app-bundle/src/commandseq/createworkspaceseq.js";
 import {openWorkspace} from "/apogeejs-app-bundle/src/commandseq/openworkspaceseq.js";
 import {saveWorkspace} from "/apogeejs-app-bundle/src/commandseq/saveworkspaceseq.js";
+import { addComponent } from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
+import { updateComponentProperties } from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js"
+import { deleteComponent } from "/apogeejs-app-bundle/src/commandseq/deletecomponentseq.js"
+import {updateWorkspaceProperties} from "/apogeejs-app-bundle/src/commandseq/updateworkspaceseq.js"
+import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
 
 import {showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
 
@@ -45,6 +50,14 @@ export default class ApogeeView {
         }
         /////////////////////////////////
 
+        //////////////////////////////
+        // tree state
+        this.treeStateMap = {}
+
+
+
+        //////////////////////////////////
+
         this._subscribeToAppEvents()
 
         //for react UI
@@ -59,8 +72,14 @@ export default class ApogeeView {
             this._updateViewState()
         }
 
+        let workspaceTreeState
+        if(this.workspaceManager) {
+            let workspaceTreeEntry = this.treeStateMap[this.workspaceManager.getId()]
+            if(workspaceTreeEntry) workspaceTreeState = workspaceTreeEntry.state
+        }
+
         const appElement = <AppElement 
-            workspaceManager={this.workspaceManager}
+            workspaceTreeState={workspaceTreeState}
             menuData={this.menuData}
             viewState={this.viewState} 
         />
@@ -178,9 +197,20 @@ export default class ApogeeView {
         this.app.addListener("workspaceManager_deleted",workspaceManager => this._onWorkspaceClosed(workspaceManager))
         this.app.addListener("workspaceManager_updated",workspaceManager => this._onWorkspaceUpdated(workspaceManager))
 
+        this.app.addListener("modelManager_created",modelManager => this._onModelCreated(modelManager))
+        this.app.addListener("modelManager_deleted",modelManager => this._onModelDeleted(modelManager))
+        this.app.addListener("modelManager_updated",modelManager => this._onModelUpdated(modelManager))
+
         //componet update and delete - for the tab state (since only components have tabs now)
+        this.app.addListener("component_created",component => this._onComponentCreated(component))
         this.app.addListener("component_deleted",component => this._onComponentDeleted(component))
         this.app.addListener("component_updated",component => this._onComponentUpdated(component))
+
+        this.app.addListener("update_completed",() => this._updateCompleted())
+    }
+
+    _updateCompleted() {
+        this.render()
     }
 
     _onWorkspaceCreated(workspaceManager) {
@@ -194,7 +224,14 @@ export default class ApogeeView {
 
         this._updateFileMenu()
 
-        this.render()
+        //tab state
+        this.tabDataList = []
+        this.selectedTabId = INVALID_OBJECT_ID
+        this.viewStateDirty = true;
+
+        // tree state
+        this.treeState = {}
+        this._updateTreeStateEntry(workspaceManager)
     }
 
     _onWorkspaceClosed(workspaceManager) {
@@ -213,7 +250,14 @@ export default class ApogeeView {
 
         this._updateFileMenu()
 
-        this.render()
+        //tab state
+        this.tabDataList = []
+        this.selectedTabId = INVALID_OBJECT_ID
+        this.viewStateDirty = true;
+
+        // tree state
+        this.treeState = {}
+
     }
 
     _onWorkspaceUpdated(workspaceManager) {
@@ -225,7 +269,13 @@ export default class ApogeeView {
             this._updateFileMenu()
         }
 
-        this.render()
+        //tree state
+        this._updateTreeStateEntry(workspaceManager)
+    }
+
+    _onComponentCreated(component) {
+        //tree state
+        this._updateTreeStateEntry(component)
     }
 
     _onComponentUpdated(component) {
@@ -241,14 +291,31 @@ export default class ApogeeView {
             this.viewStateDirty = true
         }
 
-        this.render()
-        
+        //tree state
+        this._updateTreeStateEntry(component)
     }
 
     _onComponentDeleted(component) {
         if(this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == component.getId())) {
             this._closeTab(component.getId())
         }
+
+        this._removeTreeStateEntry(component)
+    }
+
+    _onModelCreated(modelManager) {
+        //tree state
+        this._updateTreeStateEntry(modelManager)
+    }
+    
+    _onModelUpdated(modelManager) {
+        //tree state
+        this._updateTreeStateEntry(modelManager)
+    }
+
+    _onModelDeleted(modelManager) {
+        //tree state
+        this._removeTreeStateEntry(modelManager)
     }
 
     
@@ -387,6 +454,8 @@ export default class ApogeeView {
     }
 
 
+
+
     //---------------------------------
     // Width resize events - for tab frame and tree frame
     //---------------------------------
@@ -506,6 +575,173 @@ export default class ApogeeView {
             getTabElement: getComponentTab
         }
         return tabDataObject
+    }
+
+    /////////////////////////////////////////////////
+    // tree state
+
+    _getTreeStateData(workspaceObject) {
+        let treeStateData = {
+            id: workspaceObject.getId(),
+            name: workspaceObject.getName(),
+            iconSrc: workspaceObject.getIconUrl(),
+            status: workspaceObject.getState(),
+        }
+
+        let menuItems = this._getTreeMenuItems(workspaceObject)
+        if(menuItems) treeStateData.menuItems = menuItems
+
+        return treeStateData
+    }
+
+    _getTreeStateParent(workspaceObject) {
+        switch(workspaceObject.getType()) {
+            case "workspaceManager":
+                return null
+
+            case "modelManager":
+                return this.workspaceManager
+            
+            case "component": 
+                let modelManager = this.workspaceManager.getModelManager()
+                let parentComponent = workspaceObject.getParentComponent(modelManager)
+                return parentComponent ? parentComponent : modelManager
+
+            default:
+                return null
+        }
+    }
+
+    _getTreeMenuItems(workspaceObject) {
+        switch(workspaceObject.getType()) {
+            case "workspaceManager":
+                return this._workspaceManagerTreeMenuItems(workspaceObject)
+            
+            case "component": 
+                return this._componentTreeMenuItems(workspaceObject)
+
+            default:
+                return null
+        }
+    }
+
+    _workspaceManagerTreeMenuItems(workspaceManager) {
+        return [
+            {text: "Edit Properties", action: () => updateWorkspaceProperties(workspaceManager) },
+        ]
+    }
+
+    _componentTreeMenuItems(component) {
+        //menu items
+        let menuItems = []
+        //open tab
+        if(component.getComponentConfig().isParentOfChildEntries) {
+            menuItems.push({text: "Open", action: () => this.tabFunctions.openTab(component.getId())})
+        }
+        //component properties
+        this._addComponentMenuItems(menuItems,component)
+
+        //add children
+        if(component.getComponentConfig().isParentOfChildEntries) {
+            this._addParentMenuItems(menuItems,component.getParentFolderForChildren())
+        }
+
+        return menuItems
+    }
+
+    _updateTreeStateEntry(workspaceObject) {
+        let newData = this._getTreeStateData(workspaceObject)
+
+        let oldEntry = this.treeStateMap[newData.id]
+        let newEntry
+        if(!oldEntry) {
+            newEntry = {
+                state: {
+                    data: newData,
+                    uiState: {},
+                    childTreeEntries: []
+                },
+                stateDirty: true,
+                dataDirty: true,
+                uiStateDirty: true,
+                childrenDirty: true
+            }
+        }
+        else {
+            //set new data for the state
+            let newState = {}
+            Object.assign(newState,oldEntry.state)
+            newState.data = newData
+            
+            //craete new entry with updated state
+            newEntry = {}
+            Object.assign(newEntry,oldEntry)
+            newEntry.state = newState
+            newEntry.stateDirty = true
+            newEntry.dataDirty = true
+        }
+
+        //set the new entry
+        this.treeStateMap[workspaceObject.getId()] = newEntry
+
+        this._addToParentTreeStateEntry(workspaceObject,newEntry)
+    }
+
+    _addToParentTreeStateEntry(workspaceObject,treeStateEntry) {
+        let parentWorkspaceObject = this._getTreeStateParent(workspaceObject)
+        if(!parentWorkspaceObject) return
+
+        let parentEntry = this.treeStateMap[parentWorkspaceObject.getId()]
+
+        //get the new state entry
+        let newStateEntry
+        if(parentEntry.stateDirty) {
+            newStateEntry = parentEntry.state
+        }
+        else {
+            newStateEntry = {}
+            Object.assign(newStateEntry,parentEntry.state)
+            parentEntry.state = newStateEntry
+            parentEntry.stateDirty = true
+        }
+
+        //add the child
+        let index = newStateEntry.childTreeEntries.findIndex(childTreeEntry => childTreeEntry.data.id == workspaceObject.getId())
+        if(index >= 0) {
+            newStateEntry.childTreeEntries[index] = treeStateEntry.state
+        }
+        else {
+            newStateEntry.childTreeEntries.push(treeStateEntry.state)
+        }
+
+        parentEntry.childrenDirty = true
+
+        this._addToParentTreeStateEntry(parentWorkspaceObject,parentEntry)
+    }
+
+    _removeTreeStateEntry(workspaceObject) {
+        throw new Error("implement!")
+    }
+
+    _removeFromParentTreeStateEntry(workspaceObject) {
+        throw new Error("implement!")
+    }
+
+    //utilities 
+    _addComponentMenuItems(menuItems,component) {
+        menuItems.push({text: "Edit Properties", action: () => updateComponentProperties(component)})
+        menuItems.push({text: "Delete", action: () => deleteComponent(component)})
+    }
+    
+    _addParentMenuItems(menuItems,memberParent) {
+        let initialValues = memberParent ? {parentId:memberParent.getId()} : {}
+        const parentComponentConfigs = componentInfo.getParentComponentConfigs()
+        parentComponentConfigs.forEach(componentConfig => {
+            let childMenuItem = {};
+            childMenuItem.text = "Add Child " + componentConfig.displayName;
+            childMenuItem.action = () => addComponent(this.app,componentConfig,initialValues);
+            menuItems.push(childMenuItem);
+        })
     }
 
 }
