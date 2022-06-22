@@ -29,12 +29,14 @@ export default class ApogeeView {
         this.containerId = containerId
         this.app = new Apogee(this)
 
+        /////////////////////////////////////
         //app menu
         this.menuData = null;
         this.fileMenuData = this._getFileMenuData(this.app,this.workspaceManager)
         this.editMenuData = this._getEditMenuData(this.app)
         this.aboutMenuData = this._getAboutMenuData()
         this.packageMenuData()
+        ///////////////////////////////////////
 
         /////////////////////////////
         //view state
@@ -52,16 +54,13 @@ export default class ApogeeView {
 
         //////////////////////////////
         // tree state
-        this.treeStateMap = {}
-
-
+        this.objectMap = {}
+        this.objectStateMap = {}
+        this.workspaceTreeState = null
 
         //////////////////////////////////
 
         this._subscribeToAppEvents()
-
-        //for react UI
-        this.cacheObjects = {}
     }
 
     ////////////////////////////////////
@@ -72,14 +71,8 @@ export default class ApogeeView {
             this._updateViewState()
         }
 
-        let workspaceTreeState
-        if(this.workspaceManager) {
-            let workspaceTreeEntry = this.treeStateMap[this.workspaceManager.getId()]
-            if(workspaceTreeEntry) workspaceTreeState = workspaceTreeEntry.state
-        }
-
         const appElement = <AppElement 
-            workspaceTreeState={workspaceTreeState}
+            workspaceTreeState={this.workspaceTreeState}
             menuData={this.menuData}
             viewState={this.viewState} 
         />
@@ -197,12 +190,7 @@ export default class ApogeeView {
         this.app.addListener("workspaceManager_deleted",workspaceManager => this._onWorkspaceClosed(workspaceManager))
         this.app.addListener("workspaceManager_updated",workspaceManager => this._onWorkspaceUpdated(workspaceManager))
 
-        this.app.addListener("modelManager_created",modelManager => this._onModelCreated(modelManager))
-        this.app.addListener("modelManager_deleted",modelManager => this._onModelDeleted(modelManager))
-        this.app.addListener("modelManager_updated",modelManager => this._onModelUpdated(modelManager))
-
         //componet update and delete - for the tab state (since only components have tabs now)
-        this.app.addListener("component_created",component => this._onComponentCreated(component))
         this.app.addListener("component_deleted",component => this._onComponentDeleted(component))
         this.app.addListener("component_updated",component => this._onComponentUpdated(component))
 
@@ -210,6 +198,18 @@ export default class ApogeeView {
     }
 
     _updateCompleted() {
+
+        let oldObjectMap = this.objectMap
+        let oldObjectStateMap = this.objectStateMap
+        let newObjectMap = {}
+        let newObjectStateMap = {}
+
+        if(this.workspaceManager) {
+            this.workspaceTreeState = this._createObjectTreeState(this.workspaceManager,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap)
+        }
+        this.objectMap = newObjectMap
+        this.objectStateMap = newObjectStateMap
+
         this.render()
     }
 
@@ -227,11 +227,7 @@ export default class ApogeeView {
         //tab state
         this.tabDataList = []
         this.selectedTabId = INVALID_OBJECT_ID
-        this.viewStateDirty = true;
-
-        // tree state
-        this.treeState = {}
-        this._updateTreeStateEntry(workspaceManager)
+        this.viewStateDirty = true
     }
 
     _onWorkspaceClosed(workspaceManager) {
@@ -245,18 +241,12 @@ export default class ApogeeView {
         this.app.clearListenersAndHandlers()
         this._subscribeToAppEvents()
 
-        //clear the cache objects
-        this.cacheObjects = {}
-
         this._updateFileMenu()
 
         //tab state
         this.tabDataList = []
         this.selectedTabId = INVALID_OBJECT_ID
-        this.viewStateDirty = true;
-
-        // tree state
-        this.treeState = {}
+        this.viewStateDirty = true
 
     }
 
@@ -268,14 +258,6 @@ export default class ApogeeView {
         if(workspaceManager.isFieldUpdated("fileMetadata")) {
             this._updateFileMenu()
         }
-
-        //tree state
-        this._updateTreeStateEntry(workspaceManager)
-    }
-
-    _onComponentCreated(component) {
-        //tree state
-        this._updateTreeStateEntry(component)
     }
 
     _onComponentUpdated(component) {
@@ -290,32 +272,12 @@ export default class ApogeeView {
             this.tabDataList = newTabDataList
             this.viewStateDirty = true
         }
-
-        //tree state
-        this._updateTreeStateEntry(component)
     }
 
     _onComponentDeleted(component) {
         if(this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == component.getId())) {
             this._closeTab(component.getId())
         }
-
-        this._removeTreeStateEntry(component)
-    }
-
-    _onModelCreated(modelManager) {
-        //tree state
-        this._updateTreeStateEntry(modelManager)
-    }
-    
-    _onModelUpdated(modelManager) {
-        //tree state
-        this._updateTreeStateEntry(modelManager)
-    }
-
-    _onModelDeleted(modelManager) {
-        //tree state
-        this._removeTreeStateEntry(modelManager)
     }
 
     
@@ -580,38 +542,6 @@ export default class ApogeeView {
     /////////////////////////////////////////////////
     // tree state
 
-    _getTreeStateData(workspaceObject) {
-        let treeStateData = {
-            id: workspaceObject.getId(),
-            name: workspaceObject.getName(),
-            iconSrc: workspaceObject.getIconUrl(),
-            status: workspaceObject.getState(),
-        }
-
-        let menuItems = this._getTreeMenuItems(workspaceObject)
-        if(menuItems) treeStateData.menuItems = menuItems
-
-        return treeStateData
-    }
-
-    _getTreeStateParent(workspaceObject) {
-        switch(workspaceObject.getType()) {
-            case "workspaceManager":
-                return null
-
-            case "modelManager":
-                return this.workspaceManager
-            
-            case "component": 
-                let modelManager = this.workspaceManager.getModelManager()
-                let parentComponent = workspaceObject.getParentComponent(modelManager)
-                return parentComponent ? parentComponent : modelManager
-
-            default:
-                return null
-        }
-    }
-
     _getTreeMenuItems(workspaceObject) {
         switch(workspaceObject.getType()) {
             case "workspaceManager":
@@ -649,84 +579,6 @@ export default class ApogeeView {
         return menuItems
     }
 
-    _updateTreeStateEntry(workspaceObject) {
-        let newData = this._getTreeStateData(workspaceObject)
-
-        let oldEntry = this.treeStateMap[newData.id]
-        let newEntry
-        if(!oldEntry) {
-            newEntry = {
-                state: {
-                    data: newData,
-                    uiState: {},
-                    childTreeEntries: []
-                },
-                stateDirty: true,
-                dataDirty: true,
-                uiStateDirty: true,
-                childrenDirty: true
-            }
-        }
-        else {
-            //set new data for the state
-            let newState = {}
-            Object.assign(newState,oldEntry.state)
-            newState.data = newData
-            
-            //craete new entry with updated state
-            newEntry = {}
-            Object.assign(newEntry,oldEntry)
-            newEntry.state = newState
-            newEntry.stateDirty = true
-            newEntry.dataDirty = true
-        }
-
-        //set the new entry
-        this.treeStateMap[workspaceObject.getId()] = newEntry
-
-        this._addToParentTreeStateEntry(workspaceObject,newEntry)
-    }
-
-    _addToParentTreeStateEntry(workspaceObject,treeStateEntry) {
-        let parentWorkspaceObject = this._getTreeStateParent(workspaceObject)
-        if(!parentWorkspaceObject) return
-
-        let parentEntry = this.treeStateMap[parentWorkspaceObject.getId()]
-
-        //get the new state entry
-        let newStateEntry
-        if(parentEntry.stateDirty) {
-            newStateEntry = parentEntry.state
-        }
-        else {
-            newStateEntry = {}
-            Object.assign(newStateEntry,parentEntry.state)
-            parentEntry.state = newStateEntry
-            parentEntry.stateDirty = true
-        }
-
-        //add the child
-        let index = newStateEntry.childTreeEntries.findIndex(childTreeEntry => childTreeEntry.data.id == workspaceObject.getId())
-        if(index >= 0) {
-            newStateEntry.childTreeEntries[index] = treeStateEntry.state
-        }
-        else {
-            newStateEntry.childTreeEntries.push(treeStateEntry.state)
-        }
-
-        parentEntry.childrenDirty = true
-
-        this._addToParentTreeStateEntry(parentWorkspaceObject,parentEntry)
-    }
-
-    _removeTreeStateEntry(workspaceObject) {
-        throw new Error("implement!")
-    }
-
-    _removeFromParentTreeStateEntry(workspaceObject) {
-        throw new Error("implement!")
-    }
-
     //utilities 
     _addComponentMenuItems(menuItems,component) {
         menuItems.push({text: "Edit Properties", action: () => updateComponentProperties(component)})
@@ -744,6 +596,76 @@ export default class ApogeeView {
         })
     }
 
+    _createObjectTreeState(newObject,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap) {
+        
+        //add a comment about why I am storing these extra object (as a side effect)
+
+        const oldObject = oldObjectMap[newObject.getId()]
+        const oldObjectState = oldObjectStateMap[newObject.getId()]
+
+        // check for "data" updates
+        // - id - doesn't change
+        // - name - changes - use change flag
+        // - iconSrc - doesn't change
+        // - status - changes
+        // - statusMsg - changes
+        // - menuItems - doesn't change
+        let dataUpdated = false
+        let newData
+        if(newObject != oldObject) {
+            let nameUpdated = (!oldObjectState) || (oldObjectState.data.name == newObject.getName())
+            let statusUpdated = (!oldObjectState) || (oldObjectState.data.status == newObject.getState())
+            let statusMsgUpdated = (!oldObjectState) || (oldObjectState.data.statusMsg == newObject.getStateMessage())
+            dataUpdated = (nameUpdated)||(statusUpdated)||(statusMsgUpdated)
+            if(dataUpdated) {
+                newData = {
+                    id: newObject.getId(),
+                    name: newObject.getName(),
+                    iconSrc: oldObjectState ? oldObjectState.data.iconSrc : newObject.getIconUrl(),
+                    status: newObject.getState(),
+                    statusMsg: newObject.getStateMessage(),
+                    menuItems: oldObjectState ? oldObjectState.menuItems : this._getTreeMenuItems(newObject)
+                }
+            }
+        }
+
+        //uiState is not updated here
+
+        //check for children updates
+        let children = newObject.getChildren(this.workspaceManager)
+        let newChildTreeEntries = children.map(childObject => this._createObjectTreeState(childObject,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap))
+        let childrenUpdated = oldObjectState ? !_arraysMatchReferences(newChildTreeEntries,oldObjectState.childTreeEntries) : true
+
+        //geneterate the new state if needed
+        let newObjectState
+        if((!dataUpdated)&&(!childrenUpdated)) {
+            newObjectState = oldObjectState
+        }
+        else {
+            newObjectState = {
+                data: dataUpdated ? newData : oldObjectState.data,
+                uiState: oldObjectState ? oldObjectState.uiState : null,
+                childTreeEntries: childrenUpdated ? newChildTreeEntries : oldObjectState.childTreeEntries
+            }
+        }
+
+        //store references to these objects by id for easy lookup
+        newObjectMap[newObject.getId()] = newObject
+        newObjectStateMap[newObject.getId()] = newObjectState
+
+        return newObjectState
+
+    }
+
+}
+
+/** This function returns true if the two arrays contain entries that are equal. */
+function _arraysMatchReferences(array1,array2) {
+    if(array1.length != array2.length) return false
+    for(let i = 0; i < array1.length; i++) {
+        if(array1[i] != array2[i]) return false
+    }
+    return true;
 }
 
 
