@@ -49,7 +49,7 @@ export function TreeEntry({data,  uiState, childTreeEntries}) {
         <li className="treeView_item">
             <img src={controlImageUrl} onClick={controlClicked} className="workspaceTree_control"/>
             <IconWithStatus iconSrc={data.iconSrc} status={data.status} />
-            <span>{data.name}</span>
+            <span>{data.text}</span>
             { data.menuItems ? <SelectMenu text="Menu" image={menuImageUrl} items={data.menuItems} /> : '' }
             { (opened && childTreeEntries) ? <TreeView childTreeEntries={childTreeEntries} /> : ''}
         </li>

@@ -1,18 +1,25 @@
-import {Apogee} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+import {Apogee} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
-import {AppElement} from "/apogeejs-app-bundle/src/react/app.js";
+import {AppElement} from "/apogeejs-app-bundle/src/react/app.js"
 
-import {closeWorkspace} from "/apogeejs-app-bundle/src/commandseq/closeworkspaceseq.js";
-import {createWorkspace} from "/apogeejs-app-bundle/src/commandseq/createworkspaceseq.js";
-import {openWorkspace} from "/apogeejs-app-bundle/src/commandseq/openworkspaceseq.js";
-import {saveWorkspace} from "/apogeejs-app-bundle/src/commandseq/saveworkspaceseq.js";
+import workspaceManagerHelper from "/apogeejs-app-bundle/src/viewHelper/workspaceManagerHelper.js"
+import modelManagerHelper from "/apogeejs-app-bundle/src/viewHelper/modelManagerHelper.js"
+import componentHelper from "/apogeejs-app-bundle/src/viewHelper/componentHelper.js"
+import referenceManagerHelper from "/apogeejs-app-bundle/src/viewHelper/referenceManagerHelper.js"
+import {referenceEntryHelper, referenceListHelper} from "/apogeejs-app-bundle/src/viewHelper/referenceTypeHelper.js"
+
+import {closeWorkspace} from "/apogeejs-app-bundle/src/commandseq/closeworkspaceseq.js"
+import {createWorkspace} from "/apogeejs-app-bundle/src/commandseq/createworkspaceseq.js"
+import {openWorkspace} from "/apogeejs-app-bundle/src/commandseq/openworkspaceseq.js"
+import {saveWorkspace} from "/apogeejs-app-bundle/src/commandseq/saveworkspaceseq.js"
+
 import { addComponent } from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
 import { updateComponentProperties } from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js"
 import { deleteComponent } from "/apogeejs-app-bundle/src/commandseq/deletecomponentseq.js"
 import {updateWorkspaceProperties} from "/apogeejs-app-bundle/src/commandseq/updateworkspaceseq.js"
-import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js";
+//import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
-import {showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js";
+import {showSimpleActionDialog} from "/apogeejs-ui-lib/src/apogeeUiLib.js"
 
 import {getComponentTab} from "/apogeejs-app-bundle/src/react/ComponentTab.js"
 
@@ -82,18 +89,60 @@ export default class ApogeeView {
     /** This is a lookup function for a workspace object that has a tab (it just does components now)
      * @TODO this needs to be cleaned up. This was just a temporary implementation
      */
-    getTabObject(tabObjectId) {
-        if(this.workspaceManager) {
-            return this.workspaceManager.getModelManager().getComponentByComponentId(tabObjectId)
-        }
-        else {
-            alert("No workspace present")
-        }
+    getWorkspaceObject(objectId) {
+        return this.objectMap[objectId]
     }
 
 
     //end react version additions section
     /////////////////////////////
+
+    //////////////////////////////////////////
+    // function callbacks
+    // These are called based on the current workspaceManager value. It should be used
+    // for UI callbacks and not in the middle of a workspace udpate.
+
+    openTab(componentId) {
+        //do we need two functions here???
+        this._openTab(componentId)
+    }
+
+    addComponent(componentConfig,parentMemberId) {
+        let initialValues = parentMemberId? {parentId:parentMemberId} : {}
+        addComponent(app,componentConfig,initialValues)
+    }
+
+    updateComponentProperties(componentId) {
+        let component = getWorkspaceObject(componentId)
+        updateComponentProperties(component)
+    }
+
+    deleteComponent(componentId) {
+        let component = getWorkspaceObject(componentId)
+        deleteComponent(component)
+    }
+
+    editWorkspaceProperties() {
+        updateWorkspaceProperties(this.workspaceManager)
+    }
+
+    addLink(referenceType,addPropConfig) {
+        addLinkSeq(this.app,referenceType,addPropConfig)
+    }
+
+    editRefEntryProperties(referenceEntryId,editPropConfig) {
+        let referenceEntry = this.getWorkspaceObject(referenceEntryId)
+        updateLinkSeq(this.app,referenceEntry,entryConfig.referenceType,updatePropConfig)
+    }
+
+    deleteRefEntry(referenceEntryId,deleteMsg) {
+        let referenceEntry = this.getWorkspaceObject(referenceEntryId)
+        removeLinkSeq(this.app,referenceEntry,deleteMsg)
+    }
+
+    manageModules() {
+        this.app.openModuleManager()
+    }
 
     ////////////////////////////////
     //start view state interface
@@ -451,11 +500,11 @@ export default class ApogeeView {
     // UI state managements
     //====================================
 
-    _openTab(tabId,selectTab,supressRerender) {
+    _openTab(tabId,selectTab=true,supressRerender) {
         let changeMade = false
 
         if(!this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == tabId)) {
-            let tabObject = this.getTabObject(tabId)
+            let tabObject = this.getWorkspaceObject(tabId)
             if(tabObject) {
                 //update the tab data list
                 const newTabDataList = this.tabDataList.concat(this._getComponentTabDataObject(tabObject))
@@ -542,89 +591,31 @@ export default class ApogeeView {
     /////////////////////////////////////////////////
     // tree state
 
-    _getTreeMenuItems(workspaceObject) {
-        switch(workspaceObject.getType()) {
-            case "workspaceManager":
-                return this._workspaceManagerTreeMenuItems(workspaceObject)
-            
-            case "component": 
-                return this._componentTreeMenuItems(workspaceObject)
-
-            default:
-                return null
-        }
-    }
-
-    _workspaceManagerTreeMenuItems(workspaceManager) {
-        return [
-            {text: "Edit Properties", action: () => updateWorkspaceProperties(workspaceManager) },
-        ]
-    }
-
-    _componentTreeMenuItems(component) {
-        //menu items
-        let menuItems = []
-        //open tab
-        if(component.getComponentConfig().isParentOfChildEntries) {
-            menuItems.push({text: "Open", action: () => this.tabFunctions.openTab(component.getId())})
-        }
-        //component properties
-        this._addComponentMenuItems(menuItems,component)
-
-        //add children
-        if(component.getComponentConfig().isParentOfChildEntries) {
-            this._addParentMenuItems(menuItems,component.getParentFolderForChildren())
-        }
-
-        return menuItems
-    }
-
-    //utilities 
-    _addComponentMenuItems(menuItems,component) {
-        menuItems.push({text: "Edit Properties", action: () => updateComponentProperties(component)})
-        menuItems.push({text: "Delete", action: () => deleteComponent(component)})
-    }
-    
-    _addParentMenuItems(menuItems,memberParent) {
-        let initialValues = memberParent ? {parentId:memberParent.getId()} : {}
-        const parentComponentConfigs = componentInfo.getParentComponentConfigs()
-        parentComponentConfigs.forEach(componentConfig => {
-            let childMenuItem = {};
-            childMenuItem.text = "Add Child " + componentConfig.displayName;
-            childMenuItem.action = () => addComponent(this.app,componentConfig,initialValues);
-            menuItems.push(childMenuItem);
-        })
-    }
-
     _createObjectTreeState(newObject,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap) {
         
         //add a comment about why I am storing these extra object (as a side effect)
 
         const oldObject = oldObjectMap[newObject.getId()]
         const oldObjectState = oldObjectStateMap[newObject.getId()]
+        const viewHelper = this._getViewHelper(newObject)
 
         // check for "data" updates
-        // - id - doesn't change
-        // - name - changes - use change flag
-        // - iconSrc - doesn't change
-        // - status - changes
-        // - statusMsg - changes
-        // - menuItems - doesn't change
         let dataUpdated = false
         let newData
         if(newObject != oldObject) {
-            let nameUpdated = (!oldObjectState) || (oldObjectState.data.name == newObject.getName())
+            let label = viewHelper.getLabel(newObject)
+            let nameUpdated = (!oldObjectState) || (oldObjectState.data.text == label)
             let statusUpdated = (!oldObjectState) || (oldObjectState.data.status == newObject.getState())
             let statusMsgUpdated = (!oldObjectState) || (oldObjectState.data.statusMsg == newObject.getStateMessage())
             dataUpdated = (nameUpdated)||(statusUpdated)||(statusMsgUpdated)
             if(dataUpdated) {
                 newData = {
                     id: newObject.getId(),
-                    name: newObject.getName(),
-                    iconSrc: oldObjectState ? oldObjectState.data.iconSrc : newObject.getIconUrl(),
+                    text: label,
+                    iconSrc: oldObjectState ? oldObjectState.data.iconSrc : viewHelper.getIconUrl(newObject), //doesn't change
                     status: newObject.getState(),
                     statusMsg: newObject.getStateMessage(),
-                    menuItems: oldObjectState ? oldObjectState.menuItems : this._getTreeMenuItems(newObject)
+                    menuItems: oldObjectState ? oldObjectState.data.menuItems : viewHelper.getMenuItems(this,newObject) //doesn't change
                 }
             }
         }
@@ -632,9 +623,9 @@ export default class ApogeeView {
         //uiState is not updated here
 
         //check for children updates
-        let children = newObject.getChildren(this.workspaceManager)
+        let children = viewHelper.getChildren(this.workspaceManager,newObject)
         let newChildTreeEntries = children.map(childObject => this._createObjectTreeState(childObject,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap))
-        let childrenUpdated = oldObjectState ? !_arraysMatchReferences(newChildTreeEntries,oldObjectState.childTreeEntries) : true
+        let childrenUpdated = oldObjectState ? !_arrayContentsMatch(newChildTreeEntries,oldObjectState.childTreeEntries) : true
 
         //geneterate the new state if needed
         let newObjectState
@@ -657,10 +648,36 @@ export default class ApogeeView {
 
     }
 
+    _getViewHelper(workspaceObject) {
+        switch (workspaceObject.getWorkspaceObjectType()) {
+            case "WorkspaceManager":
+                return workspaceManagerHelper
+
+            case "ModelManager":
+                return modelManagerHelper
+
+            case "Component":
+                return componentHelper
+
+            case "ReferenceManager":
+                return referenceManagerHelper
+
+            case "ReferenceList":
+                return referenceListHelper
+
+            case "ReferenceEntry":
+                return referenceEntryHelper
+                
+            default:
+                throw new Error("Unrocgnized workspace object: " + workspaceObject.getWorkspaceObjectType())
+
+        }
+    }
+
 }
 
 /** This function returns true if the two arrays contain entries that are equal. */
-function _arraysMatchReferences(array1,array2) {
+function _arrayContentsMatch(array1,array2) {
     if(array1.length != array2.length) return false
     for(let i = 0; i < array1.length; i++) {
         if(array1[i] != array2[i]) return false
