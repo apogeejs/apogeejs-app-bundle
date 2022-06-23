@@ -30,12 +30,11 @@ const modelManagerHelper = {
         //menu items - add children
         let menuItems = []
         let model = modelManager.getModel()
-        let initialValues = {parentId:model.getId()}
         const parentComponentConfigs = componentInfo.getParentComponentConfigs()
         parentComponentConfigs.forEach(componentConfig => {
             let childMenuItem = {};
             childMenuItem.text = "Add Child " + componentConfig.displayName
-            childMenuItem.action = () => apogeeView.addComponent(componentConfig,initialValues)
+            childMenuItem.action = () => apogeeView.addComponent(componentConfig,model.getId())
             menuItems.push(childMenuItem);
         })
 

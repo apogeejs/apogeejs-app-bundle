@@ -47,12 +47,11 @@ const componentHelper = {
         //add children
         if(component.getComponentConfig().isParentOfChildEntries) {
             let memberParent = component.getParentFolderForChildren()
-            let initialValues = memberParent? {parentId:memberParent.getId()} : {}
             const parentComponentConfigs = componentInfo.getParentComponentConfigs()
             parentComponentConfigs.forEach(componentConfig => {
                 let childMenuItem = {};
                 childMenuItem.text = "Add Child " + componentConfig.displayName
-                childMenuItem.action = () => apogeeView.addComponent(componentConfig,initialValues)
+                childMenuItem.action = () => apogeeView.addComponent(componentConfig,memberParent.getId())
                 menuItems.push(childMenuItem);
             })
         }

@@ -109,16 +109,16 @@ export default class ApogeeView {
 
     addComponent(componentConfig,parentMemberId) {
         let initialValues = parentMemberId? {parentId:parentMemberId} : {}
-        addComponent(app,componentConfig,initialValues)
+        addComponent(this.app,componentConfig,initialValues)
     }
 
     updateComponentProperties(componentId) {
-        let component = getWorkspaceObject(componentId)
+        let component = this.getWorkspaceObject(componentId)
         updateComponentProperties(component)
     }
 
     deleteComponent(componentId) {
-        let component = getWorkspaceObject(componentId)
+        let component = this.getWorkspaceObject(componentId)
         deleteComponent(component)
     }
 
