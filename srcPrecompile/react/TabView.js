@@ -9,31 +9,35 @@ import {IconWithStatus} from "./IconwithStatus.js"
  * - status getState() - returns the status
  * - getIconUrl() - gets the url for the icon
 */
-export function TabView({tabObjectInfos, selectedTabId, closeTab, selectTabId}) {
+export function TabView({tabListState}) {
+
+    let selectedId = tabListState.selectedId
+    let stateArray = tabListState.stateArray
+    let selectTab = tabListState.tabFunctions.selectTab
+    let closeTab = tabListState.tabFunctions.closeTab
 
     return (
         <div className="tabView">
             <div className="tabView_head">
-                {tabObjectInfos.map(tabObjectInfo => {
-                    let tabObject = tabObjectInfo.tabObject
+                {stateArray.map(tabState => {
                     return <TabTab 
-                        key={tabObject.getId()} 
-                        tabObject={tabObject}
+                        key={tabState.id} 
+                        label={tabState.label}
+                        status={tabState.status}
+                        statusMessage={tabState.statusMessage}
+                        iconSrc={tabState.iconSrc}
                         closeTab={closeTab} 
-                        selectTabId={selectTabId} 
-                        selected={selectedTabId == tabObject.getId()}
+                        selectTab={selectTab} 
+                        isSelected={selectedId == tabState.id}
                     />
                 })}
             </div>
             <div className="tabView_body">
-                {tabObjectInfos.map(tabObjectInfo => {
-                    let tabObject = tabObjectInfo.tabObject
-                    let getTabElement = tabObjectInfo.getTabElement
+                {stateArray.map(tabState => {
                     return <TabFrame
-                        key={tabObject.getId()} 
-                        tabObject={tabObject}
-                        getTabElement={getTabElement} 
-                        showing={selectedTabId == tabObject.getId()}
+                        key={tabState.id} 
+                        tabState={tabState} 
+                        showing={selectedId == tabState.id}
                     />
                 })}
             </div>
@@ -42,33 +46,33 @@ export function TabView({tabObjectInfos, selectedTabId, closeTab, selectTabId}) 
 }
 
 /** The argument tabObject is the component or other workspace object that is displayed in the tab. */
-function TabTab({tabObject, closeTab, selectTabId, selected}) {
+function TabTab({tabId, label, status, iconSrc, closeTab, selectTab, isSelected}) {
     function closeClicked(event) {
-        closeTab(tabObject.getId())
+        closeTab(tabId)
         event.stopPropagation() //prevent click from going to tab
     }
 
     function tabClicked(event) {
-        selectTabId(tabObject.getId())
+        selectTab(tabId)
         event.stopPropagation()
     }
 
-    let className = "tabView_tab " + (selected ? "tabView_selected" : "tabView_deselected")
+    let className = "tabView_tab " + (isSelected ? "tabView_selected" : "tabView_deselected")
     let imageUrl = apogeeui.uiutil.getResourcePath("/close_gray.png","ui-lib");
 
     return (
         <div onClick={tabClicked} className={className}>
-        <IconWithStatus iconSrc={tabObject.getIconUrl()} status={tabObject.getState()} />
-            <span>{tabObject.getName()}</span>
+        <IconWithStatus iconSrc={iconSrc} status={status} />
+            <span>{label}</span>
             <input type="image" onClick={closeClicked} src={imageUrl}/>    
         </div>
     )
 }
 
-function TabFrame({tabObject, getTabElement, showing}) {
+function TabFrame({tabState, showing}) {
     return (
         <div style={{display: showing ? '' : "none"}} className="tabView_frame">
-            {getTabElement(tabObject,showing)}
+            {tabState.getTabElement(tabState,showing)}
         </div>
     )
 }

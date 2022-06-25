@@ -2,35 +2,26 @@ import {SplitFrame} from "./SplitFrame.js"
 import {TreeView} from "./TreeView.js"
 import {TabView} from "./TabView.js"
 import {MenuBar} from "./MenuBar.js"
-import {WorkspaceTreeEntry} from "./WorkspaceObjects.js"
 
 ///////////////////////////////////////////
 //Application
 ///////////////////////////////////////////
 
 /** This is the app element. */
-export function AppElement({workspaceTreeState,menuData,viewState}) {
+export function AppElement({workspaceTreeState,menuData,tabListState}) {
 
-    /////////////////////////////////////////
-    //TEMP
-    let tabObjectInfos,selectedTabId,tabFunctions,activeTabObject
-    if(viewState) {
-        tabObjectInfos = viewState.tabDataList
-        selectedTabId = viewState.selectedTabId
-        tabFunctions = viewState.tabFunctions
+    //get active tab data
+    let activeTabState
+    if(tabListState) {
+        activeTabState = tabListState.stateArray.filter(tabState => tabState.id == tabListState.selectedId)
 
-        let activeObjectInfo = tabObjectInfos.filter(tabDataObject => tabDataObject.tabId == selectedTabId)
-        if(activeObjectInfo) {
-            activeTabObject = activeObjectInfo.tabObject
-        }
     }
-    /////////////////////////////////////////    
 
     let activeTabName, activeTabIcon, activeTabStatus
-    if(activeTabObject) {
-        activeTabName = activeTabObject.getFullName(workspaceManager.getModelManager())
-        activeTabIcon = activeTabObject.getIconUrl()
-        activeTabObject.getState()
+    if(activeTabState) {
+        activeTabName = activeTabState.label
+        activeTabIcon = activeTabState.iconSrc
+        activeTabStatus = activeTabState.status
     }
 
     return (
@@ -38,8 +29,7 @@ export function AppElement({workspaceTreeState,menuData,viewState}) {
             <MenuBar menuData={menuData} activeTabName={activeTabName} activeTabIcon={activeTabIcon} activeTabStatus={activeTabStatus} />
             <SplitFrame
                 leftContent={<TreeView childTreeEntries={workspaceTreeState ? [workspaceTreeState] : []}/>}
-                rightContent={<TabView tabObjectInfos={tabObjectInfos} selectedTabId={selectedTabId} 
-                    closeTab={tabFunctions.closeTab} selectTabId={tabFunctions.selectTab} />} 
+                rightContent={<TabView tabListState={tabListState} />} 
             />
         </>
     )

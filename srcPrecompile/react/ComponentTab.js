@@ -1,52 +1,35 @@
 import {ComponentCell} from "./ComponentCell.js"
-import {getChildComponents} from "./componentUtils.js"
 import {bannerVisible,StateBanner} from "./StateBanner.js"
-import {addComponent} from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
-export function getComponentTab(component,showing) {
-    return <ComponentTab component={component} showing={showing} />
+export function getComponentTab(tabState,showing) {
+    return <ComponentTab tabState={tabState} showing={showing} />
 }
 
-export function ComponentTab({component,showing}) {
-    if(component.getComponentConfig().isParentOfChildEntries) {
+export function ComponentTab({tabState,showing}) {
 
-        //get child components
-        let app = component.getApp()
-        let modelManager = app.getModelManager()
-        let parentFolder = component.getParentFolderForChildren();
-        let childComponents = getChildComponents(modelManager,parentFolder) 
-
-        let childComponentConfigs = componentInfo.getChildComponentConfigs()
-        
-        return (
-            <div className="componentTabWrapper">
-                <div className="componentPageHeaderElement">
-                    <PageToolbarElement app={app} parentFolder={parentFolder} childComponentConfigs={childComponentConfigs} />
-                    {bannerVisible(component) ? <StateBanner component={component} /> : ''}
-                </div>
-                <div className="componentPageBodyElement">
-                    {
-                        //get cells for child components that have cells (view modes exist)
-                        childComponents.filter(component => component.getComponentConfig().viewModes)
-                            .map(component => <ComponentCell key={component.getId()} component={component} showing={showing} />)
-                    }
-                </div>
+    let childComponentConfigs = componentInfo.getChildComponentConfigs()
+    
+    return (
+        <div className="componentTabWrapper">
+            <div className="componentPageHeaderElement">
+                <PageToolbarElement addChildComponent={tabState.addChildComponent} childComponentConfigs={childComponentConfigs} />
+                {bannerVisible(tabState.status) ? <StateBanner status={tabState.status} message={tabState.statusMessage} /> : ''}
             </div>
-        )
-    }
-    else {
-        console.log("Requesting tab for non-parent component")
-        return <div>INVALID TAB - NOT A PARENT</div>
-    }
+            <div className="componentPageBodyElement">
+                {
+                    //get cells for child components that have cells (view modes exist)
+                    tabState.cellStateArray ? tabState.cellStateArray.map(cellState => <ComponentCell key={cellState.id} cellState={cellState} cellShowing={showing} />) : ''
+                }
+            </div>
+        </div>
+    )
 }
 
-function PageToolbarElement({app, parentFolder, childComponentConfigs}) {
+function PageToolbarElement({addChildComponent, childComponentConfigs}) {
 
     //get the command to create in this folder
-    var initialValues = {};
-    initialValues.parentId = parentFolder.getId();
-    let createComponent = componentConfig => addComponent(app,componentConfig,initialValues)
+    let createComponent = componentConfig => addChildComponent(componentConfig)
 
     const [selectedChildConfig, setSelectedChildConfig] = React.useState(() => childComponentConfigs[0])
 

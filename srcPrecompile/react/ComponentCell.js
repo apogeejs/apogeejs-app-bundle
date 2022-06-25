@@ -1,14 +1,13 @@
 import {IconWithStatus} from "./IconwithStatus.js"
 import {SelectMenu} from "./SelectMenu.js"
-import {addComponentMenuItems} from "./componentUtils.js"
 import {bannerVisible,StateBanner} from "./StateBanner.js"
 //oops - move this
 import DATA_DISPLAY_CONSTANTS from "/apogeejs-app-lib/src/datadisplay/dataDisplayConstants.js"
 
-export function ComponentCell({component,showing}) {
+export function ComponentCell({cellState,cellShowing}) {
 
-    const viewModes = component.getComponentConfig().viewModes
-    const [openedViews,setOpenedViews] = React.useState(() => viewModes.map(viewModeInfo => viewModeInfo.isActive))
+    //LATER THIS STATE WILL BE KEPT ETERNALLY
+    const [openedViews,setOpenedViews] = React.useState(() => cellState.viewModeControlStates.map(state => state.opened))
 
     //need to work out how I want to do the styling
 
@@ -16,14 +15,15 @@ export function ComponentCell({component,showing}) {
         //<div key={component.getInstanceNumber()} className="visiui_pageChild_mainClass">
         <div className="visiui_pageChild_mainClass">
             <div className="visiui_pageChild_titleBarClass">
-                <CellHeading component={component} />
-                <DataViewControls component={component} openedViews={openedViews} setOpenedViews={setOpenedViews} />
-                <span className="visiui_pageChild_cellTypeLabelClass">{component.getComponentTypeDisplayName()}</span>
+                <CellHeading label={cellState.displayName} iconSrc={cellState.iconSrc} 
+                    status={cellState.status} statusMessage={cellState.statusMessage} menuItems={cellState.menuItems} />
+                <DataViewControls viewModeControlStates={cellState.viewModeControlStates} openedViews={openedViews} setOpenedViews={setOpenedViews} />
+                <span className="visiui_pageChild_cellTypeLabelClass">{cellState.componentTypeName}</span>
             </div>
-            {bannerVisible(component) ? <StateBanner component={component} /> : ''}
+            {bannerVisible(cellState.status) ? <StateBanner status={cellState.status} statusMessage={cellState.statusMessage} /> : ''}
             <div className="visiui_pageChild_viewContainerClass" >
-                {viewModes.map((viewModeInfo,viewModeIndex) => 
-                    openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} component={component} viewModeIndex={viewModeIndex} showing={showing} /> : ''
+                {cellState.viewModes.map((viewModeState,viewModeIndex) => 
+                    openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} componentId={cellState.id} viewModeState={viewModeState} cellShowing={cellShowing} /> : ''
                 )}
             </div>
         </div>
@@ -32,40 +32,25 @@ export function ComponentCell({component,showing}) {
 
 
 /** This is the icon, name and properties menu */
-function CellHeading({component}) {
-
-    const text = component.getDisplayName()
-    const iconUrl = component.getIconUrl()
-    const status = "normal" //fix this
-
-    // @TODO - update this (maybe just the comment) - the function hsed here comes from a global file workspaceObject.js
-    let menuItems =  []
-    addComponentMenuItems(menuItems,component)
-
+function CellHeading({label,iconSrc,status,statusMessage,menuItems}) {
     let menuImageUrl = apogeeui.uiutil.getResourcePath("/menuDots16_darkgray.png","ui-lib")
 
     return (
         <>
-            <IconWithStatus iconSrc={iconUrl} status={status} />
-            <span className="visiui_pageChild_titleBarNameClass">{text}</span>
+            <IconWithStatus iconSrc={iconSrc} status={status} />
+            <span className="visiui_pageChild_titleBarNameClass">{label}</span>
             <SelectMenu text="Menu" image={menuImageUrl} items={menuItems} />
         </>
     )
 }
 
 /** This holds the selectors for the visible data views */
-function DataViewControls({component, openedViews, setOpenedViews}) {
-
-    const viewModes = component.getComponentConfig().viewModes
-
-    //function to check if view mode should be removed
-    const showViewTab = (viewModeInfo) => viewModeInfo.isViewRemoved ? !viewModeInfo.isViewRemoved(component) : true
+function DataViewControls({viewModeControlStates, openedViews, setOpenedViews}) {
 
     return (
         <div className="visiui_pageChild_titleBarViewsClass">
-            {viewModes.map( (viewModeInfo,viewModeIndex) => 
-                showViewTab(viewModeInfo) ? <DataViewControl key={viewModeInfo.name} viewModeInfo={viewModeInfo} 
-                    viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} /> : ''
+            {viewModeControlStates.map( (state,viewModeIndex) => state.hidden ? '' : <DataViewControl key={state.name} label={state.name} 
+                    viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} />
             )}
         </div>
     )
@@ -75,7 +60,7 @@ const VIEW_CLOSED_IMAGE_PATH = "/closed_black.png";
 const VIEW_OPENED_IMAGE_PATH = "/opened_black.png";
 
 /** This is a selector for a visible data view */
-function DataViewControl({viewModeInfo, viewModeIndex, openedViews, setOpenedViews}) {
+function DataViewControl({label, viewModeIndex, openedViews, setOpenedViews}) {
 
     const viewOpened = openedViews[viewModeIndex]
     const setViewOpened = opened => {
@@ -95,48 +80,45 @@ function DataViewControl({viewModeInfo, viewModeIndex, openedViews, setOpenedVie
     return (
         <a className="visiui_displayContainer_viewSelectorLinkClass" onClick={handleClick}>
             <img src={imgSrc} className="visiui_displayContainer_expandContractClass" />
-            <span className="visiui_displayContainer_viewSelectorClass">{viewModeInfo.label}</span>
+            <span className="visiui_displayContainer_viewSelectorClass">{label}</span>
         </a>
     )
 }
 
 
+/** This is the container for the display element provided by the view mode */
+function ViewModeFrame({componentId,viewModeState,cellShowing}) {
 
-function ViewModeFrame({component,viewModeIndex,showing}) {
-    let viewModeInfo = component.getComponentConfig().viewModes[viewModeIndex]
-
-    const [editModeData,setEditModeData] = React.useState(null)
-    const [msgData,setMsgData] = React.useState(null)
+    const [editMode,setEditMode] = React.useState(false)
     const [verticalSize,setVerticalSize] = React.useState(null)
-    const [sizeCommandData,setSizeCommandData] = React.useState(null)
 
-    const showMsg = (msgData)&&(msgData.type != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
-    const msgBarStyle = showMsg ? getMessageBarStyle(msgData.type) : null
+    const showMsg = (viewModeState.sourceState.messageType)&&(viewModeState.sourceState.messageType != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
+    const msgBarStyle = showMsg ? getMessageBarStyle(viewModeState.sourceState.messageType) : null
 
-    const onSave = () => editModeData.save ? editModeData.save() : null
-    const onCancel = () => editModeData.cancel ? editModeData.cancel() : null
+    const onSave = () =>  viewModeState.sourceState.save ? viewModeState.sourceState.save() : null
+    const onCancel = () => setEditMode(false)
 
     return (
         <div className="visiui_displayContainerClass_mainClass">
             <div>
-                <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeInfo.label}</div>
-                {sizeCommandData ? <div className="visiui_displayContainer_viewSizingElementClass">
-                    <ViewSizeElement sizeCommandData={sizeCommandData} size={verticalSize} setSize={setVerticalSize} />
+                <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeState.viewName}</div>
+                {viewModeState.sizeCommandData ? <div className="visiui_displayContainer_viewSizingElementClass">
+                    <ViewSizeElement sizeCommandData={viewModeState.sizeCommandData} size={verticalSize} setSize={setVerticalSize} />
                 </div> : ''}
-                {viewModeInfo.getViewStatusElement ? 
+                {viewModeState.getViewStatusElement ? 
                     <div className="visiui_displayContainer_viewDisplayBarClass">
-                        {viewModeInfo.getViewStatusElement(component)}
+                        {viewModeState.getViewStatusElement(viewModeState.sourceState)}
                     </div> : ''
                 }
             </div>
-            { showMsg ? <div className={msgBarStyle} >{msgData.msg}</div> : ''}
-            { editModeData ?
+            { showMsg ? <div className={msgBarStyle} >{viewModeState.sourceState.message}</div> : ''}
+            { editMode ?
                 <div className="visiui_displayContainer_saveBarContainerClass">
                     Edit: 
                     <button type="button" onClick={onSave}>Save</button>
                     <button  type="button" onClick={onCancel}>Cancel</button>
                 </div> : ''}
-            {viewModeInfo.getViewModeElement(component,showing,setEditModeData,setMsgData,verticalSize,setSizeCommandData)}
+            {viewModeState.getViewModeElement(componentId,viewModeState.sourceState,cellShowing,setEditMode,verticalSize)}
         </div>
     )
 }

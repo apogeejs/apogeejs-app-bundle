@@ -1,6 +1,6 @@
 import {Apogee} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
-import {AppElement} from "/apogeejs-app-bundle/src/react/app.js"
+import {AppElement} from "/apogeejs-app-bundle/src/react/App.js"
 
 import workspaceManagerHelper from "/apogeejs-app-bundle/src/viewHelper/workspaceManagerHelper.js"
 import modelManagerHelper from "/apogeejs-app-bundle/src/viewHelper/modelManagerHelper.js"
@@ -46,16 +46,17 @@ export default class ApogeeView {
         ///////////////////////////////////////
 
         /////////////////////////////
-        //view state
-        this.tabDataList = []
-        this.selectedTabId = null
-        this.viewState = null
-        this.viewStateDirty = true
-
+        //tab state
         this.tabFunctions = {
             openTab: (tabId,isSelected = true) => this._openTab(tabId,isSelected),
             closeTab: (tabId) => this._closeTab(tabId),
             selectTab: (tabId) => this._selectTab(tabId)
+        }
+
+        this.tabListState = {
+            selectedId: INVALID_OBJECT_ID,
+            stateArray: [],
+            tabFunctions: this.tabFunctions
         }
         /////////////////////////////////
 
@@ -73,16 +74,12 @@ export default class ApogeeView {
     ////////////////////////////////////
     // React Version additions section
     render() {
-
-        if(this.viewStateDirty) {
-            this._updateViewState()
-        }
-
         const appElement = <AppElement 
             workspaceTreeState={this.workspaceTreeState}
             menuData={this.menuData}
-            viewState={this.viewState} 
+            tabListState={this.tabListState} 
         />
+
         ReactDOM.render(appElement,document.getElementById(this.containerId))
     }
 
@@ -148,56 +145,51 @@ export default class ApogeeView {
     //start view state interface
 
     getViewStateJson() {
-        //Do I want to do this, or expolicitly not do this?
-        if(this.viewStateDirty) {
-            this._updateViewState()
-        }
+        // let json = {
+        //     openTabs: []
+        // }
 
-        let json = {
-            openTabs: []
-        }
+        // let modelManager = this.workspaceManager.getModelManager()
 
-        let modelManager = this.workspaceManager.getModelManager()
+        // this.tabListState.forEach(tabDataObject => {
+        //     let fullName = tabDataObject.tabObject.getFullName(modelManager)
+        //     json.openTabs.push(fullName)
+        //     if(this.selectedTabId == tabDataObject.tabObject.getId()) {
+        //         json.selectedTab = fullName
+        //     }
+        // })
 
-        this.tabDataList.forEach(tabDataObject => {
-            let fullName = tabDataObject.tabObject.getFullName(modelManager)
-            json.openTabs.push(fullName)
-            if(this.selectedTabId == tabDataObject.tabObject.getId()) {
-                json.selectedTab = fullName
-            }
-        })
-
-        return json.openTabs.length > 0 ? json : undefined
+        // return json.openTabs.length > 0 ? json : undefined
     }
 
     setViewStateJson(viewStateJson) {
-        if((viewStateJson)&&(viewStateJson.openTabs)) {
-            let modelManager = this.workspaceManager.getModelManager()
-            let model = modelManager.getModel()
+        // if((viewStateJson)&&(viewStateJson.openTabs)) {
+        //     let modelManager = this.workspaceManager.getModelManager()
+        //     let model = modelManager.getModel()
 
-            let tabDataList = []
-            let selectedTabId
+        //     let tabDataList = []
+        //     let selectedTabId
 
-            viewStateJson.openTabs.forEach(fullName => {
-                let member = model.getMemberByFullName(model,fullName)
-                let componentId = modelManager.getComponentIdByMemberId(member.getId())
-                if(componentId) {
-                    let component = modelManager.getComponentByComponentId(componentId)
-                    let tabDataObject = this._getComponentTabDataObject(component)
-                    tabDataList.push(tabDataObject)
+        //     viewStateJson.openTabs.forEach(fullName => {
+        //         let member = model.getMemberByFullName(model,fullName)
+        //         let componentId = modelManager.getComponentIdByMemberId(member.getId())
+        //         if(componentId) {
+        //             let component = modelManager.getComponentByComponentId(componentId)
+        //             let tabDataObject = this._getComponentTabDataObject(component)
+        //             tabDataList.push(tabDataObject)
 
-                    if(viewStateJson.selectedTab == fullName) {
-                        selectedTabId = component.getId()
-                    }
-                }
-            })
+        //             if(viewStateJson.selectedTab == fullName) {
+        //                 selectedTabId = component.getId()
+        //             }
+        //         }
+        //     })
 
-            this.tabDataList = tabDataList
-            this.selectedTabId = selectedTabId
-            this.viewStateDirty = true
+        //     this.tabDataList = tabDataList
+        //     this.selectedTabId = selectedTabId
+        //     this.viewStateDirty = true
 
-            this.render()
-        }
+        //     this.render()
+        // }
     }
 
     //end view state interface
@@ -239,23 +231,24 @@ export default class ApogeeView {
         this.app.addListener("workspaceManager_deleted",workspaceManager => this._onWorkspaceClosed(workspaceManager))
         this.app.addListener("workspaceManager_updated",workspaceManager => this._onWorkspaceUpdated(workspaceManager))
 
-        //componet update and delete - for the tab state (since only components have tabs now)
-        this.app.addListener("component_deleted",component => this._onComponentDeleted(component))
-        this.app.addListener("component_updated",component => this._onComponentUpdated(component))
-
         this.app.addListener("update_completed",() => this._updateCompleted())
     }
 
     _updateCompleted() {
 
         let oldObjectMap = this.objectMap
+        let oldTabListState = this.tabListState
         let oldObjectStateMap = this.objectStateMap
+
         let newObjectMap = {}
         let newObjectStateMap = {}
 
         if(this.workspaceManager) {
-            this.workspaceTreeState = this._createObjectTreeState(this.workspaceManager,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap)
+            this._loadObjectMap(this.workspaceManager,newObjectMap)
+            this.tabListState = this._createTabListState(newObjectMap,oldObjectMap,oldTabListState)
+            this.workspaceTreeState = this._createObjectTreeState(this.workspaceManager,newObjectStateMap,oldObjectMap,oldObjectStateMap)
         }
+
         this.objectMap = newObjectMap
         this.objectStateMap = newObjectStateMap
 
@@ -272,11 +265,6 @@ export default class ApogeeView {
         this.workspaceManager = workspaceManager
 
         this._updateFileMenu()
-
-        //tab state
-        this.tabDataList = []
-        this.selectedTabId = INVALID_OBJECT_ID
-        this.viewStateDirty = true
     }
 
     _onWorkspaceClosed(workspaceManager) {
@@ -291,12 +279,6 @@ export default class ApogeeView {
         this._subscribeToAppEvents()
 
         this._updateFileMenu()
-
-        //tab state
-        this.tabDataList = []
-        this.selectedTabId = INVALID_OBJECT_ID
-        this.viewStateDirty = true
-
     }
 
     _onWorkspaceUpdated(workspaceManager) {
@@ -306,26 +288,6 @@ export default class ApogeeView {
         //(we may want to make the menu depend on the is dirty flag too)
         if(workspaceManager.isFieldUpdated("fileMetadata")) {
             this._updateFileMenu()
-        }
-    }
-
-    _onComponentUpdated(component) {
-        let index = this.tabDataList.findIndex(tabDataObject => tabDataObject.tabObject.getId() == component.getId())
-        if(index >= 0) {
-            //replace the component of the old entry with the new component
-            const newTabDataList = this.tabDataList.map( (listTabDataObject,listIndex) => {
-                if(listIndex == index) return this._getComponentTabDataObject(component,listTabDataObject)
-                else return listTabDataObject
-            })
-            
-            this.tabDataList = newTabDataList
-            this.viewStateDirty = true
-        }
-    }
-
-    _onComponentDeleted(component) {
-        if(this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == component.getId())) {
-            this._closeTab(component.getId())
         }
     }
 
@@ -464,9 +426,6 @@ export default class ApogeeView {
         }
     }
 
-
-
-
     //---------------------------------
     // Width resize events - for tab frame and tree frame
     //---------------------------------
@@ -501,97 +460,189 @@ export default class ApogeeView {
     //====================================
 
     _openTab(tabId,selectTab=true,supressRerender) {
-        let changeMade = false
+        let oldTabListState = this.tabListState
+        let oldStateArray = oldTabListState.stateArray
 
-        if(!this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == tabId)) {
-            let tabObject = this.getWorkspaceObject(tabId)
-            if(tabObject) {
-                //update the tab data list
-                const newTabDataList = this.tabDataList.concat(this._getComponentTabDataObject(tabObject))
-                this.tabDataList = newTabDataList
+        if(oldStateArray.find(tabState => tabState.id == tabId)) return //tab already opened
 
-                changeMade = true
-            }
+        let component = this.objectMap[tabId]
+        if(!component) return //component not found
+
+        let newStateArray = oldStateArray.slice()
+        let newTabState = this._getTabState(component)
+        newStateArray.push(newTabState)
+
+        let newSelectedId = (selectTab || (oldStateArray.length == 0)) ? tabId : oldTabListState.selectedId
+
+        let newTabListState = {
+            selectedId: newSelectedId,
+            stateArray: newStateArray,
+            tabFunctions: this.tabFunctions
         }
+        this.tabListState = newTabListState
 
-        if((selectTab)&&(this.selectedTabId != tabId)) {
-            this.selectedTabId = tabId
-            
-            changeMade = true
-        }
-
-        if((changeMade)&&(!supressRerender)) {
-            this.viewStateDirty = true
+        if(!supressRerender) {
             this.render()
         } 
     }
 
     _closeTab(tabId,supressRerender) {
-        let changeMade = false
+        let oldTabListState = this.tabListState
+        let oldStateArray = oldTabListState.stateArray
 
-        const newTabDataList = this.tabDataList.filter(tabDataObject => tabDataObject.tabObject.getId() != tabId)
-        if(newTabDataList.length != this.tabDataList.length) {
-            //update the tab data list
-            this.tabDataList = newTabDataList
-            
-            changeMade = true
-        }
+        if(!oldStateArray.find(tabState => tabState.id == tabId)) return //tab not opened
 
-        if(tabId == this.selectedTabId) {
-            if(this.tabDataList.length > 0) this.selectedTabId = this.tabDataList[0].tabObject.getId()
-            
-            changeMade = true
+        let newStateArray = oldStateArray.filter(tabState => tabState.id != tabId)
+        let newSelectedId
+        if(oldTabListState.selectedId == tabId) {
+            newSelectedId = newStateArray.length >= 0 ? newStateArray[0].id : INVALID_OBJECT_ID
         }
         else {
-            this.selectedTabId = INVALID_OBJECT_ID
-
-            changeMade = true
+            newSelectedId = oldTabListState.selectedId 
         }
+        
+        let newTabListState = {
+            selectedId: newSelectedId,
+            stateArray: newStateArray,
+            tabFunctions: this.tabFunctions
+        }
+        this.tabListState = newTabListState
 
-        if((changeMade)&&(!supressRerender)) {
-            this.viewStateDirty = true
+        if(!supressRerender) {
             this.render()
         } 
     }
 
     _selectTab(tabId,supressRerender) {
-        let changeMade = false
+        let oldTabListState = this.tabListState
 
-        if((tabId != this.selectedTabId)&&(this.tabDataList.find(tabDataObject => tabDataObject.tabObject.getId() == tabId))) {
-            this.selectedTabId = tabId
+        if(oldTabListState.selectedId == tabId) return //already selected
+        if(!oldTabListState.stateArray.find(tabState => tabState.id == tabId)) return //tab not opened
 
-            changeMade = true
-        }
-
-        if((changeMade)&&(!supressRerender)) {
-            this.viewStateDirty = true
-            this.render()
-        }    
-    }
-
-    _updateViewState() {
-        this.viewState = {
-            tabDataList: this.tabDataList,
-            selectedTabId: this.selectedTabId,
+        let newTabListState = {
+            selectedId: tabId,
+            stateArray: oldTabListState.stateArray,
             tabFunctions: this.tabFunctions
         }
+        this.tabListState = newTabListState
 
-        this.viewStateDirty = false
+        this.render()
+    }
+ 
+    ///////////////////////////////////////////////
+    // create object map
+
+    
+    _loadObjectMap(newObject,newObjectMap) {
+        newObjectMap[newObject.getId()] = newObject
+        const viewHelper = this._getViewHelper(newObject)
+        let children = viewHelper.getChildren(this.workspaceManager,newObject)
+        children.forEach(child => this._loadObjectMap(child,newObjectMap))
     }
 
-    _getComponentTabDataObject(component,oldTabDataObject) {
-        //if we have ui state we need to include it in the new object)
-        const tabDataObject = {
-            tabObject: component,
-            getTabElement: getComponentTab
+
+    /////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////
+    // tab state
+
+    _createTabListState(newObjectMap,oldObjectMap,oldTabListState) {
+        let newTabListState = {
+            selectedId: oldTabListState.selectedId,
+            stateArray: [],
+            tabFunctions: this.tabFunctions
         }
-        return tabDataObject
+        let selectionDeleted = false
+        
+        oldTabListState.stateArray.forEach(oldTabState => {
+            let newComponent = newObjectMap[oldTabState.id]
+            let oldComponent = oldObjectMap[oldTabState.id]
+            if(newComponent) {
+                //get new tab state
+                let newTabState = this._getTabState(newComponent,oldComponent,oldTabState)
+                newTabListState.stateArray.push(newTabState)
+            }
+            else {
+                //component deleted - make sure this is not selected
+                if(oldTabListState.selectedId == oldTabState.id) {
+                    selectionDeleted = true;
+                }
+            }
+        })
+
+        if(selectionDeleted) {
+            if(newTabListState.stateArray.length > 0) {
+                newTabListState.selectedId = newTabListState.stateArray[0].id
+            }
+            else {
+                newTabListState.selectedId = INVALID_OBJECT_ID
+            }
+        }
+
+        return newTabListState
     }
+
+    _getTabState(component,oldComponent,oldTabState) {
+        //LATER UDPATE ONLY WHAT IS NEEDED
+
+        let tabState = {}
+        tabState.id = component.getId()
+        tabState.label = component.getName()
+        tabState.iconSrc = component.getIconUrl()
+        tabState.status = component.getState()
+        tabState.statusMessage = component.getStateMessage()
+
+        tabState.addChildComponent = (componentConfig) => this.addComponent(componentConfig,component.getId()) //reuse, don't recreate instance
+        tabState.getTabElement = getComponentTab
+
+        const viewHelper = this._getViewHelper(component)
+        let children = viewHelper.getChildren(this.workspaceManager,component);
+        tabState.cellStateArray = children.filter(child => (child.getComponentConfig().viewModes !== undefined))
+            .map(child => this._getCellState(child,viewHelper))
+
+        return tabState
+    }
+
+    _getCellState(component,viewHelper) {
+        let cellState = {}
+        cellState.id = component.getId()
+        cellState.displayName = component.getDisplayName()
+        cellState.iconSrc = component.getIconUrl()
+        cellState.status = component.getState()
+        cellState.statusMessage = component.getStateMessage()
+        cellState.componentTypeName = component.getComponentConfig().displayName
+
+        cellState.menuItems = viewHelper.getMenuItems(this,component) //THESE ARE THE WRONG ITEMS! (and I should reuse them)
+
+        cellState.viewModeControlStates = component.getComponentConfig().viewModes.map(viewModeInfo => {
+            return {
+                hidden: false,
+                name: viewModeInfo.label,
+                opened: viewModeInfo.isActive
+            }
+        })
+
+        //view modes
+        cellState.viewModes = component.getComponentConfig().viewModes.map(viewModeInfo => {
+            let viewState = {}
+            viewState.viewName = viewModeInfo.label
+            if(viewModeInfo.sizeCommandInfo) viewState.sizeCommandInfo = viewModeInfo.sizeCommandInfo
+            viewState.sourceState = viewModeInfo.getSourceState(component)
+            viewState.getViewModeElement = viewModeInfo.getViewModeElement
+            if(viewModeInfo.getViewStatusElement) viewState.getViewStatusElement = viewModeInfo.getViewStatusElement
+            return viewState
+        })
+
+        return cellState
+    }
+
+
+    //////////////////////////////////////////////////////
 
     /////////////////////////////////////////////////
     // tree state
 
-    _createObjectTreeState(newObject,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap) {
+    _createObjectTreeState(newObject,newObjectStateMap,oldObjectMap,oldObjectStateMap) {
         
         //add a comment about why I am storing these extra object (as a side effect)
 
@@ -624,7 +675,7 @@ export default class ApogeeView {
 
         //check for children updates
         let children = viewHelper.getChildren(this.workspaceManager,newObject)
-        let newChildTreeEntries = children.map(childObject => this._createObjectTreeState(childObject,newObjectMap,newObjectStateMap,oldObjectMap,oldObjectStateMap))
+        let newChildTreeEntries = children.map(childObject => this._createObjectTreeState(childObject,newObjectStateMap,oldObjectMap,oldObjectStateMap))
         let childrenUpdated = oldObjectState ? !_arrayContentsMatch(newChildTreeEntries,oldObjectState.childTreeEntries) : true
 
         //geneterate the new state if needed
@@ -640,8 +691,6 @@ export default class ApogeeView {
             }
         }
 
-        //store references to these objects by id for easy lookup
-        newObjectMap[newObject.getId()] = newObject
         newObjectStateMap[newObject.getId()] = newObjectState
 
         return newObjectState

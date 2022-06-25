@@ -1,21 +1,21 @@
 
 import apogeeutil from "/apogeejs-util-lib/src/apogeeUtilLib.js";
 
-export function bannerVisible(component) {
-    return ( (component.getState() == apogeeutil.STATE_ERROR) ||
-     (component.getState() == apogeeutil.STATE_PENDING) ||
-     (component.getState() == apogeeutil.STATE_INVALID) )
+export function bannerVisible(status) {
+    return ( (status == apogeeutil.STATE_ERROR) ||
+     (status == apogeeutil.STATE_PENDING) ||
+     (status == apogeeutil.STATE_INVALID) )
 }
 
-export function StateBanner({component}) {
+export function StateBanner({status, message}) {
     let bannerColor
     let bannerBackground
     let text
-    switch(component.getState()) {
+    switch(status) {
         case apogeeutil.STATE_ERROR:
             bannerColor = 'white'
             bannerBackground = 'red'
-            text = component.getStateMessage()
+            text = message
             break
 
         case apogeeutil.STATE_PENDING:
