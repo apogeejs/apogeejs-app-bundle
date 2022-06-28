@@ -13,13 +13,14 @@ export function ComponentTab({tabState,showing}) {
     return (
         <div className="componentTabWrapper">
             <div className="componentPageHeaderElement">
-                <PageToolbarElement addChildComponent={tabState.addChildComponent} childComponentConfigs={childComponentConfigs} />
-                {bannerVisible(tabState.status) ? <StateBanner status={tabState.status} message={tabState.statusMessage} /> : ''}
+                <PageToolbarElement addChildComponent={tabState.tabData.addChildComponent} childComponentConfigs={childComponentConfigs} />
+                {bannerVisible(tabState.status) ? <StateBanner status={tabState.tabData.status} message={tabState.tabData.statusMessage} /> : ''}
             </div>
             <div className="componentPageBodyElement">
                 {
                     //get cells for child components that have cells (view modes exist)
-                    tabState.cellStateArray ? tabState.cellStateArray.map(cellState => <ComponentCell key={cellState.id} cellState={cellState} cellShowing={showing} />) : ''
+                    tabState.cellStateArray ? tabState.cellStateArray.map(cellState => 
+                        <ComponentCell key={cellState.cellData.id} cellState={cellState} cellShowing={showing} />) : ''
                 }
             </div>
         </div>

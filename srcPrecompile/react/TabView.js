@@ -12,32 +12,33 @@ import {IconWithStatus} from "./IconwithStatus.js"
 export function TabView({tabListState}) {
 
     let selectedId = tabListState.selectedId
-    let stateArray = tabListState.stateArray
+    let tabStateArray = tabListState.tabStateArray
     let selectTab = tabListState.tabFunctions.selectTab
     let closeTab = tabListState.tabFunctions.closeTab
 
     return (
         <div className="tabView">
             <div className="tabView_head">
-                {stateArray.map(tabState => {
+                {tabStateArray.map(tabState => {
                     return <TabTab 
-                        key={tabState.id} 
-                        label={tabState.label}
-                        status={tabState.status}
-                        statusMessage={tabState.statusMessage}
-                        iconSrc={tabState.iconSrc}
+                        key={tabState.tabData.id} 
+                        tabId={tabState.tabData.id} 
+                        label={tabState.tabData.label}
+                        status={tabState.tabData.status}
+                        statusMessage={tabState.tabData.statusMessage}
+                        iconSrc={tabState.tabData.iconSrc}
                         closeTab={closeTab} 
                         selectTab={selectTab} 
-                        isSelected={selectedId == tabState.id}
+                        isSelected={selectedId == tabState.tabData.id}
                     />
                 })}
             </div>
             <div className="tabView_body">
-                {stateArray.map(tabState => {
+                {tabStateArray.map(tabState => {
                     return <TabFrame
-                        key={tabState.id} 
+                        key={tabState.tabData.id} 
                         tabState={tabState} 
-                        showing={selectedId == tabState.id}
+                        showing={selectedId == tabState.tabData.id}
                     />
                 })}
             </div>
@@ -72,7 +73,7 @@ function TabTab({tabId, label, status, iconSrc, closeTab, selectTab, isSelected}
 function TabFrame({tabState, showing}) {
     return (
         <div style={{display: showing ? '' : "none"}} className="tabView_frame">
-            {tabState.getTabElement(tabState,showing)}
+            {tabState.tabData.getTabElement(tabState,showing)}
         </div>
     )
 }

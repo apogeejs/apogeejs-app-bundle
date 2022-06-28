@@ -13,7 +13,7 @@ export function AppElement({workspaceTreeState,menuData,tabListState}) {
     //get active tab data
     let activeTabState
     if(tabListState) {
-        activeTabState = tabListState.stateArray.filter(tabState => tabState.id == tabListState.selectedId)
+        activeTabState = tabListState.tabStateArray.filter(tabState => tabState.tabData.id == tabListState.selectedId)
 
     }
 

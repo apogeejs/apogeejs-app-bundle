@@ -15,15 +15,16 @@ export function ComponentCell({cellState,cellShowing}) {
         //<div key={component.getInstanceNumber()} className="visiui_pageChild_mainClass">
         <div className="visiui_pageChild_mainClass">
             <div className="visiui_pageChild_titleBarClass">
-                <CellHeading label={cellState.displayName} iconSrc={cellState.iconSrc} 
-                    status={cellState.status} statusMessage={cellState.statusMessage} menuItems={cellState.menuItems} />
+                <CellHeading label={cellState.cellData.displayName} iconSrc={cellState.cellData.iconSrc} 
+                    status={cellState.cellData.status} statusMessage={cellState.cellData.statusMessage} menuItems={cellState.cellData.menuItems} />
                 <DataViewControls viewModeControlStates={cellState.viewModeControlStates} openedViews={openedViews} setOpenedViews={setOpenedViews} />
-                <span className="visiui_pageChild_cellTypeLabelClass">{cellState.componentTypeName}</span>
+                <span className="visiui_pageChild_cellTypeLabelClass">{cellState.cellData.componentTypeName}</span>
             </div>
-            {bannerVisible(cellState.status) ? <StateBanner status={cellState.status} statusMessage={cellState.statusMessage} /> : ''}
+            {bannerVisible(cellState.cellData.status) ? <StateBanner status={cellState.cellData.status} statusMessage={cellState.cellData.statusMessage} /> : ''}
             <div className="visiui_pageChild_viewContainerClass" >
-                {cellState.viewModes.map((viewModeState,viewModeIndex) => 
-                    openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} componentId={cellState.id} viewModeState={viewModeState} cellShowing={cellShowing} /> : ''
+                {cellState.viewModeStates.map((viewModeState,viewModeIndex) => 
+                    openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} componentId={cellState.cellData.id} 
+                        viewModeState={viewModeState} cellShowing={cellShowing} /> : ''
                 )}
             </div>
         </div>
@@ -89,14 +90,30 @@ function DataViewControl({label, viewModeIndex, openedViews, setOpenedViews}) {
 /** This is the container for the display element provided by the view mode */
 function ViewModeFrame({componentId,viewModeState,cellShowing}) {
 
-    const [editMode,setEditMode] = React.useState(false)
+    const [editModeData,setEditModeData] = React.useState(null) //set to null or {data: data} or {getData: getData}
     const [verticalSize,setVerticalSize] = React.useState(null)
 
     const showMsg = (viewModeState.sourceState.messageType)&&(viewModeState.sourceState.messageType != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
     const msgBarStyle = showMsg ? getMessageBarStyle(viewModeState.sourceState.messageType) : null
 
-    const onSave = () =>  viewModeState.sourceState.save ? viewModeState.sourceState.save() : null
-    const onCancel = () => setEditMode(false)
+    const onSave = () =>  {
+        if(viewModeState.sourceState.save) {
+            let data
+            if(editModeData.data) {
+                data = editModeData.data
+            } 
+            else if(editModeData.getData) {
+                data = editModeData.getData()
+            }
+            else {
+                //no data - save not possible
+                return
+            }
+            viewModeState.sourceState.save(data)
+        }
+        setEditModeData(null) //end edit mode
+    }
+    const onCancel = () => setEditModeData(null)
 
     return (
         <div className="visiui_displayContainerClass_mainClass">
@@ -112,13 +129,13 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
                 }
             </div>
             { showMsg ? <div className={msgBarStyle} >{viewModeState.sourceState.message}</div> : ''}
-            { editMode ?
+            { editModeData ?
                 <div className="visiui_displayContainer_saveBarContainerClass">
                     Edit: 
                     <button type="button" onClick={onSave}>Save</button>
                     <button  type="button" onClick={onCancel}>Cancel</button>
                 </div> : ''}
-            {viewModeState.getViewModeElement(componentId,viewModeState.sourceState,cellShowing,setEditMode,verticalSize)}
+            {viewModeState.getViewModeElement(componentId,viewModeState.sourceState,cellShowing,setEditModeData,verticalSize)}
         </div>
     )
 }

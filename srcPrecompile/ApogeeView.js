@@ -45,28 +45,29 @@ export default class ApogeeView {
         this.packageMenuData()
         ///////////////////////////////////////
 
-        /////////////////////////////
-        //tab state
         this.tabFunctions = {
             openTab: (tabId,isSelected = true) => this._openTab(tabId,isSelected),
             closeTab: (tabId) => this._closeTab(tabId),
             selectTab: (tabId) => this._selectTab(tabId)
         }
 
+        /////////////////////////////
+        //state
+
+        this.objectMap = {}
+        this.tabStateMap = {}
+        this.treeEntryStateMap = {}
+
         this.tabListState = {
             selectedId: INVALID_OBJECT_ID,
-            stateArray: [],
+            tabStateArray: [],
             tabFunctions: this.tabFunctions
         }
-        /////////////////////////////////
 
-        //////////////////////////////
-        // tree state
-        this.objectMap = {}
-        this.objectStateMap = {}
         this.workspaceTreeState = null
 
-        //////////////////////////////////
+        
+        /////////////////////////////////
 
         this._subscribeToAppEvents()
     }
@@ -238,19 +239,22 @@ export default class ApogeeView {
 
         let oldObjectMap = this.objectMap
         let oldTabListState = this.tabListState
-        let oldObjectStateMap = this.objectStateMap
+        let oldTabStateMap = this.tabStateMap
+        let oldTreeEntryStateMap = this.treeEntryStateMap
 
         let newObjectMap = {}
-        let newObjectStateMap = {}
+        let newTabStateMap = {}
+        let newTreeEntryStateMap = {}
 
         if(this.workspaceManager) {
             this._loadObjectMap(this.workspaceManager,newObjectMap)
-            this.tabListState = this._createTabListState(newObjectMap,oldObjectMap,oldTabListState)
-            this.workspaceTreeState = this._createObjectTreeState(this.workspaceManager,newObjectStateMap,oldObjectMap,oldObjectStateMap)
+            this.tabListState = this._createTabListState(oldTabListState,newObjectMap)
+            this.workspaceTreeState = this._createObjectTreeState(this.workspaceManager,oldObjectMap,newTreeEntryStateMap,oldTreeEntryStateMap)
         }
 
         this.objectMap = newObjectMap
-        this.objectStateMap = newObjectStateMap
+        this.tabStateMap = newTabStateMap
+        this.treeEntryStateMap = newTreeEntryStateMap
 
         this.render()
     }
@@ -461,22 +465,22 @@ export default class ApogeeView {
 
     _openTab(tabId,selectTab=true,supressRerender) {
         let oldTabListState = this.tabListState
-        let oldStateArray = oldTabListState.stateArray
+        let oldTabStateArray = oldTabListState.tabStateArray
 
-        if(oldStateArray.find(tabState => tabState.id == tabId)) return //tab already opened
+        if(oldTabStateArray.find(tabState => tabState.tabData.id == tabId)) return //tab already opened
 
         let component = this.objectMap[tabId]
         if(!component) return //component not found
 
-        let newStateArray = oldStateArray.slice()
+        let newTabStateArray = oldTabStateArray.slice()
         let newTabState = this._getTabState(component)
-        newStateArray.push(newTabState)
+        newTabStateArray.push(newTabState)
 
-        let newSelectedId = (selectTab || (oldStateArray.length == 0)) ? tabId : oldTabListState.selectedId
+        let newSelectedId = (selectTab || (oldTabStateArray.length == 0)) ? tabId : oldTabListState.selectedId
 
         let newTabListState = {
             selectedId: newSelectedId,
-            stateArray: newStateArray,
+            tabStateArray: newTabStateArray,
             tabFunctions: this.tabFunctions
         }
         this.tabListState = newTabListState
@@ -488,14 +492,14 @@ export default class ApogeeView {
 
     _closeTab(tabId,supressRerender) {
         let oldTabListState = this.tabListState
-        let oldStateArray = oldTabListState.stateArray
+        let oldTabStateArray = oldTabListState.tabStateArray
 
-        if(!oldStateArray.find(tabState => tabState.id == tabId)) return //tab not opened
+        if(!oldTabStateArray.find(tabState => tabState.tabData.id == tabId)) return //tab not opened
 
-        let newStateArray = oldStateArray.filter(tabState => tabState.id != tabId)
+        let newTabStateArray = oldTabStateArray.filter(tabState => tabState.tabData.id != tabId)
         let newSelectedId
         if(oldTabListState.selectedId == tabId) {
-            newSelectedId = newStateArray.length >= 0 ? newStateArray[0].id : INVALID_OBJECT_ID
+            newSelectedId = newTabStateArray.length > 0 ? newTabStateArray[0].tabData.id : INVALID_OBJECT_ID
         }
         else {
             newSelectedId = oldTabListState.selectedId 
@@ -503,7 +507,7 @@ export default class ApogeeView {
         
         let newTabListState = {
             selectedId: newSelectedId,
-            stateArray: newStateArray,
+            tabStateArray: newTabStateArray,
             tabFunctions: this.tabFunctions
         }
         this.tabListState = newTabListState
@@ -517,11 +521,11 @@ export default class ApogeeView {
         let oldTabListState = this.tabListState
 
         if(oldTabListState.selectedId == tabId) return //already selected
-        if(!oldTabListState.stateArray.find(tabState => tabState.id == tabId)) return //tab not opened
+        if(!oldTabListState.tabStateArray.find(tabState => tabState.tabData.id == tabId)) return //tab not opened
 
         let newTabListState = {
             selectedId: tabId,
-            stateArray: oldTabListState.stateArray,
+            tabStateArray: oldTabListState.tabStateArray,
             tabFunctions: this.tabFunctions
         }
         this.tabListState = newTabListState
@@ -546,94 +550,208 @@ export default class ApogeeView {
     ////////////////////////////////////////////////////
     // tab state
 
-    _createTabListState(newObjectMap,oldObjectMap,oldTabListState) {
+    _createTabListState(oldTabListState,newObjectMap) {
         let newTabListState = {
             selectedId: oldTabListState.selectedId,
-            stateArray: [],
+            tabStateArray: [],
             tabFunctions: this.tabFunctions
         }
         let selectionDeleted = false
         
-        oldTabListState.stateArray.forEach(oldTabState => {
-            let newComponent = newObjectMap[oldTabState.id]
-            let oldComponent = oldObjectMap[oldTabState.id]
+        //update the tab state for each opened tab component (that still exists()
+        let oldTabStateArray = oldTabListState.tabStateArray
+        let newTabStateArray = []
+        oldTabStateArray.forEach(oldTabState => {
+            let newComponent = newObjectMap[oldTabState.tabData.id]
             if(newComponent) {
                 //get new tab state
-                let newTabState = this._getTabState(newComponent,oldComponent,oldTabState)
-                newTabListState.stateArray.push(newTabState)
+                let newTabState = this._getTabState(newComponent,oldTabState)
+                newTabStateArray.push(newTabState)
             }
             else {
                 //component deleted - make sure this is not selected
-                if(oldTabListState.selectedId == oldTabState.id) {
+                if(oldTabListState.selectedId == oldTabState.tabData.id) {
                     selectionDeleted = true;
                 }
             }
         })
+        let tabStateArrayUpdated = !_arrayContentsMatch(oldTabStateArray,newTabStateArray)
 
+        //selection (this only changes if the state array changes)
+        let newSelectedId
+        let selectedIdUpdated
         if(selectionDeleted) {
-            if(newTabListState.stateArray.length > 0) {
-                newTabListState.selectedId = newTabListState.stateArray[0].id
+            selectedIdUpdated = true
+            if(newTabStateArray.length > 0) {
+                newSelectedId = newTabStateArray[0].tabData.id
             }
             else {
-                newTabListState.selectedId = INVALID_OBJECT_ID
+                newSelectedId = INVALID_OBJECT_ID
             }
         }
+        else {
+            selectedIdUpdated = false
+            newSelectedId = oldTabListState.selectedId
+        }
+
+        //update
+        if( tabStateArrayUpdated || selectedIdUpdated ) {
+            newTabListState = {
+                selectedId: newSelectedId,
+                tabStateArray: tabStateArrayUpdated ? newTabStateArray : oldTabStateArray,
+                tabFunctions: this.tabFunctions
+            }
+        }
+        else {
+            newTabListState = oldTabListState
+        }
+
 
         return newTabListState
     }
 
-    _getTabState(component,oldComponent,oldTabState) {
-        //LATER UDPATE ONLY WHAT IS NEEDED
+    _getTabState(component,oldTabState) { 
 
-        let tabState = {}
-        tabState.id = component.getId()
-        tabState.label = component.getName()
-        tabState.iconSrc = component.getIconUrl()
-        tabState.status = component.getState()
-        tabState.statusMessage = component.getStateMessage()
+        //tab data
+        let label = component.getName()
+        let status = component.getState()
+        let statusMessage = component.getStateMessage()
 
-        tabState.addChildComponent = (componentConfig) => this.addComponent(componentConfig,component.getId()) //reuse, don't recreate instance
-        tabState.getTabElement = getComponentTab
+        let oldTabData = oldTabState ? oldTabState.tabData : null
+        let newTabData
+        let dataUpdated
+        if( (!oldTabData) || (label != oldTabData.label) || (status != oldTabData.status) || (statusMessage != oldTabData.statusMessage)) {
+            newTabData = {}
+            newTabData.id = component.getId()
+            newTabData.label = label
+            newTabData.iconSrc = oldTabData ? oldTabData.iconSrc : component.getIconUrl()
+            newTabData.status = status
+            newTabData.statusMessage = statusMessage
+            newTabData.addChildComponent = oldTabState ? oldTabState.addChildComponent : 
+                (componentConfig) => this.addComponent(componentConfig,component.getId()) //we can reuse since this doesn't change
+                newTabData.getTabElement = getComponentTab
+            dataUpdated = true
+        }
+        else {
+            newTabData = oldTabData
+            dataUpdated = false
+        }
 
+        //cells state array
         const viewHelper = this._getViewHelper(component)
-        let children = viewHelper.getChildren(this.workspaceManager,component);
-        tabState.cellStateArray = children.filter(child => (child.getComponentConfig().viewModes !== undefined))
-            .map(child => this._getCellState(child,viewHelper))
+        let childrenWithCells = viewHelper.getChildren(this.workspaceManager,component).filter(child => (child.getComponentConfig().viewModes !== undefined))
+        let oldCellStateArray = oldTabState ? oldTabState.cellStateArray : null
+        let newCellStateArray = childrenWithCells.map(child => {
+            let oldCellState = oldCellStateArray ? oldCellStateArray.find(cellState => cellState.cellData.id == child.getId()) : null
+            return this._getCellState(child,viewHelper,oldCellState)
+        })
 
-        return tabState
+        let stateArrayUpdated = oldCellStateArray ? !_arrayContentsMatch(newCellStateArray,oldCellStateArray) : true
+
+        let newTabState
+        if(dataUpdated || stateArrayUpdated) {
+            newTabState = {
+                tabData: dataUpdated ? newTabData : oldTabData,
+                cellStateArray : stateArrayUpdated ? newCellStateArray : oldCellStateArray
+            }
+        }
+        else {
+            newTabState = oldTabState
+        }
+
+        return newTabState
     }
 
-    _getCellState(component,viewHelper) {
-        let cellState = {}
-        cellState.id = component.getId()
-        cellState.displayName = component.getDisplayName()
-        cellState.iconSrc = component.getIconUrl()
-        cellState.status = component.getState()
-        cellState.statusMessage = component.getStateMessage()
-        cellState.componentTypeName = component.getComponentConfig().displayName
+    _getCellState(component,viewHelper,oldCellState) {
 
-        cellState.menuItems = viewHelper.getMenuItems(this,component) //THESE ARE THE WRONG ITEMS! (and I should reuse them)
+        let displayName = component.getDisplayName()
+        let status = component.getState()
+        let statusMessage = component.getStateMessage()
 
-        cellState.viewModeControlStates = component.getComponentConfig().viewModes.map(viewModeInfo => {
-            return {
-                hidden: false,
-                name: viewModeInfo.label,
-                opened: viewModeInfo.isActive
+        //get new cell data
+        let newCellData
+        let oldCellData = oldCellState ? oldCellState.cellData : null
+        let dataUpdated
+        if((!oldCellData)||(displayName != oldCellData.displayName)||(status != oldCellData.status)||(statusMessage != oldCellData.statusMessage)) {
+            newCellData = {}
+            newCellData.id = component.getId()
+            newCellData.displayName = displayName
+            newCellData.iconSrc = oldCellData ? oldCellData.iconSrc : component.getIconUrl()
+            newCellData.status = status
+            newCellData.statusMessage = statusMessage
+            newCellData.componentTypeName = component.getComponentConfig().displayName
+            newCellData.menuItems = oldCellData ? oldCellData.menuItems : viewHelper.getMenuItems(this,component) //these don't change. Reuse them 
+            dataUpdated = true
+        }
+        else {
+            newCellData = oldCellData
+            dataUpdated = false
+        }
+
+        //get new view mode states
+        let viewModes = component.getComponentConfig().viewModes
+        let oldViewModeControlStates = oldCellState ? oldCellState.viewModeControlStates : null
+        let oldViewModeStates = oldCellState ? oldCellState.viewModeStates : null
+        let newViewModeControlStates = []
+        let newViewModeStates = []
+        viewModes.forEach((viewModeInfo,index) => {
+
+            let oldViewModeControlState = oldViewModeControlStates ? oldViewModeControlStates[index] : null
+            let oldViewModeState = oldViewModeStates ? oldViewModeStates[index] : null
+            let oldSourceState = oldViewModeState ? oldViewModeState.sourceState : null
+
+            let sourceState = viewModeInfo.getSourceState(component,oldSourceState)
+
+            //view mode control state
+            let newViewModeControlState
+            if((!oldViewModeControlState)||(oldViewModeControlState.hidden != sourceState.hidden)) {
+                newViewModeControlState = {
+                    hidden: sourceState.hidden,
+                    name: viewModeInfo.label,
+                    opened: oldViewModeControlState ? oldViewModeControlState.opened : viewModeInfo.isActive
+                }
             }
+            else {
+                newViewModeControlState = oldViewModeControlState
+            }
+
+            newViewModeControlStates[index] = newViewModeControlState
+            
+            //view mode state
+            let newViewModeState
+            if(sourceState != oldSourceState) {
+                newViewModeState = {}
+                newViewModeState.viewName = viewModeInfo.label
+                if(viewModeInfo.sizeCommandInfo) newViewModeState.sizeCommandInfo = viewModeInfo.sizeCommandInfo
+                newViewModeState.sourceState = sourceState
+                newViewModeState.getViewModeElement = viewModeInfo.getViewModeElement
+                if(viewModeInfo.getViewStatusElement) newViewModeState.getViewStatusElement = viewModeInfo.getViewStatusElement
+            }
+            else {
+                newViewModeState = oldViewModeState
+            }
+            newViewModeStates[index] = newViewModeState
+
         })
 
-        //view modes
-        cellState.viewModes = component.getComponentConfig().viewModes.map(viewModeInfo => {
-            let viewState = {}
-            viewState.viewName = viewModeInfo.label
-            if(viewModeInfo.sizeCommandInfo) viewState.sizeCommandInfo = viewModeInfo.sizeCommandInfo
-            viewState.sourceState = viewModeInfo.getSourceState(component)
-            viewState.getViewModeElement = viewModeInfo.getViewModeElement
-            if(viewModeInfo.getViewStatusElement) viewState.getViewStatusElement = viewModeInfo.getViewStatusElement
-            return viewState
-        })
+        //get new cell state
+        let vmcsUpdated = oldViewModeControlStates ? !_arrayContentsMatch(newViewModeControlStates,oldViewModeControlStates) : true
+        let vmsUpdated = oldViewModeStates ? !_arrayContentsMatch(newViewModeStates,oldViewModeStates) : true
 
-        return cellState
+        let newCellState
+        if(dataUpdated || vmcsUpdated || vmsUpdated ) {
+            newCellState = {
+                cellData: dataUpdated ? newCellData : oldCellData,
+                viewModeControlStates : vmcsUpdated ? newViewModeControlStates : oldViewModeControlStates,
+                viewModeStates : vmsUpdated ? newViewModeStates : oldViewModeStates
+            }
+        }
+        else {
+            newCellState = oldCellState
+        }
+
+
+        return newCellState
     }
 
 
@@ -642,12 +760,12 @@ export default class ApogeeView {
     /////////////////////////////////////////////////
     // tree state
 
-    _createObjectTreeState(newObject,newObjectStateMap,oldObjectMap,oldObjectStateMap) {
+    _createObjectTreeState(newObject,oldObjectMap,newTreeEntryStateMap,oldTreeEntryStateMap) {
         
-        //add a comment about why I am storing these extra object (as a side effect)
+        //I am storing the old object and old state to facilitate change comparisons
 
         const oldObject = oldObjectMap[newObject.getId()]
-        const oldObjectState = oldObjectStateMap[newObject.getId()]
+        const oldTreeEntryState = oldTreeEntryStateMap[newObject.getId()]
         const viewHelper = this._getViewHelper(newObject)
 
         // check for "data" updates
@@ -655,18 +773,18 @@ export default class ApogeeView {
         let newData
         if(newObject != oldObject) {
             let label = viewHelper.getLabel(newObject)
-            let nameUpdated = (!oldObjectState) || (oldObjectState.data.text == label)
-            let statusUpdated = (!oldObjectState) || (oldObjectState.data.status == newObject.getState())
-            let statusMsgUpdated = (!oldObjectState) || (oldObjectState.data.statusMsg == newObject.getStateMessage())
+            let nameUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.text == label)
+            let statusUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.status == newObject.getState())
+            let statusMsgUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.statusMsg == newObject.getStateMessage())
             dataUpdated = (nameUpdated)||(statusUpdated)||(statusMsgUpdated)
             if(dataUpdated) {
                 newData = {
                     id: newObject.getId(),
                     text: label,
-                    iconSrc: oldObjectState ? oldObjectState.data.iconSrc : viewHelper.getIconUrl(newObject), //doesn't change
+                    iconSrc: oldTreeEntryState ? oldTreeEntryState.data.iconSrc : viewHelper.getIconUrl(newObject), //doesn't change
                     status: newObject.getState(),
                     statusMsg: newObject.getStateMessage(),
-                    menuItems: oldObjectState ? oldObjectState.data.menuItems : viewHelper.getMenuItems(this,newObject) //doesn't change
+                    menuItems: oldTreeEntryState ? oldTreeEntryState.data.menuItems : viewHelper.getMenuItems(this,newObject) //doesn't change
                 }
             }
         }
@@ -675,25 +793,25 @@ export default class ApogeeView {
 
         //check for children updates
         let children = viewHelper.getChildren(this.workspaceManager,newObject)
-        let newChildTreeEntries = children.map(childObject => this._createObjectTreeState(childObject,newObjectStateMap,oldObjectMap,oldObjectStateMap))
-        let childrenUpdated = oldObjectState ? !_arrayContentsMatch(newChildTreeEntries,oldObjectState.childTreeEntries) : true
+        let newChildTreeEntries = children.map(childObject => this._createObjectTreeState(childObject,oldObjectMap,newTreeEntryStateMap,oldTreeEntryStateMap))
+        let childrenUpdated = oldTreeEntryState ? !_arrayContentsMatch(newChildTreeEntries,oldTreeEntryState.childTreeEntries) : true
 
         //geneterate the new state if needed
-        let newObjectState
+        let newTreeEntryState
         if((!dataUpdated)&&(!childrenUpdated)) {
-            newObjectState = oldObjectState
+            newTreeEntryState = oldTreeEntryState
         }
         else {
-            newObjectState = {
-                data: dataUpdated ? newData : oldObjectState.data,
-                uiState: oldObjectState ? oldObjectState.uiState : null,
-                childTreeEntries: childrenUpdated ? newChildTreeEntries : oldObjectState.childTreeEntries
+            newTreeEntryState = {
+                data: dataUpdated ? newData : oldTreeEntryState.data,
+                uiState: oldTreeEntryState ? oldTreeEntryState.uiState : null,
+                childTreeEntries: childrenUpdated ? newChildTreeEntries : oldTreeEntryState.childTreeEntries
             }
         }
 
-        newObjectStateMap[newObject.getId()] = newObjectState
+        newTreeEntryStateMap[newObject.getId()] = newTreeEntryState
 
-        return newObjectState
+        return newTreeEntryState
 
     }
 
