@@ -20,7 +20,7 @@ export function updateComponentProperties(component) {
     if(componentConfig.propertyDialogEntries) {
         componentConfig.propertyDialogEntries.forEach(entry => {
             let entryCopy = apogeeutil.jsonCopy(entry.dialogElement);
-            initialFormValues[entry.dialogElement.key] = _getDialogValue(modelManager,component,entry);
+            initialFormValues[entry.dialogElement.key] = _getDialogValue(component,entry);
             additionalLines.push(entryCopy);
         }); 
     }
@@ -43,8 +43,6 @@ export function updateComponentProperties(component) {
             }
         }
         
-        let commandsDeleteComponent = false;
-        let deleteMsg;
         var commands = [];
         
         //--------------
@@ -110,16 +108,7 @@ export function updateComponentProperties(component) {
             }
         }
 
-        if(commandsDeleteComponent) {
-            //if there is a delete, verify the user wants to do this
-            let cancelAction = () => {
-            };
-            apogeeUserConfirm(deleteMsg,"Delete","Cancel",doAction,cancelAction);
-        }
-        else {
-            //otherwise just take the action
-            doAction();
-        }
+        doAction();
 
         //return true to close the dialog
         return true;
@@ -221,19 +210,11 @@ function _getBasePropertyValues(component) {
 }
 /** This reads a property value from the given component/member and
  * converts it to a form value. */
-function _getDialogValue(modelManager,mainComponent,entry) {
-    
-    let propertyComponent;
-    if((entry.component)&&(entry.component != ".")) {
-        propertyComponent = mainComponent.getChildComponent(modelManager,entry.component);
-    }
-    else {
-        propertyComponent = mainComponent;
-    }
+function _getDialogValue(component,entry) {
 
     let propertyValue;
     if(entry.member !== undefined) {
-        let propertyMember = propertyComponent.getChildMemberFromPath(entry.member);
+        let propertyMember = component.getChildMemberFromPath(entry.member);
         if(propertyMember) {
             propertyValue = propertyMember.getField(entry.propertyKey);
         }
@@ -242,7 +223,7 @@ function _getDialogValue(modelManager,mainComponent,entry) {
         }
     }
     else {
-        propertyValue = propertyComponent.getField(entry.propertyKey);
+        propertyValue = component.getField(entry.propertyKey);
     }
 
     if(entry.propertyToForm) {
@@ -260,15 +241,15 @@ function _getDialogValue(modelManager,mainComponent,entry) {
 
 /** This function creates the property jsons for a component and member, for both create and update,
  * feeding in the property dialog values.
- * Pass mainComponent for update component, set to null create component. */
-export function getPropertyJsons(mainComponentConfig,mainComponent,dialogEntries,newFormValues) {
+ * Pass the value for component for update component, set to null create component. */
+export function getPropertyJsons(componentConfig,component,dialogEntries,newFormValues) {
     let memberJson;
     let componentJson;
     //for a "create", get the default jsons
-    if(!mainComponent) {
-        memberJson = apogeeutil.jsonCopy(mainComponentConfig.defaultMemberJson);
+    if(!component) {
+        memberJson = apogeeutil.jsonCopy(componentConfig.defaultMemberJson);
         memberJson.name = newFormValues.name;
-        componentJson = apogeeutil.jsonCopy(mainComponentConfig.defaultComponentJson);
+        componentJson = apogeeutil.jsonCopy(componentConfig.defaultComponentJson);
     }
 
     //add in the property dialog results
@@ -281,17 +262,16 @@ export function getPropertyJsons(mainComponentConfig,mainComponent,dialogEntries
                 if(entry.member !== undefined) {
                     if(!memberJson) memberJson = {}; //used in update only
 
-                    let memberPath = Component.getFullMemberPath(entry.component,entry.member);
-                    let singleMemberJson = _lookupSinglePropertyJson(memberJson,memberPath);
+                    //lookup the proper json in case there is a member path
+                    let singleMemberJson = _lookupSinglePropertyJson(memberJson,entry.member);
                     if(!singleMemberJson.fields) singleMemberJson.fields = {};
                     singleMemberJson.fields[entry.propertyKey] = propertyValue;
                 }
                 else {
                     if(!componentJson) componentJson = {}; //used in update only
 
-                    let singleComponentJson = _lookupSinglePropertyJson(componentJson,entry.component);
-                    if(!singleComponentJson.fields) singleComponentJson.fields = {};
-                    singleComponentJson.fields[entry.propertyKey] = propertyValue;
+                    if(!componentJson.fields) componentJson.fields = {};
+                    componentJson.fields[entry.propertyKey] = propertyValue;
                 }
             }
         })
@@ -299,8 +279,6 @@ export function getPropertyJsons(mainComponentConfig,mainComponent,dialogEntries
 
     return {memberJson, componentJson};
 }
-
-
 
 function _lookupSinglePropertyJson(propertyJson,path) {
     if(!propertyJson) propertyJson = {};
