@@ -10,16 +10,18 @@ const modelManagerHelper = {
         return uiutil.getResourcePath(ICON_RES_PATH,"app")
     },
 
-    getChildren(workspaceManager,moduleManager) {
-        let model = moduleManager.getField("model")
+    getChildren(workspaceManager,modelManager) {
+        let model = modelManager.getField("model")
         let childComponents = []
-        let childIdMap = model.getChildIdMap()
-        for(let childKey in childIdMap) {
-            let childMemberId = childIdMap[childKey]
-            let childComponentId = moduleManager.getComponentIdByMemberId(childMemberId)
-            if(childComponentId) {
-                let childComponent = moduleManager.getComponentByComponentId(childComponentId)
-                childComponents.push(childComponent)
+        if(model) {
+            let childIdMap = model.getChildIdMap()
+            for(let childKey in childIdMap) {
+                let childMemberId = childIdMap[childKey]
+                let childComponentId = modelManager.getComponentIdByMemberId(childMemberId)
+                if(childComponentId) {
+                    let childComponent = modelManager.getComponentByComponentId(childComponentId)
+                    childComponents.push(childComponent)
+                }
             }
         }
         return childComponents
