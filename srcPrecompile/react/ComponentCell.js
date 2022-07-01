@@ -90,14 +90,18 @@ function DataViewControl({label, viewModeIndex, openedViews, setOpenedViews}) {
 /** This is the container for the display element provided by the view mode */
 function ViewModeFrame({componentId,viewModeState,cellShowing}) {
 
+    let viewModeInfo = viewModeState.viewModeInfo
+    let sourceState = viewModeState.sourceState
+
     const [editModeData,setEditModeData] = React.useState(null) //set to null or {data: data} or {getData: getData}
     const [verticalSize,setVerticalSize] = React.useState(null)
+    const inEditMode = editModeData ? true : false
 
-    const showMsg = (viewModeState.messageType)&&(viewModeState.messageType != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
-    const msgBarStyle = showMsg ? getMessageBarStyle(viewModeState.messageType) : null
+    const showMsg = (sourceState.messageType)&&(sourceState.messageType != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
+    const msgBarStyle = showMsg ? getMessageBarStyle(sourceState.messageType) : null
 
     const onSave = () =>  {
-        if(viewModeState.save) {
+        if(sourceState.save) {
             let data
             if(editModeData.data) {
                 data = editModeData.data
@@ -109,7 +113,7 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
                 //no data - save not possible
                 return
             }
-            viewModeState.save(data)
+            let success = sourceState.save(data)
         }
         setEditModeData(null) //end edit mode
     }
@@ -118,24 +122,24 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
     return (
         <div className="visiui_displayContainerClass_mainClass">
             <div>
-                <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeState.viewName}</div>
-                {viewModeState.sizeCommandData ? <div className="visiui_displayContainer_viewSizingElementClass">
-                    <ViewSizeElement sizeCommandData={viewModeState.sizeCommandData} size={verticalSize} setSize={setVerticalSize} />
+                <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeInfo.viewName}</div>
+                {viewModeInfo.sizeCommandData ? <div className="visiui_displayContainer_viewSizingElementClass">
+                    <ViewSizeElement sizeCommandData={viewModeInfo.sizeCommandData} size={verticalSize} setSize={setVerticalSize} />
                 </div> : ''}
-                {viewModeState.getViewStatusElement ? 
+                {viewModeInfo.getViewStatusElement ? 
                     <div className="visiui_displayContainer_viewDisplayBarClass">
-                        {viewModeState.getViewStatusElement(viewModeState.statusState)}
+                        {viewModeInfo.getViewStatusElement(sourceState.statusState)}
                     </div> : ''
                 }
             </div>
-            { showMsg ? <div className={msgBarStyle} >{viewModeState.message}</div> : ''}
+            { showMsg ? <div className={msgBarStyle} >{sourceState.message}</div> : ''}
             { editModeData ?
                 <div className="visiui_displayContainer_saveBarContainerClass">
                     Edit: 
                     <button type="button" onClick={onSave}>Save</button>
                     <button  type="button" onClick={onCancel}>Cancel</button>
                 </div> : ''}
-            {viewModeState.getViewModeElement(viewModeState.displayState,viewModeState.dataState,viewModeState.hideDisplay,cellShowing,setEditModeData,verticalSize)}
+            {viewModeInfo.getViewModeElement(sourceState,inEditMode,setEditModeData,verticalSize,cellShowing)}
         </div>
     )
 }

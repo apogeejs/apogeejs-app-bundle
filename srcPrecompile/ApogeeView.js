@@ -721,13 +721,8 @@ export default class ApogeeView {
             let newViewModeState
             if(sourceState != oldSourceState) {
                 newViewModeState = {}
-                newViewModeState.viewName = viewModeInfo.label
-                if(viewModeInfo.sizeCommandInfo) newViewModeState.sizeCommandInfo = viewModeInfo.sizeCommandInfo
-
-                Object.assign(newViewModeState,sourceState)
-
-                newViewModeState.getViewModeElement = viewModeInfo.getViewModeElement
-                if(viewModeInfo.getViewStatusElement) newViewModeState.getViewStatusElement = viewModeInfo.getViewStatusElement
+                newViewModeState.viewModeInfo = viewModeInfo
+                newViewModeState.sourceState = sourceState
             }
             else {
                 newViewModeState = oldViewModeState
