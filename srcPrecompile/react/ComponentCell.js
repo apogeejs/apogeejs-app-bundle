@@ -93,11 +93,11 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
     const [editModeData,setEditModeData] = React.useState(null) //set to null or {data: data} or {getData: getData}
     const [verticalSize,setVerticalSize] = React.useState(null)
 
-    const showMsg = (viewModeState.sourceState.messageType)&&(viewModeState.sourceState.messageType != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
-    const msgBarStyle = showMsg ? getMessageBarStyle(viewModeState.sourceState.messageType) : null
+    const showMsg = (viewModeState.messageType)&&(viewModeState.messageType != DATA_DISPLAY_CONSTANTS.MESSAGE_TYPE_NONE)
+    const msgBarStyle = showMsg ? getMessageBarStyle(viewModeState.messageType) : null
 
     const onSave = () =>  {
-        if(viewModeState.sourceState.save) {
+        if(viewModeState.save) {
             let data
             if(editModeData.data) {
                 data = editModeData.data
@@ -109,7 +109,7 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
                 //no data - save not possible
                 return
             }
-            viewModeState.sourceState.save(data)
+            viewModeState.save(data)
         }
         setEditModeData(null) //end edit mode
     }
@@ -124,18 +124,18 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
                 </div> : ''}
                 {viewModeState.getViewStatusElement ? 
                     <div className="visiui_displayContainer_viewDisplayBarClass">
-                        {viewModeState.getViewStatusElement(viewModeState.sourceState)}
+                        {viewModeState.getViewStatusElement(viewModeState.statusState)}
                     </div> : ''
                 }
             </div>
-            { showMsg ? <div className={msgBarStyle} >{viewModeState.sourceState.message}</div> : ''}
+            { showMsg ? <div className={msgBarStyle} >{viewModeState.message}</div> : ''}
             { editModeData ?
                 <div className="visiui_displayContainer_saveBarContainerClass">
                     Edit: 
                     <button type="button" onClick={onSave}>Save</button>
                     <button  type="button" onClick={onCancel}>Cancel</button>
                 </div> : ''}
-            {viewModeState.getViewModeElement(componentId,viewModeState.sourceState,cellShowing,setEditModeData,verticalSize)}
+            {viewModeState.getViewModeElement(viewModeState.displayState,viewModeState.dataState,viewModeState.hideDisplay,cellShowing,setEditModeData,verticalSize)}
         </div>
     )
 }
