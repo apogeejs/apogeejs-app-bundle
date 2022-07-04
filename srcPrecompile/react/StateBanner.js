@@ -7,15 +7,13 @@ export function bannerVisible(status) {
      (status == apogeeutil.STATE_INVALID) )
 }
 
-export function StateBanner({status, message}) {
+export function StateBanner({status, text}) {
     let bannerColor
     let bannerBackground
-    let text
     switch(status) {
         case apogeeutil.STATE_ERROR:
             bannerColor = 'white'
             bannerBackground = 'red'
-            text = message
             break
 
         case apogeeutil.STATE_PENDING:
@@ -29,6 +27,9 @@ export function StateBanner({status, message}) {
             bannerBackground = 'gray'
             text = 'Invalid Value'
             break
+
+        default:
+            return ''
     }
 
     return <div className="visiui_pageChild_bannerContainerClass" style={{color: bannerColor, backgroundColor: bannerBackground}}>{text}</div> 

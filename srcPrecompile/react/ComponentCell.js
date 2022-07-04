@@ -20,7 +20,7 @@ export function ComponentCell({cellState,cellShowing}) {
                 <DataViewControls viewModeControlStates={cellState.viewModeControlStates} openedViews={openedViews} setOpenedViews={setOpenedViews} />
                 <span className="visiui_pageChild_cellTypeLabelClass">{cellState.cellData.componentTypeName}</span>
             </div>
-            {bannerVisible(cellState.cellData.status) ? <StateBanner status={cellState.cellData.status} statusMessage={cellState.cellData.statusMessage} /> : ''}
+            {bannerVisible(cellState.cellData.status) ? <StateBanner status={cellState.cellData.status} text={cellState.cellData.statusMessage} /> : ''}
             <div className="visiui_pageChild_viewContainerClass" >
                 {cellState.viewModeStates.map((viewModeState,viewModeIndex) => 
                     openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} componentId={cellState.cellData.id} 

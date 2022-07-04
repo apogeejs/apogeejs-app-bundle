@@ -14,7 +14,7 @@ export function ComponentTab({tabState,showing}) {
         <div className="componentTabWrapper">
             <div className="componentPageHeaderElement">
                 <PageToolbarElement addChildComponent={tabState.tabData.addChildComponent} childComponentConfigs={childComponentConfigs} />
-                {bannerVisible(tabState.status) ? <StateBanner status={tabState.tabData.status} message={tabState.tabData.statusMessage} /> : ''}
+                {bannerVisible(tabState.tabData.status) ? <StateBanner status={tabState.tabData.status} text={tabState.tabData.statusMessage} /> : ''}
             </div>
             <div className="componentPageBodyElement">
                 {
