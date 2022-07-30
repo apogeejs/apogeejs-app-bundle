@@ -122,7 +122,7 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
     return (
         <div className="visiui_displayContainerClass_mainClass">
             <div>
-                <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeInfo.viewName}</div>
+                <div className="visiui_displayContainer_viewHeadingClass visiui_hideSelection">{viewModeInfo.label}</div>
                 {viewModeInfo.sizeCommandData ? <div className="visiui_displayContainer_viewSizingElementClass">
                     <ViewSizeElement sizeCommandData={viewModeInfo.sizeCommandData} size={verticalSize} setSize={setVerticalSize} />
                 </div> : ''}
@@ -147,7 +147,7 @@ function ViewModeFrame({componentId,viewModeState,cellShowing}) {
 
 function ViewSizeElement({sizeCommandData,size,setSize}) {
     
-    let baseSize = (size === null) ? sizeCommandData.previous : size 
+    let baseSize = (size === null) ? sizeCommandData.default : size 
 
     const onSmaller = () => {
         let newSize = baseSize - sizeCommandData.increment
