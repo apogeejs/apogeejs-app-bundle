@@ -23,7 +23,7 @@ export function ComponentCell({cellState,cellShowing}) {
             {bannerVisible(cellState.cellData.status) ? <StateBanner status={cellState.cellData.status} text={cellState.cellData.statusMessage} /> : ''}
             <div className="visiui_pageChild_viewContainerClass" >
                 {cellState.viewModeStates.map((viewModeState,viewModeIndex) => 
-                    openedViews[viewModeIndex] ? <ViewModeFrame key={viewModeIndex} componentId={cellState.cellData.id} 
+                    openedViews[viewModeIndex] && (!cellState.viewModeControlStates[viewModeIndex].hidden) ? <ViewModeFrame key={viewModeIndex} componentId={cellState.cellData.id} 
                         viewModeState={viewModeState} cellShowing={cellShowing} /> : ''
                 )}
             </div>
@@ -50,8 +50,8 @@ function DataViewControls({viewModeControlStates, openedViews, setOpenedViews}) 
 
     return (
         <div className="visiui_pageChild_titleBarViewsClass">
-            {viewModeControlStates.map( (state,viewModeIndex) => state.hidden ? '' : <DataViewControl key={state.name} label={state.name} 
-                    viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} />
+            {viewModeControlStates.map( (state,viewModeIndex) => state.hidden ? '' : <DataViewControl key={state.name} label={state.name}  
+                    style={state.style} viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} />
             )}
         </div>
     )
@@ -61,7 +61,7 @@ const VIEW_CLOSED_IMAGE_PATH = "/closed_black.png";
 const VIEW_OPENED_IMAGE_PATH = "/opened_black.png";
 
 /** This is a selector for a visible data view */
-function DataViewControl({label, viewModeIndex, openedViews, setOpenedViews}) {
+function DataViewControl({label, style, viewModeIndex, openedViews, setOpenedViews}) {
 
     const viewOpened = openedViews[viewModeIndex]
     const setViewOpened = opened => {
@@ -81,7 +81,7 @@ function DataViewControl({label, viewModeIndex, openedViews, setOpenedViews}) {
     return (
         <a className="visiui_displayContainer_viewSelectorLinkClass" onClick={handleClick}>
             <img src={imgSrc} className="visiui_displayContainer_expandContractClass" />
-            <span className="visiui_displayContainer_viewSelectorClass">{label}</span>
+            <span className="visiui_displayContainer_viewSelectorClass" style={style}>{label}</span>
         </a>
     )
 }

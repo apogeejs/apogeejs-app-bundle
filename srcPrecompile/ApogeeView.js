@@ -708,6 +708,7 @@ export default class ApogeeView {
                 newViewModeControlState = {
                     hidden: sourceState.hidden,
                     name: viewModeInfo.label,
+                    style: viewModeInfo.tabStyle,
                     opened: oldViewModeControlState ? oldViewModeControlState.opened : viewModeInfo.isActive
                 }
             }
