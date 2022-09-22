@@ -628,7 +628,7 @@ export default class ApogeeView {
             newTabData.status = status
             newTabData.statusMessage = statusMessage
             newTabData.addChildComponent = oldTabState ? oldTabState.addChildComponent : 
-                (componentConfig) => this.addComponent(componentConfig,component.getId()) //we can reuse since this doesn't change
+                (componentConfig) => this.addComponent(componentConfig,component.getMember().getId()) //we can reuse since this doesn't change
                 newTabData.getTabElement = getComponentTab
             dataUpdated = true
         }
