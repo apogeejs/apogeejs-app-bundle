@@ -1,6 +1,6 @@
 import {uiutil} from "/apogeejs-ui-lib/src/apogeeUiLib.js"
 
-const referenceManagerHelper = {
+const referenceViewManager = {
     getLabel(referenceManager) {
         return FOLDER_LABEL
     },
@@ -19,7 +19,7 @@ const referenceManagerHelper = {
     }
 }
 
-export default referenceManagerHelper
+export default referenceViewManager
 
 const FOLDER_LABEL = "Libraries"
 const ICON_RES_PATH = "/icons3/folderIcon.png"

@@ -1,7 +1,7 @@
 import {uiutil} from "/apogeejs-ui-lib/src/apogeeUiLib.js"
 import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
-const modelManagerHelper = {
+const modelViewManager = {
     getLabel(modelManager) {
         return FOLDER_LABEL
     },
@@ -44,7 +44,7 @@ const modelManagerHelper = {
     }
 }
 
-export default modelManagerHelper
+export default modelViewManager
 
 const FOLDER_LABEL = "Code"
 const ICON_RES_PATH = "/icons3/folderIcon.png"

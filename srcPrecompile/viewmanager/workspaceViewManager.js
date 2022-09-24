@@ -1,6 +1,6 @@
 import {uiutil} from "/apogeejs-ui-lib/src/apogeeUiLib.js"
 
-const workspaceManagerHelper = {
+const workspaceViewManager = {
     getLabel(workspaceManager) {
         return workspaceManager.getName()
     },
@@ -25,6 +25,6 @@ const workspaceManagerHelper = {
     }
 }
 
-export default workspaceManagerHelper
+export default workspaceViewManager
 
 const ICON_RES_PATH = "/icons3/workspaceIcon.png"; 

@@ -108,7 +108,7 @@ const REF_DATA = {
 }
 
 
-export const referenceListHelper = {
+export const referenceListViewManager = {
     getLabel(referenceList) {
         let refType = referenceList.getReferenceType()
         return REF_DATA[refType].listLabel
@@ -151,7 +151,7 @@ export const referenceListHelper = {
     }
 }
 
-export const referenceEntryHelper = {
+export const referenceEntryViewManager = {
     getLabel(referenceEntry) {
         return referenceEntry.getDisplayName()
     },
