@@ -1,4 +1,4 @@
-import getViewManager from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
+import {getViewManagerByObject,getViewManagerByType} from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
 import arrayContentsInstanceMatch from "/apogeejs-app-bundle/src/viewmanager/arrayContentsInstanceMatch.js"
 
 export default class TabListStateManager {
@@ -29,6 +29,54 @@ export default class TabListStateManager {
         this.tabListState = this._createTabListState(oldTabListState)
     }
 
+    /** Returns serialized information for the tab state. If none is available
+     * null is returned. */
+    getStateJson() {
+        let stateJson = {} 
+        if(this.tabListState.tabStateArray) {
+            this.tabListState.tabStateArray.forEach( tabState => {
+                let tabJson = this._getTabJson(tabState)
+                if(tabJson) {
+                    if(!stateJson.tabs) stateJson.tabs = []
+                    stateJson.tabs.push(tabJson)
+
+                    //set the selected tab data if this is selected
+                    if(this.tabListState.selectedId == tabState.tabData.id) {
+                        stateJson.selectedIndex = stateJson.tabs.length - 1 
+                    }
+                }
+            })
+        }
+
+        if(_.size(stateJson) > 0) return stateJson
+        else return null
+    }
+
+    setStateJson(stateJson) {
+        let newTabListState = {
+            selectedId: INVALID_OBJECT_ID,
+            tabStateArray: [],
+            tabFunctions: this.tabFunctions
+        }
+
+        if(stateJson.tabs) {
+            stateJson.tabs.forEach( (tabJson,index) => {
+                let tabState = this._deserializeTabState(tabJson)
+                if(tabState) {
+                    newTabListState.tabStateArray.push(tabState)
+
+                    //set selected index
+                    if(stateJson.selectedIndex == index) {
+                        newTabListState.selectedId = tabState.tabData.id
+                    }
+                }
+            })
+        }
+
+        //ugh, this is ugly
+        this.tabListState = newTabListState
+    }
+
     //-----------------------------
     // state update functions
     //-----------------------------
@@ -44,7 +92,7 @@ export default class TabListStateManager {
 
         let newTabStateArray = oldTabStateArray.slice()
 
-        let viewManager = getViewManager(component)
+        let viewManager = getViewManagerByObject(component)
         let newTabState = viewManager.getTabState(this.apogeeView,component)
         newTabStateArray.push(newTabState)
 
@@ -117,12 +165,11 @@ export default class TabListStateManager {
         let oldTabStateArray = oldTabListState.tabStateArray
         let newTabStateArray = []
         oldTabStateArray.forEach(oldTabState => {
-            //I am assuming these are all components for now
-            let newComponent = this.apogeeView.getWorkspaceObject(oldTabState.tabData.id)
-            if(newComponent) {
+            let workspaceObject = this.apogeeView.getWorkspaceObject(oldTabState.tabData.id)
+            if(workspaceObject) {
                 //get new tab state
-                let viewManager = getViewManager(newComponent)
-                let newTabState = viewManager.getTabState(this.apogeeView,newComponent,oldTabState)
+                let viewManager = getViewManagerByObject(workspaceObject)
+                let newTabState = viewManager.getTabState(this.apogeeView,workspaceObject,oldTabState)
                 newTabStateArray.push(newTabState)
             }
             else {
@@ -166,6 +213,34 @@ export default class TabListStateManager {
 
 
         return newTabListState
+    }
+
+    //--------------------------
+    // serialization
+    //--------------------------
+
+    _getTabJson(tabState) {
+        //tab state should have a field tabData, with field id
+        let workspaceObject = this.apogeeView.getWorkspaceObject(tabState.tabData.id)
+        if(workspaceObject) {
+            let viewManager = getViewManagerByObject(workspaceObject)
+            if(viewManager) {
+                return viewManager.serializeTabState(this.apogeeView,workspaceObject,tabState)
+            }
+        }
+    }
+
+    _deserializeTabState(tabStateJson) {
+        //Tab state json should have a field "identifier" with the workspace object type.
+        //Pass the state to this view manager to deserialize
+        if(tabStateJson.identifier) {
+            let viewManager = getViewManagerByType(tabStateJson.identifier.type)
+            if(viewManager) {
+                return viewManager.deserializeTabState(this.apogeeView,tabStateJson)
+            }
+        }
+        
+        return null
     }
     
 }

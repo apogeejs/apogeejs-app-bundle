@@ -113,6 +113,33 @@ const componentViewManager = {
         return newTabState
     },
 
+    deserializeTabState(apogeeView,tabStateJson) {
+        let modelManager = apogeeView.getWorkspaceManager().getModelManager()
+        let model = modelManager.getModel()
+        let member = model.getMemberByFullName(model,tabStateJson.identifier.name)
+        if(member) {
+            let componentId = modelManager.getComponentIdByMemberId(member.getId())
+            let component = apogeeView.getWorkspaceObject(componentId)
+            if(component) {
+                //FOR NOW, NO STATE SAVED. JUST GET THE DEFAULT TAB STATE
+                return componentViewManager.getTabState(apogeeView,component)
+            }
+        }
+
+        //not loaded
+        return null
+    },
+
+    serializeTabState(apogeeView,component,tabState) {
+        //for now just save identifier information!!
+        return {
+            identifier: {
+                type: "Component",
+                name: component.getFullName(apogeeView.getWorkspaceManager().getModelManager())
+            }
+        }
+    },
+
     getCellState(apogeeView,component,oldCellState) {
 
         let displayName = component.getDisplayName()

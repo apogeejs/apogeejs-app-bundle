@@ -2,7 +2,7 @@ import {Apogee} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
 import {AppElement} from "/apogeejs-app-bundle/src/react/App.js"
 
-import getViewManager from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
+import {getViewManagerByObject} from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
 import MenuStateManager from "/apogeejs-app-bundle/src/viewmanager/MenuStateManager.js"
 import TreeStateManager from "/apogeejs-app-bundle/src/viewmanager/TreeStateManager.js"
 import TabListStateManager from "/apogeejs-app-bundle/src/viewmanager/TabListStateManager.js"
@@ -112,52 +112,37 @@ export default class ApogeeView {
     ////////////////////////////////
     //start view state interface
 
-    getViewStateJson() {
-        // let json = {
-        //     openTabs: []
-        // }
+    /** Returns a json representing the UI state. If there is not state available, null is returned. */
+    getViewStateJson() {        
+        if(this.workspaceManager) {
 
-        // let modelManager = this.workspaceManager.getModelManager()
+            let treeState = this.treeStateManager.getStateJson()
+            let tabState =  this.tabListStateManager.getStateJson()
+            
+            let viewStateJson = {}
+            if(treeState) viewStateJson.treeState = treeState
+            if(tabState) viewStateJson.tabState = tabState
 
-        // this.tabListState.forEach(tabDataObject => {
-        //     let fullName = tabDataObject.tabObject.getFullName(modelManager)
-        //     json.openTabs.push(fullName)
-        //     if(this.selectedTabId == tabDataObject.tabObject.getId()) {
-        //         json.selectedTab = fullName
-        //     }
-        // })
-
-        // return json.openTabs.length > 0 ? json : undefined
+            if(_.size(viewStateJson) > 0) {
+                return viewStateJson
+            }
+        }
+        
+        return null
     }
 
     setViewStateJson(viewStateJson) {
-        // if((viewStateJson)&&(viewStateJson.openTabs)) {
-        //     let modelManager = this.workspaceManager.getModelManager()
-        //     let model = modelManager.getModel()
 
-        //     let tabDataList = []
-        //     let selectedTabId
+        if(viewStateJson) {
+            if(viewStateJson.treeState) {
+                this.treeStateManager.setStateJson(viewStateJson.treeState)
+            }
+            if(viewStateJson.tabState) {
+                this.tabListStateManager.setStateJson(viewStateJson.tabState)
+            }
+        }
 
-        //     viewStateJson.openTabs.forEach(fullName => {
-        //         let member = model.getMemberByFullName(model,fullName)
-        //         let componentId = modelManager.getComponentIdByMemberId(member.getId())
-        //         if(componentId) {
-        //             let component = modelManager.getComponentByComponentId(componentId)
-        //             let tabDataObject = this._getComponentTabDataObject(component)
-        //             tabDataList.push(tabDataObject)
-
-        //             if(viewStateJson.selectedTab == fullName) {
-        //                 selectedTabId = component.getId()
-        //             }
-        //         }
-        //     })
-
-        //     this.tabDataList = tabDataList
-        //     this.selectedTabId = selectedTabId
-        //     this.viewStateDirty = true
-
-        //     this.render()
-        // }
+        this.render()
     }
 
     //end view state interface
@@ -279,7 +264,7 @@ export default class ApogeeView {
     
     _loadObjectMap(newObject,newObjectMap) {
         newObjectMap[newObject.getId()] = newObject
-        const viewManager = getViewManager(newObject)
+        const viewManager = getViewManagerByObject(newObject)
         let children = viewManager.getChildren(this.workspaceManager,newObject)
         children.forEach(child => this._loadObjectMap(child,newObjectMap))
     }

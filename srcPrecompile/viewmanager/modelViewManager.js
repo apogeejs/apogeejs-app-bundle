@@ -31,12 +31,13 @@ const modelViewManager = {
     getMenuItems(apogeeView,modelManager) {
         //menu items - add children
         let menuItems = []
-        let model = modelManager.getModel()
+        //DOH! if referneces are opened, we will get here before the model opens!!!
+        //let modelId = modelManager.getModel().getId()
         const parentComponentConfigs = componentInfo.getParentComponentConfigs()
         parentComponentConfigs.forEach(componentConfig => {
             let childMenuItem = {};
             childMenuItem.text = "Add Child " + componentConfig.displayName
-            childMenuItem.action = () => apogeeView.addComponent(componentConfig,model.getId())
+            childMenuItem.action = () => apogeeView.addComponent(componentConfig,modelManager.getModel().getId())
             menuItems.push(childMenuItem);
         })
 

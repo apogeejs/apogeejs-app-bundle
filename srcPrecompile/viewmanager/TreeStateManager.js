@@ -1,5 +1,5 @@
 import arrayContentsInstanceMatch from "/apogeejs-app-bundle/src/viewmanager/arrayContentsInstanceMatch.js"
-import getViewManager from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
+import {getViewManagerByObject} from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
 
 export default class TreeState {
 
@@ -25,6 +25,14 @@ export default class TreeState {
         this.treeEntryStateMap = newTreeEntryStateMap
     }
 
+    getStateJson() {
+        return null
+    }
+
+    setStateJson(stateJson) {
+
+    }
+
     
     _createTreeEntryState(apogeeView,newObject,oldObjectMap,newTreeEntryStateMap,oldTreeEntryStateMap) {
             
@@ -32,7 +40,7 @@ export default class TreeState {
 
         const oldObject = oldObjectMap[newObject.getId()]
         const oldTreeEntryState = oldTreeEntryStateMap[newObject.getId()]
-        const viewManager = getViewManager(newObject)
+        const viewManager = getViewManagerByObject(newObject)
 
         // check for "data" updates
         let dataUpdated = false

@@ -4,8 +4,12 @@ import componentViewManager from "/apogeejs-app-bundle/src/viewmanager/component
 import referenceViewManager from "/apogeejs-app-bundle/src/viewmanager/referenceViewManager.js"
 import {referenceEntryViewManager, referenceListViewManager} from "/apogeejs-app-bundle/src/viewmanager/referenceTypeViewManagers.js"
 
-export default function getViewManager(workspaceObject) {
-    switch (workspaceObject.getWorkspaceObjectType()) {
+export function getViewManagerByObject(workspaceObject) {
+    return getViewManagerByType(workspaceObject.getWorkspaceObjectType())
+}
+
+export function getViewManagerByType(workspaceObjectType) {
+    switch (workspaceObjectType) {
         case "WorkspaceManager":
             return workspaceViewManager
 
