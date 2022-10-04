@@ -1,4 +1,5 @@
 import {Apogee} from "/apogeejs-app-lib/src/apogeeAppLib.js"
+import FieldObject from "/apogeejs-base-lib/src/FieldObject.js"
 
 import {AppElement} from "/apogeejs-app-bundle/src/react/App.js"
 
@@ -31,8 +32,6 @@ export default class ApogeeView {
         this.treeStateManager = new TreeStateManager(this)
         this.tabListStateManager = new TabListStateManager(this)
 
-        this.objectMap = {}
-
         this._subscribeToAppEvents()
     }
 
@@ -48,15 +47,63 @@ export default class ApogeeView {
         ReactDOM.render(appElement,document.getElementById(this.containerId))
     }
 
-    /** This is a lookup function for a workspace object that has a tab (it just does components now)
-     * @TODO this needs to be cleaned up. This was just a temporary implementation
-     */
+    /** This is a lookup function for a workspace objectd by id */
     getWorkspaceObject(objectId) {
-        return this.objectMap[objectId]
+        let fieldObjectType = FieldObject.getTypeFromId(objectId)
+        switch(fieldObjectType) {
+            case "workspaceManager":
+                return objectId == this.workspaceManager.getId() ? this.workspaceManager : null
+
+            case "modelManager":
+                {
+                    let modelManager = this.workspaceManager.getModelManager()
+                    return objectId == modelManager.getId() ? modelManager : null
+                }
+
+            case "component":
+                {
+                    let modelManager = this.workspaceManager.getModelManager()
+                    return modelManager.getComponentByComponentId(objectId)
+                }
+
+            case "referenceManager":
+                {
+                    let referenceManager = this.workspaceManager.getReferenceManager()
+                    return objectId == referenceManager.getId() ? referenceManager : null
+                }
+
+            case "referenceList":
+                {
+                    let referenceManager = this.workspaceManager.getReferenceManager()
+                    return referenceManager.getReferenceListById(objectId)
+                }
+
+            case "referenceEntry":
+                {
+                    let referenceManager = this.workspaceManager.getReferenceManager()
+                    return referenceManager.getReferenceEntryById(objectId)
+                }
+
+            default:
+                return null
+        }
+
     }
 
     getWorkspaceManager() {
         return this.workspaceManager
+    }
+
+    getTabListStateManager() {
+        return this.tabListStateManager
+    }
+
+    getTreeStateManager() {
+        return this.treeStateManager
+    }
+
+    getMenuStateManager() {
+        return this.menuStateManager
     }
 
 
@@ -64,13 +111,7 @@ export default class ApogeeView {
     /////////////////////////////
 
     //////////////////////////////////////////
-    // function callbacks
-    // These are called based on the current workspaceManager value. It should be used
-    // for UI callbacks and not in the middle of a workspace udpate.
-
-    openTab(componentId) {
-        this.tabListStateManager.openTab(componentId)
-    }
+    // app state callback functions
 
     addComponent(componentConfig,parentMemberId) {
         let initialValues = parentMemberId? {parentId:parentMemberId} : {}
@@ -108,6 +149,24 @@ export default class ApogeeView {
     manageModules() {
         this.app.openModuleManager()
     }
+
+    //end app state callback functions
+    //////////////////////////////
+
+    //////////////////////////////
+    // start ui state callback functions
+
+    openTab(componentId) {
+        this.tabListStateManager.openTab(componentId)
+    }
+
+    setTabState(tabId,tabState) {
+        this.tabListStateManager.setTabState(tabId,tabState)
+        this.render()
+    }
+
+    //end UI state callback functions
+    ///////////////////////////////////////
 
     ////////////////////////////////
     //start view state interface
@@ -177,16 +236,7 @@ export default class ApogeeView {
     }
 
     _updateCompleted() {
-
-        let oldObjectMap = this.objectMap
-        let newObjectMap = {}
-
-        if(this.workspaceManager) {
-            this._loadObjectMap(this.workspaceManager,newObjectMap)
-        }
-        this.objectMap = newObjectMap
-
-        this.treeStateManager.updateState(this.workspaceManager,oldObjectMap)
+        this.treeStateManager.updateState()
         this.tabListStateManager.updateState()
 
         this.render()
@@ -256,17 +306,6 @@ export default class ApogeeView {
     _resizeTimerExpired() {
         this.resizeWaitTimer = null
         this.app.dispatchEvent("frameWidthResize",null)
-    }
-
-    ///////////////////////////////////////////////
-    // create object map
-
-    
-    _loadObjectMap(newObject,newObjectMap) {
-        newObjectMap[newObject.getId()] = newObject
-        const viewManager = getViewManagerByObject(newObject)
-        let children = viewManager.getChildren(this.workspaceManager,newObject)
-        children.forEach(child => this._loadObjectMap(child,newObjectMap))
     }
 
 }

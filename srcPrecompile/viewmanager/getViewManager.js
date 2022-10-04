@@ -5,31 +5,31 @@ import referenceViewManager from "/apogeejs-app-bundle/src/viewmanager/reference
 import {referenceEntryViewManager, referenceListViewManager} from "/apogeejs-app-bundle/src/viewmanager/referenceTypeViewManagers.js"
 
 export function getViewManagerByObject(workspaceObject) {
-    return getViewManagerByType(workspaceObject.getWorkspaceObjectType())
+    return getViewManagerByType(workspaceObject.getFieldObjectType())
 }
 
 export function getViewManagerByType(workspaceObjectType) {
     switch (workspaceObjectType) {
-        case "WorkspaceManager":
+        case "workspaceManager":
             return workspaceViewManager
 
-        case "ModelManager":
+        case "modelManager":
             return modelViewManager
 
-        case "Component":
+        case "component":
             return componentViewManager
 
-        case "ReferenceManager":
+        case "referenceManager":
             return referenceViewManager
 
-        case "ReferenceList":
+        case "referenceList":
             return referenceListViewManager
 
-        case "ReferenceEntry":
+        case "referenceEntry":
             return referenceEntryViewManager
             
         default:
-            throw new Error("Unrocgnized workspace object: " + workspaceObject.getWorkspaceObjectType())
+            throw new Error("Unrecognized workspace object: " + workspaceObjectType)
 
     }
 }

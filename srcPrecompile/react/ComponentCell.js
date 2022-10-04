@@ -6,9 +6,6 @@ import DATA_DISPLAY_CONSTANTS from "/apogeejs-app-lib/src/datadisplay/dataDispla
 
 export function ComponentCell({cellState,cellShowing}) {
 
-    //LATER THIS STATE WILL BE KEPT ETERNALLY
-    const [openedViews,setOpenedViews] = React.useState(() => cellState.viewModeControlStates.map(state => state.opened))
-
     //need to work out how I want to do the styling
 
     return (
@@ -17,13 +14,13 @@ export function ComponentCell({cellState,cellShowing}) {
             <div className="visiui_pageChild_titleBarClass">
                 <CellHeading label={cellState.cellData.displayName} iconSrc={cellState.cellData.iconSrc} 
                     status={cellState.cellData.status} statusMessage={cellState.cellData.statusMessage} menuItems={cellState.cellData.menuItems} />
-                <DataViewControls viewModeControlStates={cellState.viewModeControlStates} openedViews={openedViews} setOpenedViews={setOpenedViews} />
+                <DataViewControls viewModeControlStates={cellState.viewModeControlStates} />
                 <span className="visiui_pageChild_cellTypeLabelClass">{cellState.cellData.componentTypeName}</span>
             </div>
             {bannerVisible(cellState.cellData.status) ? <StateBanner status={cellState.cellData.status} text={cellState.cellData.statusMessage} /> : ''}
             <div className="visiui_pageChild_viewContainerClass" >
                 {cellState.viewModeStates.map((viewModeState,viewModeIndex) => 
-                    openedViews[viewModeIndex] && (!cellState.viewModeControlStates[viewModeIndex].hidden) ? <ViewModeFrame key={viewModeIndex} componentId={cellState.cellData.id} 
+                    (cellState.viewModeControlStates[viewModeIndex].opened) && (!cellState.viewModeControlStates[viewModeIndex].hidden) ? <ViewModeFrame key={viewModeIndex} componentId={cellState.cellData.id} 
                         viewModeState={viewModeState} cellShowing={cellShowing} /> : ''
                 )}
             </div>
@@ -46,12 +43,12 @@ function CellHeading({label,iconSrc,status,statusMessage,menuItems}) {
 }
 
 /** This holds the selectors for the visible data views */
-function DataViewControls({viewModeControlStates, openedViews, setOpenedViews}) {
+function DataViewControls({viewModeControlStates}) {
 
     return (
         <div className="visiui_pageChild_titleBarViewsClass">
             {viewModeControlStates.map( (state,viewModeIndex) => state.hidden ? '' : <DataViewControl key={state.name} label={state.name}  
-                    style={state.style} viewModeIndex={viewModeIndex} openedViews={openedViews} setOpenedViews={setOpenedViews} />
+                    style={state.style} viewModeIndex={viewModeIndex} viewOpened={state.opened} setViewOpened={state.setOpened} />
             )}
         </div>
     )
@@ -61,14 +58,7 @@ const VIEW_CLOSED_IMAGE_PATH = "/closed_black.png";
 const VIEW_OPENED_IMAGE_PATH = "/opened_black.png";
 
 /** This is a selector for a visible data view */
-function DataViewControl({label, style, viewModeIndex, openedViews, setOpenedViews}) {
-
-    const viewOpened = openedViews[viewModeIndex]
-    const setViewOpened = opened => {
-        let newOpenedViews = openedViews.slice()
-        newOpenedViews[viewModeIndex] = opened
-        setOpenedViews(newOpenedViews)
-    }
+function DataViewControl({label, style, viewModeIndex, viewOpened, setViewOpened}) {
 
     const imgSrc = viewOpened ? 
         apogeeui.uiutil.getResourcePath(VIEW_OPENED_IMAGE_PATH,"ui-lib") :       

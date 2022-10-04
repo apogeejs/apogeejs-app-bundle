@@ -14,12 +14,13 @@ export default class TreeState {
         return this.workspaceTreeState
     }
 
-    updateState(workspaceManager,oldObjectMap) {
+    updateState() {
         let oldTreeEntryStateMap = this.treeEntryStateMap
         let newTreeEntryStateMap = {}
 
+        let workspaceManager = this.apogeeView.getWorkspaceManager()
         if(workspaceManager) {
-            this.workspaceTreeState = this._createTreeEntryState(this.apogeeView,workspaceManager,oldObjectMap,newTreeEntryStateMap,oldTreeEntryStateMap)
+            this.workspaceTreeState = this._createTreeEntryState(this.apogeeView,workspaceManager,newTreeEntryStateMap,oldTreeEntryStateMap)
         }
 
         this.treeEntryStateMap = newTreeEntryStateMap
@@ -34,40 +35,34 @@ export default class TreeState {
     }
 
     
-    _createTreeEntryState(apogeeView,newObject,oldObjectMap,newTreeEntryStateMap,oldTreeEntryStateMap) {
-            
-        //I am storing the old object and old state to facilitate change comparisons
+    _createTreeEntryState(apogeeView,newObject,newTreeEntryStateMap,oldTreeEntryStateMap) {
 
-        const oldObject = oldObjectMap[newObject.getId()]
         const oldTreeEntryState = oldTreeEntryStateMap[newObject.getId()]
         const viewManager = getViewManagerByObject(newObject)
 
-        // check for "data" updates
+        // check for "data" updates (to this tree entry)
         let dataUpdated = false
         let newData
-        if(newObject != oldObject) {
-            let label = viewManager.getLabel(newObject)
-            let nameUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.text == label)
-            let statusUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.status == newObject.getState())
-            let statusMsgUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.statusMsg == newObject.getStateMessage())
-            dataUpdated = (nameUpdated)||(statusUpdated)||(statusMsgUpdated)
-            if(dataUpdated) {
-                newData = {
-                    id: newObject.getId(),
-                    text: label,
-                    iconSrc: oldTreeEntryState ? oldTreeEntryState.data.iconSrc : viewManager.getIconUrl(newObject), //doesn't change
-                    status: newObject.getState(),
-                    statusMsg: newObject.getStateMessage(),
-                    menuItems: oldTreeEntryState ? oldTreeEntryState.data.menuItems : viewManager.getMenuItems(apogeeView,newObject) //doesn't change
-                }
+
+        let label = viewManager.getLabel(newObject)
+        let nameUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.text == label)
+        let statusUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.status == newObject.getState())
+        let statusMsgUpdated = (!oldTreeEntryState) || (oldTreeEntryState.data.statusMsg == newObject.getStateMessage())
+        dataUpdated = (nameUpdated)||(statusUpdated)||(statusMsgUpdated)
+        if(dataUpdated) {
+            newData = {
+                id: newObject.getId(),
+                text: label,
+                iconSrc: oldTreeEntryState ? oldTreeEntryState.data.iconSrc : viewManager.getIconUrl(newObject), //doesn't change
+                status: newObject.getState(),
+                statusMsg: newObject.getStateMessage(),
+                menuItems: oldTreeEntryState ? oldTreeEntryState.data.menuItems : viewManager.getMenuItems(apogeeView,newObject) //doesn't change
             }
         }
 
-        //uiState is not updated here
-
         //check for children updates
         let children = viewManager.getChildren(apogeeView.getWorkspaceManager(),newObject)
-        let newChildTreeEntries = children.map(childObject => this._createTreeEntryState(apogeeView,childObject,oldObjectMap,newTreeEntryStateMap,oldTreeEntryStateMap))
+        let newChildTreeEntries = children.map(childObject => this._createTreeEntryState(apogeeView,childObject,newTreeEntryStateMap,oldTreeEntryStateMap))
         let childrenUpdated = oldTreeEntryState ? !arrayContentsInstanceMatch(newChildTreeEntries,oldTreeEntryState.childTreeEntries) : true
 
         //geneterate the new state if needed

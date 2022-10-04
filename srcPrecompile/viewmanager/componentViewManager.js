@@ -62,7 +62,7 @@ const componentViewManager = {
         
     },
 
-    getTabState(apogeeView,component,oldTabState) { 
+    getTabState(apogeeView,component,oldTabState,tabStateJson) { 
 
         //tab data
         let label = component.getName()
@@ -90,11 +90,15 @@ const componentViewManager = {
         }
 
         //cells state array
-        let childrenWithCells = componentViewManager.getChildren(apogeeView.workspaceManager,component).filter(child => (child.getComponentConfig().viewModes !== undefined))
+        let childrenWithCells = componentViewManager.getChildren(apogeeView.getWorkspaceManager(),component).filter(child => (child.getComponentConfig().viewModes !== undefined))
         let oldCellStateArray = oldTabState ? oldTabState.cellStateArray : null
         let newCellStateArray = childrenWithCells.map(child => {
+            let cellStateJson
+            if((tabStateJson)&&(tabStateJson.cells)) {
+                cellStateJson = tabStateJson.cells[child.getName()]
+            }
             let oldCellState = oldCellStateArray ? oldCellStateArray.find(cellState => cellState.cellData.id == child.getId()) : null
-            return componentViewManager.getCellState(apogeeView,child,oldCellState)
+            return componentViewManager.getCellState(apogeeView,component,child,oldCellState,cellStateJson)
         })
 
         let stateArrayUpdated = oldCellStateArray ? !arrayContentsInstanceMatch(newCellStateArray,oldCellStateArray) : true
@@ -113,35 +117,10 @@ const componentViewManager = {
         return newTabState
     },
 
-    deserializeTabState(apogeeView,tabStateJson) {
-        let modelManager = apogeeView.getWorkspaceManager().getModelManager()
-        let model = modelManager.getModel()
-        let member = model.getMemberByFullName(model,tabStateJson.identifier.name)
-        if(member) {
-            let componentId = modelManager.getComponentIdByMemberId(member.getId())
-            let component = apogeeView.getWorkspaceObject(componentId)
-            if(component) {
-                //FOR NOW, NO STATE SAVED. JUST GET THE DEFAULT TAB STATE
-                return componentViewManager.getTabState(apogeeView,component)
-            }
-        }
+    getCellState(apogeeView,tabComponent,component,oldCellState,cellStateJson) {
 
-        //not loaded
-        return null
-    },
-
-    serializeTabState(apogeeView,component,tabState) {
-        //for now just save identifier information!!
-        return {
-            identifier: {
-                type: "Component",
-                name: component.getFullName(apogeeView.getWorkspaceManager().getModelManager())
-            }
-        }
-    },
-
-    getCellState(apogeeView,component,oldCellState) {
-
+        let tabComponentId = tabComponent.getId()
+        let componentId = component.getId()
         let displayName = component.getDisplayName()
         let status = component.getState()
         let statusMessage = component.getStateMessage()
@@ -152,7 +131,7 @@ const componentViewManager = {
         let dataUpdated
         if((!oldCellData)||(displayName != oldCellData.displayName)||(status != oldCellData.status)||(statusMessage != oldCellData.statusMessage)) {
             newCellData = {}
-            newCellData.id = component.getId()
+            newCellData.id = componentId
             newCellData.displayName = displayName
             newCellData.iconSrc = oldCellData ? oldCellData.iconSrc : component.getIconUrl()
             newCellData.status = status
@@ -182,12 +161,22 @@ const componentViewManager = {
 
             //view mode control state
             let newViewModeControlState
-            if((!oldViewModeControlState)||(oldViewModeControlState.hidden != sourceState.hidden)) {
+            if((!oldViewModeControlState)||(oldViewModeControlState.hidden != sourceState.hidden)||(cellStateJson)) {
+
+                let isOpened
+                if(cellStateJson && cellStateJson.opened) {
+                    isOpened = cellStateJson.opened.includes(viewModeInfo.name)
+                }
+                else {
+                    isOpened = oldViewModeControlState ? oldViewModeControlState.opened : viewModeInfo.isActive
+                }
+
                 newViewModeControlState = {
                     hidden: sourceState.hidden,
                     name: viewModeInfo.label,
                     style: viewModeInfo.tabStyle,
-                    opened: oldViewModeControlState ? oldViewModeControlState.opened : viewModeInfo.isActive
+                    opened: isOpened,
+                    setOpened: oldViewModeControlState ? oldViewModeControlState.setOpened : opened => _setOpened(apogeeView,tabComponentId,componentId,index,opened)
                 }
             }
             else {
@@ -228,8 +217,115 @@ const componentViewManager = {
 
 
         return newCellState
+    },
+
+    
+    deserializeTabState(apogeeView,tabStateJson) {
+        let modelManager = apogeeView.getWorkspaceManager().getModelManager()
+        let model = modelManager.getModel()
+        let member = model.getMemberByFullName(model,tabStateJson.identifier.name)
+        if(member) {
+            let componentId = modelManager.getComponentIdByMemberId(member.getId())
+            let component = apogeeView.getWorkspaceObject(componentId)
+            if(component) {
+                return componentViewManager.getTabState(apogeeView,component,null,tabStateJson)
+            }
+        }
+
+        //not loaded
+        return null
+    },
+
+    serializeTabState(apogeeView,component,tabState) {
+        //for now just save identifier information!!
+        let tabStateJson = {}
+        let identifier = {
+            type: component.getFieldObjectType(),
+            name: component.getFullName(apogeeView.getWorkspaceManager().getModelManager())
+        }
+        tabStateJson.identifier = identifier
+        if(tabState.cellStateArray) {
+            let cells = {}
+            tabState.cellStateArray.forEach(cellState => {
+                let cellComponentId = cellState.cellData.id
+                let cellComponent = apogeeView.getWorkspaceObject(cellComponentId)
+
+                cells[cellComponent.getName()] = componentViewManager.serializeCellState(cellComponent,cellState)
+            })
+
+            if(_.size(cells) > 0) {
+                tabStateJson.cells = cells
+            }
+        }
+        return tabStateJson
+    },
+
+    serializeCellState(cellComponent,cellState) {
+        let config = cellComponent.getComponentConfig()
+        let cellStateJson = {}
+        
+        cellStateJson.opened = []
+        if(cellState.viewModeControlStates) {
+            cellState.viewModeControlStates.forEach( (viewModeControlState,index) => {
+                let viewModeConfig = config.viewModes[index]
+                if(viewModeControlState.opened) {
+                    cellStateJson.opened.push(viewModeConfig.name)
+                }
+            })
+        }
+
+        return cellStateJson
     }
 
 }
 
+//This is a clumsy implementation. The parts should be separated into functions that will allow
+//us to use pieces for different state changes. For now there is only one state kept for the tab - 
+//the opened/closed state of the views on the cells.
+function _setOpened(apogeeView,tabComponentId,cellComponentId,viewModeIndex,opened) {
+    let tabStateListManager = apogeeView.getTabListStateManager()
+    let oldTabState = tabStateListManager.getTabState(tabComponentId)
+
+    let oldCellState = oldTabState.cellStateArray.find(cellState => cellState.cellData.id == cellComponentId)
+    if(!oldCellState) {
+        print("Cell not found in open view: " + cellComponentId)    
+        return false
+    }
+
+    //create a new cell state that is a shallow copy of the old one
+    let newCellState = {}
+    Object.assign(newCellState,oldCellState)
+
+    //replace the view mode control states with exact copies, except for the one that changed.
+    newCellState.viewModeControlStates = oldCellState.viewModeControlStates.map( (heldViewModeControlState,index) => {
+        if(index == viewModeIndex) {
+            let newControlState = {}
+            Object.assign(newControlState,heldViewModeControlState);
+            newControlState.opened = opened
+            return newControlState
+        }
+        else {
+            return heldViewModeControlState
+        }
+    })
+        
+    let newTabState = {}
+    Object.assign(newTabState,oldTabState)
+    newTabState.cellStateArray = oldTabState.cellStateArray.map(heldCellState => {
+        if(heldCellState.cellData.id == cellComponentId) {
+            return newCellState
+        }
+        else {
+            return heldCellState
+        }
+    })
+
+    tabStateListManager.setTabState(newTabState)
+
+    return true
+}
+
+
 export default componentViewManager
+
+

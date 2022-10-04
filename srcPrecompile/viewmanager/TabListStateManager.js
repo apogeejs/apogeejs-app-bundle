@@ -23,6 +23,7 @@ export default class TabListStateManager {
         return this.tabListState
     }
 
+    /** This function recalculates the tab list state */
     updateState() {
         let oldTabListState = this.tabListState
         //let oldTabStateMap = this.tabStateMap
@@ -35,7 +36,7 @@ export default class TabListStateManager {
         let stateJson = {} 
         if(this.tabListState.tabStateArray) {
             this.tabListState.tabStateArray.forEach( tabState => {
-                let tabJson = this._getTabJson(tabState)
+                let tabJson = this._serializeTabState(tabState)
                 if(tabJson) {
                     if(!stateJson.tabs) stateJson.tabs = []
                     stateJson.tabs.push(tabJson)
@@ -153,6 +154,38 @@ export default class TabListStateManager {
         this.apogeeView.render()
     }
 
+    getTabState(tabId) {
+        let index = this.tabListState.tabStateArray.findIndex(heldTabState => heldTabState.tabData.id == tabId)
+
+        if(index >= 0) {
+            return this.tabListState.tabStateArray[index]
+        }
+        else {
+            return null
+        }
+    }
+
+    /** This function updates the state for a given tab. This also calls render for the UI. */
+    setTabState(tabState) {
+        //make sure we have an identifier for the tab
+        if(!tabState.tabData || !tabState.tabData.id) return
+
+        let index = this.tabListState.tabStateArray.findIndex(heldTabState => {
+            if(heldTabState.tabData) {
+                return heldTabState.tabData.id == tabState.tabData.id
+            }
+            else {
+                return false
+            }
+        })
+
+        if(index >= 0) {
+            this.tabListState.tabStateArray[index] = tabState
+        }
+
+        this.apogeeView.render()
+    }
+
 
     //=======================
     // Private methods
@@ -219,7 +252,7 @@ export default class TabListStateManager {
     // serialization
     //--------------------------
 
-    _getTabJson(tabState) {
+    _serializeTabState(tabState) {
         //tab state should have a field tabData, with field id
         let workspaceObject = this.apogeeView.getWorkspaceObject(tabState.tabData.id)
         if(workspaceObject) {
