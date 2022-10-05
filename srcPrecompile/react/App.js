@@ -28,7 +28,7 @@ export function AppElement({workspaceTreeState,menuData,tabListState}) {
         <>
             <MenuBar menuData={menuData} activeTabName={activeTabName} activeTabIcon={activeTabIcon} activeTabStatus={activeTabStatus} />
             <SplitFrame
-                leftContent={<TreeView childTreeEntries={workspaceTreeState ? [workspaceTreeState] : []}/>}
+                leftContent={<TreeView children={workspaceTreeState ? [workspaceTreeState] : []}/>}
                 rightContent={<TabView tabListState={tabListState} />} 
             />
         </>

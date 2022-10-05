@@ -35,16 +35,8 @@ export default class ApogeeView {
         this._subscribeToAppEvents()
     }
 
-    ////////////////////////////////////
-    // React Version additions section
-    render() {
-        const appElement = <AppElement 
-            workspaceTreeState={this.treeStateManager.getState()}
-            menuData={this.menuStateManager.getState()}
-            tabListState={this.tabListStateManager.getState()} 
-        />
-
-        ReactDOM.render(appElement,document.getElementById(this.containerId))
+    getApp() {
+        return this.app
     }
 
     /** This is a lookup function for a workspace objectd by id */
@@ -107,8 +99,15 @@ export default class ApogeeView {
     }
 
 
-    //end react version additions section
-    /////////////////////////////
+    render() {
+        const appElement = <AppElement 
+            workspaceTreeState={this.treeStateManager.getState()}
+            menuData={this.menuStateManager.getState()}
+            tabListState={this.tabListStateManager.getState()} 
+        />
+
+        ReactDOM.render(appElement,document.getElementById(this.containerId))
+    }
 
     //////////////////////////////////////////
     // app state callback functions
@@ -175,41 +174,75 @@ export default class ApogeeView {
     getViewStateJson() {        
         if(this.workspaceManager) {
 
-            let treeState = this.treeStateManager.getStateJson()
-            let tabState =  this.tabListStateManager.getStateJson()
+            let treeStateJson = this.treeStateManager.getStateJson()
             
-            let viewStateJson = {}
-            if(treeState) viewStateJson.treeState = treeState
-            if(tabState) viewStateJson.tabState = tabState
-
-            if(_.size(viewStateJson) > 0) {
-                return viewStateJson
+            //dummy implementation
+            let workspaceOutputJson = {}
+            workspaceOutputJson.state = {}
+            workspaceOutputJson.children = {}
+            let workspaceTreeJson = treeStateJson[this.workspaceManager.getId()]
+            if(workspaceTreeJson) {
+                 workspaceOutputJson.state.tree = workspaceTreeJson
             }
+
+            let modelOutputJson = {}
+            modelOutputJson.state = {}
+            workspaceOutputJson.children.model = modelOutputJson
+            let modelTreeJson = treeStateJson[this.workspaceManager.getModelManager().getId()]
+            if(modelTreeJson) {
+                modelOutputJson.state.tree = modelTreeJson
+            }
+
+            return workspaceOutputJson
         }
         
         return null
     }
 
-    setViewStateJson(viewStateJson) {
+    setViewStateJson(workspaceViewJson) {
+        //---------------
+        // Convert the json
+        //---------------
+        let viewStateMapJson = {}
 
-        if(viewStateJson) {
-            if(viewStateJson.treeState) {
-                this.treeStateManager.setStateJson(viewStateJson.treeState)
-            }
-            if(viewStateJson.tabState) {
-                this.tabListStateManager.setStateJson(viewStateJson.tabState)
-            }
+        //workspace entry
+        if(workspaceViewJson.state) {
+            viewStateMapJson[this.workspaceManager.getId()] = workspaceViewJson.state
         }
 
+        if(workspaceViewJson.children) {
+            //model entry
+            let modelStateJson = workspaceViewJson.children.model
+            if(modelStateJson) {
+                
+                let modelManager = this.workspaceManager.getModelManager()
+                if(modelStateJson.state) {
+                    viewStateMapJson[modelManager.getId()] = modelStateJson.state
+                }
+
+                if(modelStateJson.children) {
+                    //get component id for the children!!!
+                    //IMPLEMENT
+                }
+            }
+
+            //reference entry
+            //IMPLEMENT
+        }
+
+        //----------------------
+        //pass it to the state managers
+        //----------------------
+        this.treeStateManager.setStateJson(viewStateMapJson)
+
+        //------------------
+        //render
+        //------------------
         this.render()
     }
 
     //end view state interface
     //////////////////////////////////
-
-    getApp() {
-        return this.app
-    }
 
     //===============================
     // Protected

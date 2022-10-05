@@ -16,32 +16,31 @@ import {SelectMenu} from "./SelectMenu.js"
 /** @TODO In this file I reference uiutil, relying on it being defiend globally. I will want to laod this
  * from a module. */
 
-export function TreeView({childTreeEntries}) {
+export function TreeView({children}) {
 
     return (
         <div className="treeView_wrapper">
             <ul className="treeView_list">
-                {childTreeEntries ? childTreeEntries.map(childTreeState => <TreeEntry 
+                {children ? children.map(childTreeState => <TreeEntry 
                         key={childTreeState.data.id}
                         data={childTreeState.data}
                         uiState={childTreeState.uiState}
-                        childTreeEntries={childTreeState.childTreeEntries} 
+                        children={childTreeState.children} 
                     /> ) : ''}
             </ul>
         </div>
     )
 }
 
-export function TreeEntry({data,  uiState, childTreeEntries}) {
-    const [opened,setOpened] = React.useState(false);
+export function TreeEntry({data,  uiState, children}) {
 
-    let controlResource = (childTreeEntries)&&(childTreeEntries.length > 0) ? (opened ? "/opened_darkgray.png" : "/closed_darkgray.png") : "/circle_darkgray.png"
+    let controlResource = (children)&&(children.length > 0) ? (uiState.opened ? "/opened_darkgray.png" : "/closed_darkgray.png") : "/circle_darkgray.png"
     let controlImageUrl = apogeeui.uiutil.getResourcePath(controlResource,"ui-lib")
     let menuImageUrl = apogeeui.uiutil.getResourcePath("/menuDots16_darkgray.png","ui-lib")
 
     function controlClicked() {
-        if((childTreeEntries)&&(childTreeEntries.length > 0)) {
-            setOpened(!opened)
+        if((children)&&(children.length > 0)) {
+            uiState.setOpened(!uiState.opened)
         }
     }
 
@@ -51,7 +50,7 @@ export function TreeEntry({data,  uiState, childTreeEntries}) {
             <IconWithStatus iconSrc={data.iconSrc} status={data.status} />
             <span>{data.text}</span>
             { data.menuItems ? <SelectMenu text="Menu" image={menuImageUrl} items={data.menuItems} /> : '' }
-            { (opened && childTreeEntries) ? <TreeView childTreeEntries={childTreeEntries} /> : ''}
+            { (uiState.opened && children) ? <TreeView children={children} /> : ''}
         </li>
     )
 }

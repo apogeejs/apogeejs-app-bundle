@@ -11,7 +11,7 @@ export default class TabListStateManager {
             selectTab: (tabId) => this.selectTab(tabId)
         }
         
-        this.tabStateMap = {}
+        //this.tabStateMap = {}
         this.tabListState = {
             selectedId: INVALID_OBJECT_ID,
             tabStateArray: [],
@@ -23,61 +23,15 @@ export default class TabListStateManager {
         return this.tabListState
     }
 
-    /** This function recalculates the tab list state */
+    /** This function recalculates the tab list state for when the workspace is updated.
+     * This function does not call render. */
     updateState() {
         let oldTabListState = this.tabListState
         //let oldTabStateMap = this.tabStateMap
         this.tabListState = this._createTabListState(oldTabListState)
     }
 
-    /** Returns serialized information for the tab state. If none is available
-     * null is returned. */
-    getStateJson() {
-        let stateJson = {} 
-        if(this.tabListState.tabStateArray) {
-            this.tabListState.tabStateArray.forEach( tabState => {
-                let tabJson = this._serializeTabState(tabState)
-                if(tabJson) {
-                    if(!stateJson.tabs) stateJson.tabs = []
-                    stateJson.tabs.push(tabJson)
-
-                    //set the selected tab data if this is selected
-                    if(this.tabListState.selectedId == tabState.tabData.id) {
-                        stateJson.selectedIndex = stateJson.tabs.length - 1 
-                    }
-                }
-            })
-        }
-
-        if(_.size(stateJson) > 0) return stateJson
-        else return null
-    }
-
-    setStateJson(stateJson) {
-        let newTabListState = {
-            selectedId: INVALID_OBJECT_ID,
-            tabStateArray: [],
-            tabFunctions: this.tabFunctions
-        }
-
-        if(stateJson.tabs) {
-            stateJson.tabs.forEach( (tabJson,index) => {
-                let tabState = this._deserializeTabState(tabJson)
-                if(tabState) {
-                    newTabListState.tabStateArray.push(tabState)
-
-                    //set selected index
-                    if(stateJson.selectedIndex == index) {
-                        newTabListState.selectedId = tabState.tabData.id
-                    }
-                }
-            })
-        }
-
-        //ugh, this is ugly
-        this.tabListState = newTabListState
-    }
-
+    
     //-----------------------------
     // state update functions
     //-----------------------------
@@ -154,6 +108,7 @@ export default class TabListStateManager {
         this.apogeeView.render()
     }
 
+    /** Returns the tab state for a specific tab. */
     getTabState(tabId) {
         let index = this.tabListState.tabStateArray.findIndex(heldTabState => heldTabState.tabData.id == tabId)
 
@@ -186,6 +141,58 @@ export default class TabListStateManager {
         this.apogeeView.render()
     }
 
+
+    //----------------------------
+    // Serialization
+    //----------------------------
+
+    /** Returns serialized information for the tab state. If none is available
+     * null is returned. */
+    getStateJson() {
+        let stateJson = {} 
+        if(this.tabListState.tabStateArray) {
+            this.tabListState.tabStateArray.forEach( tabState => {
+                let tabJson = this._serializeTabState(tabState)
+                if(tabJson) {
+                    if(!stateJson.tabs) stateJson.tabs = []
+                    stateJson.tabs.push(tabJson)
+
+                    //set the selected tab data if this is selected
+                    if(this.tabListState.selectedId == tabState.tabData.id) {
+                        stateJson.selectedIndex = stateJson.tabs.length - 1 
+                    }
+                }
+            })
+        }
+
+        if(_.size(stateJson) > 0) return stateJson
+        else return null
+    }
+
+    setStateJson(stateJson) {
+        let newTabListState = {
+            selectedId: INVALID_OBJECT_ID,
+            tabStateArray: [],
+            tabFunctions: this.tabFunctions
+        }
+
+        if(stateJson.tabs) {
+            stateJson.tabs.forEach( (tabJson,index) => {
+                let tabState = this._deserializeTabState(tabJson)
+                if(tabState) {
+                    newTabListState.tabStateArray.push(tabState)
+
+                    //set selected index
+                    if(stateJson.selectedIndex == index) {
+                        newTabListState.selectedId = tabState.tabData.id
+                    }
+                }
+            })
+        }
+
+        //ugh, this is ugly
+        this.tabListState = newTabListState
+    }
 
     //=======================
     // Private methods
