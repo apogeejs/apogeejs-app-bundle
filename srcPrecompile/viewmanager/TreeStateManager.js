@@ -33,7 +33,7 @@ export default class TreeState {
 
     /** This opens and closes the tree entry for the given object id. */
     setOpened(objectId,opened) {
-        //update the stored state
+        //set opened in the stored json state
         this._updateTreeEntryJson(objectId,"opened",opened)
 
         //recalculate the view state and rerender
@@ -46,21 +46,33 @@ export default class TreeState {
     //-------------------------
 
     getStateJson() {
+        //DOH! We should use the tree entry json map if any entries are present!!!
         let stateMapJson = {}
         for(let objectId in this.treeEntryStateMap) {
             let treeEntryState = this.treeEntryStateMap[objectId]
-            stateMapJson[objectId] = treeEntryState.uiState
+            let treeEntryJson = this.treeEntryJsonMap[objectId]
+
+            //only one saved variables - opened
+            let opened
+            if(treeEntryJson && (treeEntryJson.opened !== undefined)) {
+                opened = treeEntryJson.opened //this overrides the stored state if present
+            }
+            else if(treeEntryState && treeEntryState.uiState && (treeEntryState.uiState.opened !== undefined) ) {
+                opened = treeEntryState.uiState.opened
+            }
+
+            if(opened !== undefined) {
+                let stateJson = {
+                    opened: opened
+                }
+                stateMapJson[objectId] = stateJson
+            }
         }
         return stateMapJson
     }
 
-    setStateJson(objectStateMapJson) {
-        let stateMapJson = {}
-        for(let objectId in objectStateMapJson) {
-            stateMapJson[objectId] = objectStateMapJson[objectId].tree
-        }
+    setStateJson(stateMapJson) {
         this.treeEntryJsonMap = stateMapJson
-
         this.updateState()
     }
     

@@ -167,82 +167,119 @@ export default class ApogeeView {
     //end UI state callback functions
     ///////////////////////////////////////
 
-    ////////////////////////////////
-    //start view state interface
+    //-------------------------------------
+    //Serialization
+    //-------------------------------------
 
-    /** Returns a json representing the UI state. If there is not state available, null is returned. */
-    getViewStateJson() {        
+    /** This retrieves the json to serielize the ui state */
+    getViewStateJson() {     
+        let viewStateJson = {}     
+        //----------------------
+        // get the workspace object state json
+        //----------------------  
         if(this.workspaceManager) {
+            let objectViewStateJson = {}
 
-            let treeStateJson = this.treeStateManager.getStateJson()
-            
-            //dummy implementation
-            let workspaceOutputJson = {}
-            workspaceOutputJson.state = {}
-            workspaceOutputJson.children = {}
-            let workspaceTreeJson = treeStateJson[this.workspaceManager.getId()]
-            if(workspaceTreeJson) {
-                 workspaceOutputJson.state.tree = workspaceTreeJson
+            let objectMgrJsonMap = {
+                tree: this.treeStateManager.getStateJson()
             }
 
-            let modelOutputJson = {}
-            modelOutputJson.state = {}
-            workspaceOutputJson.children.model = modelOutputJson
-            let modelTreeJson = treeStateJson[this.workspaceManager.getModelManager().getId()]
-            if(modelTreeJson) {
-                modelOutputJson.state.tree = modelTreeJson
-            }
+            this._packObjectViewStateJson(this.workspaceManager,objectMgrJsonMap,objectViewStateJson)
 
-            return workspaceOutputJson
+            viewStateJson["objects"] = objectViewStateJson
         }
-        
-        return null
+
+        //-------------------------
+        // get the tab list state json
+        //--------------------------
+        viewStateJson.tabList = this.tabListStateManager.getStateJson()
+
+        return viewStateJson
     }
 
-    setViewStateJson(workspaceViewJson) {
-        //---------------
-        // Convert the json
-        //---------------
-        let viewStateMapJson = {}
+    _packObjectViewStateJson(workspaceObject,objectMgrJsonMap,objectViewStateJson) {
+        let outputJson = {}
 
-        //workspace entry
-        if(workspaceViewJson.state) {
-            viewStateMapJson[this.workspaceManager.getId()] = workspaceViewJson.state
-        }
-
-        if(workspaceViewJson.children) {
-            //model entry
-            let modelStateJson = workspaceViewJson.children.model
-            if(modelStateJson) {
-                
-                let modelManager = this.workspaceManager.getModelManager()
-                if(modelStateJson.state) {
-                    viewStateMapJson[modelManager.getId()] = modelStateJson.state
-                }
-
-                if(modelStateJson.children) {
-                    //get component id for the children!!!
-                    //IMPLEMENT
-                }
+        //get the state json for this workspace object
+        let stateJson = {}
+        //the key represents the state managers (tab, tree, etc) There is a state for each
+        for(let mgrKey in objectMgrJsonMap) {
+            let partialJson = objectMgrJsonMap[mgrKey][workspaceObject.getId()]
+            if(partialJson) {
+                stateJson[mgrKey] = partialJson
             }
+        }
+        if(_.size(stateJson) > 0) outputJson.state = stateJson
 
-            //reference entry
-            //IMPLEMENT
+        //get the child state jsons for this workspace object
+        let viewManager = getViewManagerByObject(workspaceObject)
+        let children = viewManager.getChildren(this.workspaceManager,workspaceObject)
+        if(children) {
+            let childrenJson = {}
+            children.forEach(childObject => {
+                this._packObjectViewStateJson(childObject,objectMgrJsonMap,childrenJson)
+            })
+            if(_.size(childrenJson) > 0) {
+                outputJson.children = childrenJson
+            }
         }
 
-        //----------------------
-        //pass it to the state managers
-        //----------------------
-        this.treeStateManager.setStateJson(viewStateMapJson)
+        if(_.size(outputJson) > 0) {
+            let objectKey = viewManager.getLabel(workspaceObject)
+            objectViewStateJson[objectKey] = outputJson
+        }            
+    }
 
-        //------------------
+    /** This method deserializes the view state. It should be called after the workspace is fully loaded. */
+    setViewStateJson(viewJson) {
+        //--------------------------------------
+        //convert the json state for the objects
+        //--------------------------------------
+        let objectMgrJsonMap = {
+            tree: {}
+        }
+        if(this.workspaceManager && viewJson.objects) {
+            this._unpackObjectViewStateJson(this.workspaceManager,viewJson.objects,objectMgrJsonMap)
+        }
+        //pass it to the state managers
+        this.treeStateManager.setStateJson(objectMgrJsonMap.tree)
+
+        //-----------------------------------------------
+        //get the json state for the tab list (top level)
+        //-----------------------------------------------
+        if(viewJson.tabList) {
+            this.tabListStateManager.setStateJson(viewJson.tabList)
+        }
+
         //render
-        //------------------
         this.render()
     }
 
-    //end view state interface
-    //////////////////////////////////
+    _unpackObjectViewStateJson(workspaceObject,objectMapViewJson,objectMgrJsonMap) {
+        let viewManager = getViewManagerByObject(workspaceObject)
+        let label = viewManager.getLabel(workspaceObject) 
+        let objectViewJson = objectMapViewJson[label]
+        if(objectViewJson) {
+            if(objectViewJson.state) {
+                for(let key in objectMgrJsonMap) {
+                    if(objectViewJson.state[key]) {
+                        objectMgrJsonMap[key][workspaceObject.getId()] = objectViewJson.state[key]
+                    }
+                }
+            }
+
+            let childObjects = viewManager.getChildren(this.workspaceManager,workspaceObject)
+            if(childObjects && objectViewJson.children) {
+                childObjects.forEach(childObject => {
+                    this._unpackObjectViewStateJson(childObject,objectViewJson.children,objectMgrJsonMap)
+                })
+            }
+        }
+    }
+
+    //----
+    //(end serialization)
+    //----
 
     //===============================
     // Protected

@@ -4,6 +4,21 @@ import arrayContentsInstanceMatch from "/apogeejs-app-bundle/src/viewmanager/arr
 
 
 const componentViewManager = {
+
+    getGlobalIdentifier(apogeeView,component) {
+        let modelManager = apogeeView.getWorkspaceManager().getModelManager()
+        return {
+            type: component.getFieldObjectType(),
+            name: component.getFullName(modelManager)
+        }
+    },
+
+    getObjectByIdentifier(apogeeView,tabIdentifier) {
+        let workspaceManager = apogeeView.getWorkspaceManager()
+        let modelManager = workspaceManager.getModelManager()
+        return modelManager.getComponentByFullName(tabIdentifier.name)
+    },
+
     getLabel(component) {
         return component.getName()
     },

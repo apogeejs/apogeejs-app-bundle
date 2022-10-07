@@ -11,11 +11,22 @@ export default class TabListStateManager {
             selectTab: (tabId) => this.selectTab(tabId)
         }
         
-        //this.tabStateMap = {}
+        //This is the active state for the tab, used in rendering
+        //this value should always be set, the tabStateArray should always be present
+        //and the tab functions should always be present
+        //for each element tabState in the tabStateArray, there should always be an element tabState.tabData.id
         this.tabListState = {
             selectedId: INVALID_OBJECT_ID,
             tabStateArray: [],
             tabFunctions: this.tabFunctions
+        }
+
+        //This is a json holding cached state
+        //It should always be set. Both its fields however may be empty.
+        //It has two fields - the opened tabs (tabs, array of tab ids) and the selected tab (selectedId, a tabId)
+        //These values, if present, will override the values in the active state
+        //This is a mutable object and its contents will be removed once they are applied
+        this.tabListJson = {
         }
     }
 
@@ -27,7 +38,6 @@ export default class TabListStateManager {
      * This function does not call render. */
     updateState() {
         let oldTabListState = this.tabListState
-        //let oldTabStateMap = this.tabStateMap
         this.tabListState = this._createTabListState(oldTabListState)
     }
 
@@ -37,28 +47,28 @@ export default class TabListStateManager {
     //-----------------------------
     
     openTab(tabId,selectTab=true,supressRerender) {
-        let oldTabListState = this.tabListState
-        let oldTabStateArray = oldTabListState.tabStateArray
 
-        if(oldTabStateArray.find(tabState => tabState.tabData.id == tabId)) return //tab already opened
-
-        let component = this.apogeeView.getWorkspaceObject(tabId)  //assume all components for now
-        if(!component) return //component not found
-
-        let newTabStateArray = oldTabStateArray.slice()
-
-        let viewManager = getViewManagerByObject(component)
-        let newTabState = viewManager.getTabState(this.apogeeView,component)
-        newTabStateArray.push(newTabState)
-
-        let newSelectedId = (selectTab || (oldTabStateArray.length == 0)) ? tabId : oldTabListState.selectedId
-
-        let newTabListState = {
-            selectedId: newSelectedId,
-            tabStateArray: newTabStateArray,
-            tabFunctions: this.tabFunctions
+        //update the tab list json for this command
+        if(!this.tabListJson.tabs) {
+            let tabs = []
+            this.tabListState.tabStateArray.forEach(tabState => {
+                if(tabState && (tabState.tabData != undefined)) {
+                    tabs.push(tabState.tabData.id)
+                }
+            })
+            this.tabListJson.tabs = tabs
         }
-        this.tabListState = newTabListState
+
+        if(!this.tabListJson.tabs.includes(tabId)) {
+            this.tabListJson.tabs.push(tabId)
+        }
+
+        if(selectTab) {
+            this.tabListJson.selectedId = tabId
+        }
+
+        //update the tab state for the new tab list json
+        this.updateState()
 
         if(!supressRerender) {
             this.apogeeView.render()
@@ -66,26 +76,31 @@ export default class TabListStateManager {
     }
 
     closeTab(tabId,supressRerender) {
-        let oldTabListState = this.tabListState
-        let oldTabStateArray = oldTabListState.tabStateArray
-
-        if(!oldTabStateArray.find(tabState => tabState.tabData.id == tabId)) return //tab not opened
-
-        let newTabStateArray = oldTabStateArray.filter(tabState => tabState.tabData.id != tabId)
-        let newSelectedId
-        if(oldTabListState.selectedId == tabId) {
-            newSelectedId = newTabStateArray.length > 0 ? newTabStateArray[0].tabData.id : INVALID_OBJECT_ID
+        //update the tab list json for this command
+        if(!this.tabListJson.tabs) {
+            let tabs = []
+            this.tabListState.tabStateArray.forEach(tabState => {
+                if(tabState && (tabState.tabData != undefined) && (tabState.tabData.id != tabId)) {
+                    tabs.push(tabState.tabData.id)
+                }
+            })
+            this.tabListJson.tabs = tabs
         }
         else {
-            newSelectedId = oldTabListState.selectedId 
+            let newTabs = []
+            this.tabListJson.tabs.forEach(heldTabId => {
+                if(heldTabId != tabId) {
+                    newTabs.push(heldTabId)
+                }
+            })
+            this.tabListJson.tabs = newTabs
         }
-        
-        let newTabListState = {
-            selectedId: newSelectedId,
-            tabStateArray: newTabStateArray,
-            tabFunctions: this.tabFunctions
+        if(this.tabListJson.selectedId == tabId) {
+            this.tabListJson.selectedId = this.tabListJson.tabs.length > 0 ? this.tabListJson.tabs[0] : INVALID_OBJECT_ID
         }
-        this.tabListState = newTabListState
+
+        //update the tab state for the new tab list json
+        this.updateState()
 
         if(!supressRerender) {
             this.apogeeView.render()
@@ -93,105 +108,166 @@ export default class TabListStateManager {
     }
 
     selectTab(tabId,supressRerender) {
-        let oldTabListState = this.tabListState
+        this.tabListJson.selectedId = tabId
+        this.updateState()
 
-        if(oldTabListState.selectedId == tabId) return //already selected
-        if(!oldTabListState.tabStateArray.find(tabState => tabState.tabData.id == tabId)) return //tab not opened
-
-        let newTabListState = {
-            selectedId: tabId,
-            tabStateArray: oldTabListState.tabStateArray,
-            tabFunctions: this.tabFunctions
-        }
-        this.tabListState = newTabListState
-
-        this.apogeeView.render()
-    }
-
-    /** Returns the tab state for a specific tab. */
-    getTabState(tabId) {
-        let index = this.tabListState.tabStateArray.findIndex(heldTabState => heldTabState.tabData.id == tabId)
-
-        if(index >= 0) {
-            return this.tabListState.tabStateArray[index]
-        }
-        else {
-            return null
+        if(!supressRerender) {
+            this.apogeeView.render()
         }
     }
 
-    /** This function updates the state for a given tab. This also calls render for the UI. */
-    setTabState(tabState) {
-        //make sure we have an identifier for the tab
-        if(!tabState.tabData || !tabState.tabData.id) return
+    // /** Returns the tab state for a specific tab. */
+    // getTabState(tabId) {
+    //     let index = this.tabListState.tabStateArray.findIndex(heldTabState => heldTabState.tabData.id == tabId)
 
-        let index = this.tabListState.tabStateArray.findIndex(heldTabState => {
-            if(heldTabState.tabData) {
-                return heldTabState.tabData.id == tabState.tabData.id
-            }
-            else {
-                return false
-            }
-        })
+    //     if(index >= 0) {
+    //         return this.tabListState.tabStateArray[index]
+    //     }
+    //     else {
+    //         return null
+    //     }
+    // }
 
-        if(index >= 0) {
-            this.tabListState.tabStateArray[index] = tabState
-        }
+    // /** This function updates the state for a given tab. This also calls render for the UI. */
+    // setTabState(tabState) {
+    //     //make sure we have an identifier for the tab
+    //     if(!tabState.tabData || !tabState.tabData.id) return
 
-        this.apogeeView.render()
-    }
+    //     let index = this.tabListState.tabStateArray.findIndex(heldTabState => {
+    //         if(heldTabState.tabData) {
+    //             return heldTabState.tabData.id == tabState.tabData.id
+    //         }
+    //         else {
+    //             return false
+    //         }
+    //     })
+
+    //     if(index >= 0) {
+    //         this.tabListState.tabStateArray[index] = tabState
+    //     }
+
+    //     this.apogeeView.render()
+    // }
 
 
     //----------------------------
     // Serialization
     //----------------------------
+/*
+    getStateJson() {
+        //DOH! We should use the tree entry json map if any entries are present!!!
+        let stateMapJson = {}
+        for(let objectId in this.treeEntryStateMap) {
+            let treeEntryState = this.treeEntryStateMap[objectId]
+            let treeEntryJson = this.treeEntryJsonMap[objectId]
+
+            //only one saved variables - opened
+            let opened
+            if(treeEntryJson && (treeEntryJson.opened !== undefined)) {
+                opened = treeEntryJson.opened //this overrides the stored state if present
+            }
+            else if(treeEntryState && treeEntryState.uiState && (treeEntryState.uiState.opened !== undefined) ) {
+                opened = treeEntryState.uiState.opened
+            }
+
+            if(opened !== undefined) {
+                let stateJson = {
+                    opened: opened
+                }
+                stateMapJson[objectId] = stateJson
+            }
+        }
+        return stateMapJson
+    }
+
+    setStateJson(stateMapJson) {
+        this.treeEntryJsonMap = stateMapJson
+        this.updateState()
+    }
+*/
+
+    ///////////////////////
 
     /** Returns serialized information for the tab state. If none is available
      * null is returned. */
     getStateJson() {
-        let stateJson = {} 
-        if(this.tabListState.tabStateArray) {
-            this.tabListState.tabStateArray.forEach( tabState => {
-                let tabJson = this._serializeTabState(tabState)
-                if(tabJson) {
-                    if(!stateJson.tabs) stateJson.tabs = []
-                    stateJson.tabs.push(tabJson)
+        let tabIds, selectedTabId
 
-                    //set the selected tab data if this is selected
-                    if(this.tabListState.selectedId == tabState.tabData.id) {
+        //use data present in the tabListJson
+        if(this.tabListJson) {
+            if(this.tabListJson.tabs !== undefined) tabIds = this.tabListJson.tabs
+            if(this.tabListJson.selectedId !== undefined) selectedTabId = this.tabListJson.selectedId
+        }
+        
+        //add any needed data from the current state
+        if(tabIds === undefined) {
+            tabIds = []
+            if(this.tabListState.tabStateArray) {
+                this.tabListState.tabStateArray.forEach( tabState => {
+                    if(tabState.tabData && (tabState.tabData.id != undefined)) {
+                        tabIds.push(tabState.tabData.id)
+
+                        //if this tab present and it is selected, set it to selected tab id.
+                        if( (selectedTabId === undefined) && (this.tabListState.selectedId == tabState.tabData.id) ) {
+                            selectedTabId = this.tabListState.selectedId
+                        }
+                    }
+                })
+            }
+        }
+
+        //convert these to the serialized format
+        let stateJson
+        tabIds.forEach(tabId => {
+            let workspaceObject = this.apogeeView.getWorkspaceObject(tabId)
+            if(workspaceObject) {
+                let viewManager = getViewManagerByObject(workspaceObject)
+                let globalIdentifier = viewManager.getGlobalIdentifier(this.apogeeView,workspaceObject)
+                if(globalIdentifier) {
+                    if(!stateJson ) stateJson = {}
+                    if(!stateJson.tabs) stateJson.tabs = []
+
+                    stateJson.tabs.push(globalIdentifier)
+
+                    if(tabId == selectedTabId) {
                         stateJson.selectedIndex = stateJson.tabs.length - 1 
                     }
                 }
-            })
-        }
-
-        if(_.size(stateJson) > 0) return stateJson
-        else return null
+            }
+        })
+        
+        return stateJson
     }
 
     setStateJson(stateJson) {
-        let newTabListState = {
+        //clear the state values to start
+        let tabListJson = {
+            tabs: []
+        }
+        let tabListState = {
             selectedId: INVALID_OBJECT_ID,
             tabStateArray: [],
             tabFunctions: this.tabFunctions
         }
 
         if(stateJson.tabs) {
-            stateJson.tabs.forEach( (tabJson,index) => {
-                let tabState = this._deserializeTabState(tabJson)
-                if(tabState) {
-                    newTabListState.tabStateArray.push(tabState)
+            stateJson.tabs.forEach( (tabIdentifier,index) => {
+                //for state json held here, convert from global identifier to id
+                let viewManager = getViewManagerByType(tabIdentifier.type)
+                if(viewManager) {
+                    let workspaceObject = viewManager.getObjectByIdentifier(this.apogeeView,tabIdentifier)
+                    tabListJson.tabs.push(workspaceObject.getId())
 
-                    //set selected index
-                    if(stateJson.selectedIndex == index) {
-                        newTabListState.selectedId = tabState.tabData.id
+                    if(index == stateJson.selectedIndex) {
+                        tabListJson.selectedId = workspaceObject.getId()
                     }
                 }
             })
         }
 
-        //ugh, this is ugly
-        this.tabListState = newTabListState
+        this.tabListJson = tabListJson
+        this.tabListState = tabListState
+        this.updateState()
     }
 
     //=======================
@@ -199,44 +275,70 @@ export default class TabListStateManager {
     //=======================
 
     _createTabListState(oldTabListState) {
-        let selectionDeleted = false
-        
         //update the tab state for each opened tab component (that still exists()
         let oldTabStateArray = oldTabListState.tabStateArray
         let newTabStateArray = []
-        oldTabStateArray.forEach(oldTabState => {
-            let workspaceObject = this.apogeeView.getWorkspaceObject(oldTabState.tabData.id)
+
+        //----------------------------------
+        // get the active tab list and selected tab
+        //----------------------------------
+        let tabIds
+        if(this.tabListJson.tabs !== undefined) {
+            tabIds = this.tabListJson.tabs
+            //clear this data once we use it
+            delete this.tabListJson.tabs
+        }
+        else {
+            tabIds = oldTabStateArray.map(tabState => tabState.tabData ? tabState.tabData.id : INVALID_OBJECT_ID) 
+        }
+
+        let newSelectedId
+        if(this.tabListJson.selectedId !== undefined) {
+            newSelectedId = this.tabListJson.selectedId
+            //clear this data once we use it
+            delete this.tabListJson.selectedId
+        }
+        else {
+            newSelectedId = oldTabListState.selectedId
+        }
+
+        //------------------------------------------
+        // load the tab states
+        //------------------------------------------
+        let selectedTabPresent = false
+        tabIds.forEach(tabId => {
+            let workspaceObject = this.apogeeView.getWorkspaceObject(tabId)
             if(workspaceObject) {
+                
                 //get new tab state
+                //////////////////////////////////////////////////
+                //NOW WE WILL LOAD FROM THE TAB STATE MANAGER!!!
+                //rather than the view manager
                 let viewManager = getViewManagerByObject(workspaceObject)
+                let oldTabState =  this.tabListState.tabStateArray.find(tabState => (tabState.tabData && (tabState.tabData.id == tabId)) ) //legacy?
                 let newTabState = viewManager.getTabState(this.apogeeView,workspaceObject,oldTabState)
-                newTabStateArray.push(newTabState)
-            }
-            else {
-                //component deleted - make sure this is not selected
-                if(oldTabListState.selectedId == oldTabState.tabData.id) {
-                    selectionDeleted = true;
+                if(newTabState) {
+                    newTabStateArray.push(newTabState)
+                    if(tabId == newSelectedId) {
+                        selectedTabPresent = true
+                    }
                 }
+                ///////////////////////////////////////////////////
             }
         })
         let tabStateArrayUpdated = !arrayContentsInstanceMatch(oldTabStateArray,newTabStateArray)
 
-        //selection (this only changes if the state array changes)
-        let newSelectedId
-        let selectedIdUpdated
-        if(selectionDeleted) {
-            selectedIdUpdated = true
+        //------------------
+        //selection
+        //------------------
+        if(!selectedTabPresent) {
             if(newTabStateArray.length > 0) {
+                //set the first tab as selected
                 newSelectedId = newTabStateArray[0].tabData.id
             }
-            else {
-                newSelectedId = INVALID_OBJECT_ID
-            }
         }
-        else {
-            selectedIdUpdated = false
-            newSelectedId = oldTabListState.selectedId
-        }
+
+        let selectedIdUpdated = oldTabListState.selectedId != newSelectedId
 
         //update
         let newTabListState
@@ -258,7 +360,7 @@ export default class TabListStateManager {
     //--------------------------
     // serialization
     //--------------------------
-
+/*
     _serializeTabState(tabState) {
         //tab state should have a field tabData, with field id
         let workspaceObject = this.apogeeView.getWorkspaceObject(tabState.tabData.id)
@@ -282,7 +384,7 @@ export default class TabListStateManager {
         
         return null
     }
-    
+*/  
 }
 
 
