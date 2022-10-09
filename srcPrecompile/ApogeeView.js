@@ -7,6 +7,8 @@ import {getViewManagerByObject} from "/apogeejs-app-bundle/src/viewmanager/getVi
 import MenuStateManager from "/apogeejs-app-bundle/src/viewmanager/MenuStateManager.js"
 import TreeStateManager from "/apogeejs-app-bundle/src/viewmanager/TreeStateManager.js"
 import TabListStateManager from "/apogeejs-app-bundle/src/viewmanager/TabListStateManager.js"
+import TabStateManager from "/apogeejs-app-bundle/src/viewmanager/TabStateManager.js"
+import CellStateManager from "/apogeejs-app-bundle/src/viewmanager/CellStateManager.js"
 
 import { addComponent } from "/apogeejs-app-bundle/src/commandseq/addcomponentseq.js"
 import { updateComponentProperties } from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js"
@@ -31,6 +33,8 @@ export default class ApogeeView {
         this.menuStateManager = new MenuStateManager(this.app,this.workspaceManager)
         this.treeStateManager = new TreeStateManager(this)
         this.tabListStateManager = new TabListStateManager(this)
+        this.tabStateManager = new TabStateManager(this)
+        this.cellStateManager = new CellStateManager(this)
 
         this._subscribeToAppEvents()
     }
@@ -84,6 +88,14 @@ export default class ApogeeView {
 
     getWorkspaceManager() {
         return this.workspaceManager
+    }
+
+    getTabStateManager() {
+        return this.tabStateManager
+    }
+
+    getCellStateManager() {
+        return this.cellStateManager
     }
 
     getTabListStateManager() {
@@ -181,7 +193,9 @@ export default class ApogeeView {
             let objectViewStateJson = {}
 
             let objectMgrJsonMap = {
-                tree: this.treeStateManager.getStateJson()
+                tree: this.treeStateManager.getStateJson(),
+                tab: this.tabStateManager.getStateJson(),
+                cell: this.cellStateManager.getStateJson()
             }
 
             this._packObjectViewStateJson(this.workspaceManager,objectMgrJsonMap,objectViewStateJson)
@@ -243,6 +257,8 @@ export default class ApogeeView {
         }
         //pass it to the state managers
         this.treeStateManager.setStateJson(objectMgrJsonMap.tree)
+        this.tabStateManager.setStateJson(objectMgrJsonMap.tab)
+        this.cellStateManager.setStateJson(objectMgrJsonMap.cell)
 
         //-----------------------------------------------
         //get the json state for the tab list (top level)

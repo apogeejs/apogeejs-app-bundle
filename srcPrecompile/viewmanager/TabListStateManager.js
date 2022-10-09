@@ -306,24 +306,14 @@ export default class TabListStateManager {
         // load the tab states
         //------------------------------------------
         let selectedTabPresent = false
+        let tabStateManager = this.apogeeView.getTabStateManager()
         tabIds.forEach(tabId => {
-            let workspaceObject = this.apogeeView.getWorkspaceObject(tabId)
-            if(workspaceObject) {
-                
-                //get new tab state
-                //////////////////////////////////////////////////
-                //NOW WE WILL LOAD FROM THE TAB STATE MANAGER!!!
-                //rather than the view manager
-                let viewManager = getViewManagerByObject(workspaceObject)
-                let oldTabState =  this.tabListState.tabStateArray.find(tabState => (tabState.tabData && (tabState.tabData.id == tabId)) ) //legacy?
-                let newTabState = viewManager.getTabState(this.apogeeView,workspaceObject,oldTabState)
-                if(newTabState) {
-                    newTabStateArray.push(newTabState)
-                    if(tabId == newSelectedId) {
-                        selectedTabPresent = true
-                    }
+            let newTabState = tabStateManager.getState(tabId)
+            if(newTabState) {
+                newTabStateArray.push(newTabState)
+                if(tabId == newSelectedId) {
+                    selectedTabPresent = true
                 }
-                ///////////////////////////////////////////////////
             }
         })
         let tabStateArrayUpdated = !arrayContentsInstanceMatch(oldTabStateArray,newTabStateArray)
