@@ -46,7 +46,6 @@ export default class TreeState {
     //-------------------------
 
     getStateJson() {
-        //DOH! We should use the tree entry json map if any entries are present!!!
         let stateMapJson = {}
         for(let objectId in this.treeEntryStateMap) {
             let treeEntryState = this.treeEntryStateMap[objectId]

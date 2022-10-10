@@ -250,7 +250,9 @@ export default class ApogeeView {
         //convert the json state for the objects
         //--------------------------------------
         let objectMgrJsonMap = {
-            tree: {}
+            tree: {},
+            cell: {},
+            tab: {}
         }
         if(this.workspaceManager && viewJson.objects) {
             this._unpackObjectViewStateJson(this.workspaceManager,viewJson.objects,objectMgrJsonMap)

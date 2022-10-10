@@ -1,5 +1,6 @@
 import componentViewManager from "/apogeejs-app-bundle/src/viewmanager/componentViewManager.js"
 import arrayContentsInstanceMatch from "/apogeejs-app-bundle/src/viewmanager/arrayContentsInstanceMatch.js"
+import {getViewManagerByObject} from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
 
 export default class CellStateManager {
 
@@ -46,7 +47,8 @@ export default class CellStateManager {
             newCellJson = this._copyCellJson(oldCellJson)
         }
         else {
-            newCellJson = this._createCellJson(objectId)
+            //create cell json, whether or not we have an associated active cell state data 
+            newCellJson = this._createCellJson(objectId,false)
         }
 
         if(!newCellJson) {
@@ -75,10 +77,7 @@ export default class CellStateManager {
         if(cellJsonUpdated) {
             this.cellJsonMap[objectId] = newCellJson
 
-            //update the state of the tab list
-            let tabListStateManager = this.apogeeView.getTabListStateManager()
-            tabListStateManager.updateState()
-
+            this._updateState()
             this.apogeeView.render()
         }
     }
@@ -88,21 +87,65 @@ export default class CellStateManager {
     //----------------------------------
 
     setStateJson(stateJson) {
-
+        this.cellJsonMap = stateJson
+        
+        this._updateState()
+        this.apogeeView.render()
     }
 
     getStateJson() {
-        return {}
+        let stateJson = {}
+        let addCellJson = workspaceObject => {
+            let objectId = workspaceObject.getId()
+            let cellJson = this.cellJsonMap[objectId]
+            if(cellJson) {
+                stateJson[objectId] = cellJson
+            }
+            else {
+                //create a cell json, only if we have active state info present
+                cellJson = this._createCellJson(objectId,true)
+                if(cellJson) {
+                    stateJson[objectId] = cellJson
+                }
+            }
+        }
+        this._runOverAllWorkspaceObjects(addCellJson)
+
+        return stateJson
+    }
+
+    _runOverAllWorkspaceObjects(fxForWorkspaceObject) {
+        let workspaceManager = this.apogeeView.getWorkspaceManager()
+        if(workspaceManager) {
+           this._runOverWorkspaceObjectAndChildren(workspaceManager,fxForWorkspaceObject) 
+        }
+    }
+
+    _runOverWorkspaceObjectAndChildren(workspaceObject,fxForWorkspaceObject) {
+        fxForWorkspaceObject(workspaceObject)
+
+        let viewManager = getViewManagerByObject(workspaceObject)
+        viewManager.getChildren(this.apogeeView.getWorkspaceManager(),workspaceObject).forEach(childObject => {
+            this._runOverWorkspaceObjectAndChildren(childObject,fxForWorkspaceObject)
+        })
     }
 
     //===============================
     // Private Methods
     //===============================
 
+    /** This does an update to all the view cell state, by calling for 
+     * un update to the complete tab list state. */
+    _updateState() {
+        //update the state of the tab list
+        let tabListStateManager = this.apogeeView.getTabListStateManager()
+        tabListStateManager.updateState()
+    }
+
     /** This creates a cell json, loading the current state. It may return null if 
      * this given object is not a component with a cell.
      */
-    _createCellJson(objectId) {
+    _createCellJson(objectId,onlyWithState) {
         //lookup component - make sure this is a component with a cell
         let component = this.apogeeView.getWorkspaceObject(objectId)
         let componentConfig
@@ -119,6 +162,10 @@ export default class CellStateManager {
         //see if we have any active cell state for this id
         let cellState = this.cellStateMap[objectId]
         if(cellState) {
+
+            //is we flag "only with state", we will only create the cell json if we have state info
+            if( !cellState && onlyWithState ) return null
+
             //we only have one state item in the json now - opened
             if(cellState.viewModeControlStates) {
                 cellJson.opened = []
