@@ -1,6 +1,5 @@
 import componentViewManager from "/apogeejs-app-bundle/src/viewmanager/componentViewManager.js"
 import arrayContentsInstanceMatch from "/apogeejs-app-bundle/src/viewmanager/arrayContentsInstanceMatch.js"
-import {getViewManagerByObject} from "/apogeejs-app-bundle/src/viewmanager/getViewManager.js"
 
 export default class CellStateManager {
 
@@ -109,25 +108,9 @@ export default class CellStateManager {
                 }
             }
         }
-        this._runOverAllWorkspaceObjects(addCellJson)
+        this.apogeeView.runOverAllWorkspaceObjects(addCellJson)
 
         return stateJson
-    }
-
-    _runOverAllWorkspaceObjects(fxForWorkspaceObject) {
-        let workspaceManager = this.apogeeView.getWorkspaceManager()
-        if(workspaceManager) {
-           this._runOverWorkspaceObjectAndChildren(workspaceManager,fxForWorkspaceObject) 
-        }
-    }
-
-    _runOverWorkspaceObjectAndChildren(workspaceObject,fxForWorkspaceObject) {
-        fxForWorkspaceObject(workspaceObject)
-
-        let viewManager = getViewManagerByObject(workspaceObject)
-        viewManager.getChildren(this.apogeeView.getWorkspaceManager(),workspaceObject).forEach(childObject => {
-            this._runOverWorkspaceObjectAndChildren(childObject,fxForWorkspaceObject)
-        })
     }
 
     //===============================
@@ -161,19 +144,17 @@ export default class CellStateManager {
 
         //see if we have any active cell state for this id
         let cellState = this.cellStateMap[objectId]
-        if(cellState) {
 
-            //is we flag "only with state", we will only create the cell json if we have state info
-            if( !cellState && onlyWithState ) return null
+        //is we flag "only with state", we will only create the cell json if we have state info
+        if( !cellState && onlyWithState ) return null
 
-            //we only have one state item in the json now - opened
-            if(cellState.viewModeControlStates) {
-                cellJson.opened = []
-                cellState.viewModeControlStates.forEach( (viewModeControlState,viewModeIndex) => {
-                    let viewModeInfo = componentConfig.viewModes[viewModeIndex]
-                    if(viewModeControlState.opened) cellJson.opened.push(viewModeInfo.name)
-                })
-            }
+        //we only have one state item in the json now - opened
+        cellJson.opened = []
+        if(cellState.viewModeControlStates) {
+            cellState.viewModeControlStates.forEach( (viewModeControlState,viewModeIndex) => {
+                let viewModeInfo = componentConfig.viewModes[viewModeIndex]
+                if(viewModeControlState.opened) cellJson.opened.push(viewModeInfo.name)
+            })
         }
         
         return cellJson

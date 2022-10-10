@@ -14,7 +14,6 @@ import { addComponent } from "/apogeejs-app-bundle/src/commandseq/addcomponentse
 import { updateComponentProperties } from "/apogeejs-app-bundle/src/commandseq/updatecomponentseq.js"
 import { deleteComponent } from "/apogeejs-app-bundle/src/commandseq/deletecomponentseq.js"
 import {updateWorkspaceProperties} from "/apogeejs-app-bundle/src/commandseq/updateworkspaceseq.js"
-//import {componentInfo} from "/apogeejs-app-lib/src/apogeeAppLib.js"
 
 
 export default class ApogeeView {
@@ -84,6 +83,22 @@ export default class ApogeeView {
                 return null
         }
 
+    }
+
+    /** This executes a function for each workspace object in the workspace */
+    runOverAllWorkspaceObjects(fxForWorkspaceObject) {
+        if(this.workspaceManager) {
+           this._runOverWorkspaceObjectAndChildren(this.workspaceManager,fxForWorkspaceObject) 
+        }
+    }
+
+    _runOverWorkspaceObjectAndChildren(workspaceObject,fxForWorkspaceObject) {
+        fxForWorkspaceObject(workspaceObject)
+
+        let viewManager = getViewManagerByObject(workspaceObject)
+        viewManager.getChildren(this.workspaceManager,workspaceObject).forEach(childObject => {
+            this._runOverWorkspaceObjectAndChildren(childObject,fxForWorkspaceObject)
+        })
     }
 
     getWorkspaceManager() {

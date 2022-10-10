@@ -22,6 +22,12 @@ const workspaceViewManager = {
             }
         ]
 
+    },
+
+    getDefaultStateJson() {
+        return {
+            treeEntryOpened: true
+        }
     }
 }
 

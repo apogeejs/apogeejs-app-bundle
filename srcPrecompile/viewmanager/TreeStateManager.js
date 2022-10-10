@@ -33,8 +33,18 @@ export default class TreeState {
 
     /** This opens and closes the tree entry for the given object id. */
     setOpened(objectId,opened) {
+        let treeEntryJson = this.treeEntryJsonMap[objectId]
+        let newTreeEntryJson
+        if(treeEntryJson) {
+            newTreeEntryJson = this._copyTreeEntryJson(treeEntryJson)
+        }
+        else {
+            newTreeEntryJson = this._createTreeEntryJson(objectId,false)
+        }
+
         //set opened in the stored json state
-        this._updateTreeEntryJson(objectId,"opened",opened)
+        newTreeEntryJson.opened = opened
+        this.treeEntryJsonMap[objectId] = newTreeEntryJson
 
         //recalculate the view state and rerender
         this.updateState()
@@ -46,28 +56,51 @@ export default class TreeState {
     //-------------------------
 
     getStateJson() {
-        let stateMapJson = {}
-        for(let objectId in this.treeEntryStateMap) {
-            let treeEntryState = this.treeEntryStateMap[objectId]
+        let stateJson = {}
+        let addTreeEntryJson = workspaceObject => {
+            let objectId = workspaceObject.getId()
             let treeEntryJson = this.treeEntryJsonMap[objectId]
-
-            //only one saved variables - opened
-            let opened
-            if(treeEntryJson && (treeEntryJson.opened !== undefined)) {
-                opened = treeEntryJson.opened //this overrides the stored state if present
+            if(treeEntryJson) {
+                stateJson[objectId] = treeEntryJson
             }
-            else if(treeEntryState && treeEntryState.uiState && (treeEntryState.uiState.opened !== undefined) ) {
-                opened = treeEntryState.uiState.opened
-            }
-
-            if(opened !== undefined) {
-                let stateJson = {
-                    opened: opened
+            else {
+                //create a cell json, only if we have active state info present
+                treeEntryJson = this._createTreeEntryJson(objectId,true)
+                if(treeEntryJson) {
+                    stateJson[objectId] = treeEntryJson
                 }
-                stateMapJson[objectId] = stateJson
             }
         }
-        return stateMapJson
+        this.apogeeView.runOverAllWorkspaceObjects(addTreeEntryJson)
+
+        return stateJson
+
+
+
+
+
+        // let stateMapJson = {}
+        // for(let objectId in this.treeEntryStateMap) {
+        //     let treeEntryState = this.treeEntryStateMap[objectId]
+        //     let treeEntryJson = this.treeEntryJsonMap[objectId]
+
+        //     //only one saved variables - opened
+        //     let opened
+        //     if(treeEntryJson && (treeEntryJson.opened !== undefined)) {
+        //         opened = treeEntryJson.opened //this overrides the stored state if present
+        //     }
+        //     else if(treeEntryState && treeEntryState.uiState && (treeEntryState.uiState.opened !== undefined) ) {
+        //         opened = treeEntryState.uiState.opened
+        //     }
+
+        //     if(opened !== undefined) {
+        //         let stateJson = {
+        //             opened: opened
+        //         }
+        //         stateMapJson[objectId] = stateJson
+        //     }
+        // }
+        // return stateMapJson
     }
 
     setStateJson(stateMapJson) {
@@ -78,6 +111,39 @@ export default class TreeState {
     //==========================
     // Private Methods
     //==========================
+    
+    /** This creates a cell json, loading the current state. It may return null if 
+     * this given object is not a component with a cell.
+     */
+     _createTreeEntryJson(objectId,onlyWithState) {
+        let workspaceObject = this.apogeeView.getWorkspaceObject(objectId)
+        if(!workspaceObject) {
+            //not a component with a cell
+            return null
+        }
+
+        let treeEntryJson = {}
+
+        //get the the active state for this id
+        let treeEntryState = this.treeEntryStateMap[objectId]
+        //is we flag "only with state", we will only create the cell json if we have state info
+        if( !treeEntryState && onlyWithState ) return null
+
+        //we only have one state item in the json now - opened
+        if(treeEntryState.uiState) {
+            treeEntryJson.opened = treeEntryState.uiState.opened ? true : false
+        }
+
+        return treeEntryJson
+    }
+
+    /** The creates a shallow copy of the cellJson, such as so it can be udpated with a modified state. */
+    _copyTreeEntryJson(treeEntryJson) {
+        let newTreeEntryJson = {}
+        Object.apply(newTreeEntryJson,treeEntryJson)
+        return newTreeEntryJson
+    }
+
     /** This function updates/creates the storedtree entry json for the given object id
      * so the given property name holds the given property value. */
     _updateTreeEntryJson(objectId,propertyName,propertyValue) {
@@ -143,14 +209,14 @@ export default class TreeState {
 
             let opened
             if(entryJson && (entryJson.opened !== undefined))  {
-                opened = entryJson.opened 
+                opened = entryJson.opened ? true : false
             }
             else if(oldTreeEntryState) {
-                opened = oldTreeEntryState.ui.opened
+                opened = oldTreeEntryState.ui.opened ? true : false
             }
-            else if(viewManager.getDefaultJson){
-                objectJson = viewManager.getDefaultJson()
-                opened =  objectJson.ui ? objectJson.ui.opened : false 
+            else if(viewManager.getDefaultStateJson){
+                let defaultJson = viewManager.getDefaultStateJson(newObject)
+                opened =  (defaultJson && defaultJson.treeEntryOpened) ? true : false 
             }
 
             let setOpened

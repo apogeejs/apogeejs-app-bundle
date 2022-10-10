@@ -42,6 +42,12 @@ const modelViewManager = {
         })
 
         return menuItems
+    },
+
+    getDefaultStateJson() {
+        return {
+            treeEntryOpened: true
+        }
     }
 }
 
